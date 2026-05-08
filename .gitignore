@@ -51,3 +51,6 @@ app-example
 play-service-account.json
 *.itc.json
 credentials.json
+
+# direnv (계정별 EXPO_TOKEN 주입 — 실제 토큰은 .envrc에, 템플릿은 .envrc.example만 커밋)
+.envrc

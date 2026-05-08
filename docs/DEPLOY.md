@@ -29,13 +29,40 @@
 
 ## EAS 프로젝트 초기화 (1회)
 
+### 1. direnv로 계정 토큰 자동 주입 (권장 — 다중 프로젝트 충돌 방지)
+
+다른 프로젝트에서 다른 Expo 계정을 쓰는 경우 `eas login`/`logout`을 매번 하지 않고 폴더 단위로 자동 전환.
+
+```bash
+brew install direnv                                         # 1회
+echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc && source ~/.zshrc
+
+# Access Token 생성: https://expo.dev/settings/access-tokens
+#   - 본인 계정(l2juhan)으로 로그인 후 'Create token' (이름: when2go-cli)
+#   - 토큰 문자열은 한 번만 표시되니 즉시 복사
+
+cp .envrc.example .envrc
+# .envrc 의 EXPO_TOKEN 값을 실제 토큰으로 교체 (편집기 사용)
+
+direnv allow .       # 이 폴더에서 .envrc 자동 로드 허용
+eas whoami           # l2juhan 표시되면 성공 — 글로벌 eas login 불필요
+```
+
+### 2. 또는 단일 계정 사용자: 글로벌 로그인
+
 ```bash
 npm install -g eas-cli
 eas login
 eas build:configure
 ```
 
-`eas build:configure` 실행 시 EAS가 프로젝트 ID를 자동으로 `app.json`에 주입(`extra.eas.projectId`). `eas.json`은 이미 레포에 있음 — 덮어쓰지 말 것(빌드 프로필이 우리 정책에 맞춰져 있음).
+### 3. 프로젝트 등록
+
+```bash
+eas build:configure
+```
+
+성공 시 `app.json`의 `extra.eas.projectId`에 UUID 자동 주입 — 이 변경사항도 같이 커밋 필요. `eas.json`은 이미 레포에 있음 → 덮어쓰지 말 것(빌드 프로필이 우리 정책에 맞춰져 있음).
 
 ---
 
