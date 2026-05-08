@@ -21,6 +21,7 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 7. **PRD 동기화**: `../PRD_지금나가_v1.1.md` 변경 시 `docs/references/PRD-지금나가-v1.1.md`도 같이 갱신. 레포 안이 단일 진실 원천이 되도록.
 8. **TDD 적용 범위**: 비즈니스 로직(`src/utils/` 계산, `src/stores/` Zustand 액션, `src/hooks/` 분기·계산 있는 훅)은 **테스트 먼저 작성**. 단순 wrapper·외부 SDK 어댑터(`src/api/`)·trivial getter는 예외. UI(`src/components/`, `app/`, 애니메이션)는 TDD 비대상.
 9. **테스트 1회 원칙**: TDD로 만든 테스트가 곧 영구 자산. PR 직전에 같은 동작에 대한 테스트를 새로 만들지 않는다(중복 금지). `/review`는 "테스트 누락 여부 확인 + 전체 통과"만 체크.
+10. **광고 슬롯**: 모든 광고 영역(F-AD01 배너, F-AD04 스플래시, Trip 완료 광고 등)은 빈 placeholder 컴포넌트(`AdSlot`)로만 구현. 실제 광고 SDK(GoogleAds 등) 연동은 **앱 심사 통과 후** 별도 이슈로 분리. 상세: `docs/FRONTEND.md`.
 
 상세: `docs/FRONTEND.md` / `docs/DESIGN.md` / `docs/frontend-code-quality.md`
 

@@ -158,7 +158,43 @@ Path alias: `@/` → `src/`
 
 ---
 
-## 7. 금지 패턴
+## 7. 광고 슬롯 정책
+
+GoogleAds 등 광고 SDK 연동은 **앱 심사 통과 후**에만 가능. 그 전에는 모든 광고 영역을 빈 placeholder 컴포넌트로 처리.
+
+### 단일 컴포넌트 — `src/components/common/AdSlot.tsx`
+
+```tsx
+type AdSlotType = 'banner' | 'splash' | 'interstitial';
+
+interface AdSlotProps {
+  type: AdSlotType;     // 광고 타입 (배너/스플래시/전면)
+  height?: number;       // banner는 60~100, splash는 화면 하단 작게
+  className?: string;
+}
+
+// 심사 전: 회색 placeholder + "광고 영역" 텍스트
+// 심사 후: 환경변수(EXPO_PUBLIC_ADS_ENABLED)로 실 SDK로 교체
+```
+
+### 화면별 광고 슬롯 매핑
+
+| PRD ID | 위치 | type | 비고 |
+|--------|------|------|------|
+| F-AD01 | Home/Result 하단 | `banner` | 60dp 배너 |
+| F-AD04 | Onboarding 스플래시 하단 | `splash` | TMAP 스타일, 1~2초 노출 |
+| (선택) | ActiveTrip 완료 시 | `interstitial` | 전면, 닫기 버튼 필수 |
+
+### 정책
+
+- 화면 작업 시 광고 영역을 **누락하지 말 것** — 심사 통과 후 즉시 활성화 가능하도록 슬롯·여백·레이아웃 미리 확보
+- placeholder는 **시각적으로 광고처럼 보이지 않게** — 회색 박스 + 작은 텍스트만
+- F-AD02(앱 첫 화면 전면 팝업)은 F-AD04 스플래시로 통합 — 별도 전면 팝업 화면 만들지 말 것
+- 실 SDK 연동은 **GoogleAds 심사 통과 + 별도 이슈**로만 진행
+
+---
+
+## 8. 금지 패턴
 
 ```
 ❌ 하드코딩 색상값: style={{ color: '#2563eb' }}, className="bg-[#2563eb]"
