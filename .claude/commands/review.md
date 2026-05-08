@@ -5,6 +5,29 @@
 
 ---
 
+## 두 가지 모드
+
+| 모드 | 트리거 | 검증 범위 | 언제 사용 |
+|------|--------|----------|----------|
+| **Full**(기본) | `/review` | 브랜치의 모든 변경 파일 | PR 생성 직전 |
+| **Incremental** | `/review {경로}` 또는 `/review --module {도메인}` | 지정 경로/도메인만 | **모듈 단위 완성 직후** (예: API 1개 + 대응 훅 1개 짝이 끝났을 때) |
+
+**Incremental QA 권장 이유**: 버그를 빌드 후가 아니라 **각 모듈 완성 직후** 잡으면 누적·전파 비용이 줄어든다. 특히 백엔드 API ↔ 프론트 훅처럼 경계면이 있는 짝은 짝이 완성되자마자 한 번 돌리는 게 효율적이다.
+
+**적용 예**:
+```
+# Trip API + useTripList 훅 짝이 끝난 시점
+/review --module trip
+→ src/api/trip/, src/hooks/trip/, src/stores/tripStore.ts만 검증
+
+# 특정 파일 묶음만
+/review src/utils/departure.ts src/hooks/trip/useDepartureCalc.ts
+```
+
+Incremental 실행 시 변경 범위 외 파일의 위반은 보고하지 않음(노이즈 차단). PR 직전엔 반드시 Full로 한 번 더 돌릴 것.
+
+---
+
 ## 체크 항목
 
 ### 1. Hook 통과 확인

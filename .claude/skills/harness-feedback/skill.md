@@ -1,3 +1,8 @@
+---
+name: harness-feedback
+description: "동일 위반 패턴이 반복 발생할 때 하네스 자체를 보강하는 스킬. '같은 실수가 반복돼', '하네스 보강해줘', '규칙 추가해줘', '피드백 루프', '에이전트가 자꾸 X를 빼먹어' 같은 메타 피드백이 나오거나, /review가 같은 패턴을 2회 이상 [WARNING]으로 잡거나, PostToolUse Hook이 같은 ESLint 규칙을 3회 이상 자동 교정할 때 반드시 트리거. Level 1(문서) → Level 2(ESLint) → Level 2.5(교정 지시) → Level 3(구조 테스트) 4단계 중 적절한 강도를 제안하고 docs/design-docs/feedback-log.md에 기록한다."
+---
+
 # harness-feedback
 
 > 트리거: "같은 실수가 반복돼", "하네스 보강해줘", "규칙 추가해줘", "피드백 루프"

@@ -26,6 +26,8 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 
 ## 에이전트 / 스킬 구조
 
+> 구조 패턴: **파이프라인 + 생성-검증 혼합** — `when2go-ui`/`when2go-logic`이 작성 → `when2go-qa`가 별도 컨텍스트로 검증.
+
 ```
 .claude/agents/
   when2go-ui      — 화면 컴포넌트, 스타일, 애니메이션

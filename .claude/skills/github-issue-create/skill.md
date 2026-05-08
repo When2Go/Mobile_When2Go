@@ -1,3 +1,8 @@
+---
+name: github-issue-create
+description: "GitHub 이슈를 .github/ISSUE_TEMPLATE/ 6종(feature/bug/design/refactor/test/chore) 중 가장 적합한 템플릿으로 생성하는 스킬. '이슈 만들어줘', '이슈 생성', 'issue 만들어', '버그 리포트', '이슈화 해줘', '이슈로 등록' 등 새 이슈를 만들라는 요청이면 반드시 이 스킬을 사용할 것. 자체 포맷이 아닌 레포의 템플릿을 따르며, PRD ID·라벨도 자동 채움. 이미 있는 이슈를 작업하라는 요청(번호가 명시됨)은 github-issue-work를 쓸 것."
+---
+
 # github-issue-create
 
 > 트리거: "이슈 만들어줘", "이슈 생성", "issue 만들어", "버그 리포트", "이슈화 해줘"
