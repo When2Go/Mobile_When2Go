@@ -11,7 +11,10 @@
     "newArchEnabled": true,
     "ios": {
       "bundleIdentifier": "kr.co.when2go.app",
-      "supportsTablet": false
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "kr.co.when2go.app",
@@ -46,6 +49,18 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f7717f21-8d3c-4bdc-8f63-d02f52f78ad1"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f7717f21-8d3c-4bdc-8f63-d02f52f78ad1"
     }
   }
 }
