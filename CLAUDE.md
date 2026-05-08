@@ -57,6 +57,7 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 - 작업 시작: `issue #번호 작업해줘`
 - 이슈 생성: `이슈 만들어줘` (스킬이 적합한 템플릿을 골라 채움)
 - 브랜치: `feat/issue-{설명}-#{번호}`
+- **exec-plan 라이프사이클**: 작업 전 `docs/exec-plans/{날짜}-issue-{번호}.md` 작성 → 작업은 이 plan을 1차 참조 → PR Approve 시점에 plan 삭제 후 머지. approve 전 삭제 금지
 - PR: `.github/pull_request_template.md` 양식, Squash and Merge
 
 ## 자동 교정 루프
@@ -72,7 +73,7 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/design-docs/core-beliefs.md` — 프로젝트 설계 철학
 - `docs/design-docs/feedback-log.md` — 피드백 루프 기록
 - `docs/generated/component-inventory.md` — 컴포넌트 목록 (자동 생성)
-- `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성)
+- `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성, PR Approve 후 삭제)
 - `frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준
 - `folder-structure.md` — 확정 폴더 구조
 
