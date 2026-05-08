@@ -12,7 +12,7 @@
 - 모든 .ts/.tsx 파일에서 ESLint + TypeScript 에러 없음
 - Hook이 자동 수정한 내역 로그 확인
 
-### 2. 코드 품질 검증 (`frontend-code-quality.md` 기준)
+### 2. 코드 품질 검증 (`docs/frontend-code-quality.md` 기준)
 
 | 항목 | 검사 방법 |
 |------|---------|

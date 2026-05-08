@@ -22,7 +22,7 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 8. **TDD 적용 범위**: 비즈니스 로직(`src/utils/` 계산, `src/stores/` Zustand 액션, `src/hooks/` 분기·계산 있는 훅)은 **테스트 먼저 작성**. 단순 wrapper·외부 SDK 어댑터(`src/api/`)·trivial getter는 예외. UI(`src/components/`, `app/`, 애니메이션)는 TDD 비대상.
 9. **테스트 1회 원칙**: TDD로 만든 테스트가 곧 영구 자산. PR 직전에 같은 동작에 대한 테스트를 새로 만들지 않는다(중복 금지). `/review`는 "테스트 누락 여부 확인 + 전체 통과"만 체크.
 
-상세: `docs/FRONTEND.md` / `docs/DESIGN.md` / `frontend-code-quality.md`
+상세: `docs/FRONTEND.md` / `docs/DESIGN.md` / `docs/frontend-code-quality.md`
 
 ## 에이전트 / 스킬 구조
 
@@ -87,7 +87,7 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성, PR Approve 후 삭제)
 - `docs/references/PRD-지금나가-v1.1.md` — 상위 폴더 PRD 사본 (변경 시 양쪽 동기화)
 - `docs/TESTING.md` — 단위 테스트 가이드 (대상·예시·우선순위)
-- `frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준
+- `docs/frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준
 - `folder-structure.md` — 확정 폴더 구조
 
 현재 작업: `docs/exec-plans/` 참조

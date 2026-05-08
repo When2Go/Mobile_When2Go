@@ -1,7 +1,7 @@
 # Frontend 코드 컨벤션
 
 > 이 문서는 when2go-ui, when2go-logic 에이전트가 코드를 작성할 때 따르는 기준입니다.
-> 코드 품질 기준 상세: `frontend-code-quality.md`
+> 코드 품질 기준 상세: `docs/frontend-code-quality.md`
 
 ---
 

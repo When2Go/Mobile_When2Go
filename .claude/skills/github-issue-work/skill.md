@@ -39,7 +39,7 @@
 
 - `docs/FRONTEND.md` — 코드 컨벤션
 - `docs/DESIGN.md` — 디자인 시스템
-- `frontend-code-quality.md` — 코드 품질 기준
+- `docs/frontend-code-quality.md` — 코드 품질 기준
 - `folder-structure.md` — 파일 위치 기준
 
 ## 범위 밖

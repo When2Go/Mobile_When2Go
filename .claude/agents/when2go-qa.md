@@ -22,25 +22,25 @@
 - [ ] `no-console` 위반 없음
 - [ ] `@typescript-eslint/no-explicit-any` 위반 없음
 
-### 2. 가독성 (`frontend-code-quality.md` 섹션 1)
+### 2. 가독성 (`docs/frontend-code-quality.md` 섹션 1)
 
 - [ ] 같이 실행되지 않는 코드가 분리되어 있는가? (Trip 상태별 컴포넌트 분리 등)
 - [ ] 복잡한 조건에 이름이 붙어 있는가? (`isMyActiveTrip`, `isLateRisk` 등)
 - [ ] 매직 넘버 없이 상수명이 사용되는가? (`300` → `ANIMATION_DELAY_MS`)
 - [ ] 중첩 삼항 연산자가 없는가?
 
-### 3. 예측 가능성 (`frontend-code-quality.md` 섹션 2)
+### 3. 예측 가능성 (`docs/frontend-code-quality.md` 섹션 2)
 
 - [ ] 같은 종류의 훅/함수의 반환 타입이 통일되어 있는가?
 - [ ] 함수 이름으로 예측 불가능한 부수 효과가 없는가?
 - [ ] `http`, `api` 등 라이브러리 이름과 충돌하는 변수명이 없는가?
 
-### 4. 응집도 (`frontend-code-quality.md` 섹션 3)
+### 4. 응집도 (`docs/frontend-code-quality.md` 섹션 3)
 
 - [ ] 함께 수정되는 파일이 같은 도메인 디렉토리에 있는가?
 - [ ] 상수가 사용처와 가까운 위치에 선언되어 있는가?
 
-### 5. 결합도 (`frontend-code-quality.md` 섹션 4)
+### 5. 결합도 (`docs/frontend-code-quality.md` 섹션 4)
 
 - [ ] 하나의 훅이 3개 초과 책임을 갖지 않는가?
 - [ ] Props Drilling이 3단계 이상 없는가?

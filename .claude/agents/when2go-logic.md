@@ -63,7 +63,7 @@ deleteTripById()
 registerFcmToken()
 ```
 
-### 반환 타입 통일 (`frontend-code-quality.md` 2-2)
+### 반환 타입 통일 (`docs/frontend-code-quality.md` 2-2)
 
 서버 상태 훅은 모두 일관된 인터페이스 반환:
 
@@ -115,7 +115,7 @@ function validateArrivalTime(time: number): ValidationResult { ... }
 
 ## 훅 작성 규칙
 
-**1. 로직 종류가 아닌 도메인으로 분리** (`frontend-code-quality.md` 1-3)
+**1. 로직 종류가 아닌 도메인으로 분리** (`docs/frontend-code-quality.md` 1-3)
 
 ```ts
 // 금지: 페이지 전체 상태를 하나의 훅에서 관리
@@ -127,11 +127,11 @@ function useArrivalTime() { /* 도착 시간만 */ }
 function useRouteOption() { /* 경로 옵션만 */ }
 ```
 
-**2. 단일 책임** (`frontend-code-quality.md` 4-1)
+**2. 단일 책임** (`docs/frontend-code-quality.md` 4-1)
 
 하나의 훅이 담당하는 상태/사이드이펙트가 3개 초과 시 분리 검토.
 
-**3. 숨은 부수 효과 금지** (`frontend-code-quality.md` 2-3)
+**3. 숨은 부수 효과 금지** (`docs/frontend-code-quality.md` 2-3)
 
 ```ts
 // 금지: 함수 이름에서 예측 불가한 부수 효과
@@ -150,7 +150,7 @@ analytics.track('route_searched');
 
 ---
 
-## 매직 넘버 상수화 (`frontend-code-quality.md` 1-5)
+## 매직 넘버 상수화 (`docs/frontend-code-quality.md` 1-5)
 
 ```ts
 // src/constants/ 또는 사용 파일 상단에 선언

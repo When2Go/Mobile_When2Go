@@ -91,7 +91,7 @@ const sub    = isDark ? "text-zinc-400" : "text-zinc-500";
 
 ## 컴포넌트 작성 규칙
 
-**1. 같이 실행되지 않는 코드는 분리** (`frontend-code-quality.md` 1-1)
+**1. 같이 실행되지 않는 코드는 분리** (`docs/frontend-code-quality.md` 1-1)
 
 ```tsx
 // 금지: 상태별 분기가 한 컴포넌트에 산재
@@ -108,14 +108,14 @@ function TripCard({ trip }) {
 }
 ```
 
-**2. 복잡한 조건에 이름 붙이기** (`frontend-code-quality.md` 1-4)
+**2. 복잡한 조건에 이름 붙이기** (`docs/frontend-code-quality.md` 1-4)
 
 ```tsx
 const isMyActiveTrip = trip.status === 'active' && trip.userId === deviceId;
 const isLateRisk = progress >= 0.9;
 ```
 
-**3. 중첩 삼항 연산자 금지** (`frontend-code-quality.md` 1-7)
+**3. 중첩 삼항 연산자 금지** (`docs/frontend-code-quality.md` 1-7)
 
 ```tsx
 // 금지
@@ -129,9 +129,9 @@ const label = (() => {
 })();
 ```
 
-**4. Props Drilling 3단계 이상 금지** (`frontend-code-quality.md` 4-3) — Composition 패턴 또는 Context 사용
+**4. Props Drilling 3단계 이상 금지** (`docs/frontend-code-quality.md` 4-3) — Composition 패턴 또는 Context 사용
 
-**5. 구현 상세 추상화** (`frontend-code-quality.md` 1-2) — 인증 가드, 초기화 로직은 래퍼/레이아웃으로 분리
+**5. 구현 상세 추상화** (`docs/frontend-code-quality.md` 1-2) — 인증 가드, 초기화 로직은 래퍼/레이아웃으로 분리
 
 ---
 
