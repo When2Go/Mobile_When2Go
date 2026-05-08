@@ -53,7 +53,7 @@
 - [ ] 간격이 Design.md 기준을 따르는가? (좌우 `px-5` 등)
 - [ ] `BottomSheetModal` 래퍼를 사용하는가? (`@gorhom/bottom-sheet` 직접 사용 금지)
 
-### 7. 폴더 구조 (`folder-structure.md` 참조)
+### 7. 폴더 구조 (`docs/folder-structure.md` 참조)
 
 - [ ] 파일이 올바른 위치에 있는가?
 - [ ] API 함수가 `src/api/` 에 있는가?

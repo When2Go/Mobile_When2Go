@@ -7,7 +7,7 @@
 
 ## 1. 폴더 구조
 
-`folder-structure.md` 참조. 핵심 규칙:
+`docs/folder-structure.md` 참조. 핵심 규칙:
 
 - `app/` — Expo Router 라우트 파일만 (JSX 최소화, 로직은 `src/`에서)
 - `src/api/{도메인}/` — API 함수 + 타입 (도메인별 응집)

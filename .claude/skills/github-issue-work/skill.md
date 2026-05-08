@@ -11,7 +11,7 @@
 3. **작업 전 계획 문서화** — `docs/exec-plans/{날짜}-issue-{번호}.md` 생성:
    - 원본 이슈 URL, Labels, PRD ID (있으면)
    - 목표 (이슈 본문에서 추출)
-   - 관련 파일 (folder-structure.md 기반으로 파악)
+   - 관련 파일 (docs/folder-structure.md 기반으로 파악)
    - 작업 분해 체크리스트
    - 완료 기준
 4. 작업 유형에 맞는 에이전트 연계 — **모든 작업은 위 exec-plan을 1차 참조 자료로 진행**:
@@ -40,7 +40,7 @@
 - `docs/FRONTEND.md` — 코드 컨벤션
 - `docs/DESIGN.md` — 디자인 시스템
 - `docs/frontend-code-quality.md` — 코드 품질 기준
-- `folder-structure.md` — 파일 위치 기준
+- `docs/folder-structure.md` — 파일 위치 기준
 
 ## 범위 밖
 
