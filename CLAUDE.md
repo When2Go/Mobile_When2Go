@@ -38,15 +38,25 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
   /gc       — 가비지 컬렉션
   /health   — 하네스 건강 점검
   /quality  — 품질 등급 재평가
+
+.github/ISSUE_TEMPLATE/
+  feature.md   — 신규 기능 (PRD ID 필수)
+  bug.md       — 버그 리포트
+  design.md    — 디자인 작업
+  refactor.md  — 리팩터링
+  test.md      — 테스트 작업
+  chore.md     — 설정 · 의존성 · 잡무
+
+.github/pull_request_template.md  — PR 본문 기본 양식
 ```
 
 ## GitHub 이슈 워크플로우
 
-- 모든 작업은 GitHub 이슈 기반
+- 모든 작업은 GitHub 이슈 기반 — `.github/ISSUE_TEMPLATE/`의 6종 템플릿 중 선택
 - 작업 시작: `issue #번호 작업해줘`
-- 이슈 생성: `이슈 만들어줘`
+- 이슈 생성: `이슈 만들어줘` (스킬이 적합한 템플릿을 골라 채움)
 - 브랜치: `feat/issue-{설명}-#{번호}`
-- PR 머지: Squash and Merge
+- PR: `.github/pull_request_template.md` 양식, Squash and Merge
 
 ## 자동 교정 루프
 
