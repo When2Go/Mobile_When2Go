@@ -10,6 +10,7 @@ closes #
 ## 테스트
 
 - [ ] ESLint + TypeScript 에러 없음
+- [ ] `npm test` 통과 — 신규 로직(`src/utils/`·`src/hooks/`·`src/stores/`)에 테스트 누락 없음 (`docs/TESTING.md` 4축 기준)
 - [ ] Light / Dark 모드 확인
 - [ ] 주요 플로우 직접 테스트
 
