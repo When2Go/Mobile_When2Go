@@ -37,6 +37,23 @@
 
 ---
 
+## 디자인 시안 참조 (필수)
+
+모든 화면·컴포넌트 구현은 상위 폴더 `../design/`(저장소 외부, Vite + React HTML 시안)을 **1차 자료**로 사용한다. 시안과 다르게 구현하면 PR 본문에 사유 명시.
+
+참조 우선순위:
+
+| 자료 | 용도 |
+|------|------|
+| `../design/index.html` (또는 dev 서버) | 화면 흐름 · 인터랙션 시안 확인 |
+| `../design/src/` 컴포넌트 | 컴포넌트 구조 · 클래스 매칭 |
+| `../design/Design.md` | 디자인 토큰 정의 (`docs/DESIGN.md`의 원본) |
+| `../design/guidelines/Guidelines.md` | 톤 · 스타일 가이드라인 |
+
+> 시안의 Tailwind 클래스를 그대로 옮기지 말고, RN/NativeWind에 맞는 토큰·클래스로 매핑할 것. (예: 시안의 hover/group hover 등 RN 미지원 패턴 제외)
+
+---
+
 ## 디자인 시스템 준수
 
 `docs/DESIGN.md` 참조. 핵심 규칙:

@@ -1,7 +1,8 @@
 # 디자인 시스템
 
 > 이 문서는 when2go-ui 에이전트가 스타일을 작성할 때 따르는 유일한 기준입니다.
-> 원본: `design/Design.md` (Figma Make 프리뷰 기반 추출)
+> 원본 시안: 상위 폴더 `../design/` (Vite + React HTML — Figma Make 프리뷰 기반).
+> 토큰 정의는 `../design/Design.md`, 화면 시안은 `../design/index.html` / `../design/src/`, 톤·가이드는 `../design/guidelines/Guidelines.md`. **UI 작업은 본 문서의 토큰만 따르는 것이 아니라, 시안 자체와 화면별로 직접 대조해야 한다.**
 
 ---
 
