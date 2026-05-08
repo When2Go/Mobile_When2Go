@@ -43,5 +43,6 @@ app-example
 /android
 
 # editor / tool settings (local only)
+.history
 .vscode/
 .claude/settings.local.json

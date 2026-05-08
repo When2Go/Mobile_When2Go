@@ -56,7 +56,7 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 - 모든 작업은 GitHub 이슈 기반 — `.github/ISSUE_TEMPLATE/`의 6종 템플릿 중 선택
 - 작업 시작: `issue #번호 작업해줘`
 - 이슈 생성: `이슈 만들어줘` (스킬이 적합한 템플릿을 골라 채움)
-- 브랜치: `feat/issue-{설명}-#{번호}`
+- 브랜치: `feat/issue-{설명}#{번호}`
 - **exec-plan 라이프사이클**: 작업 전 `docs/exec-plans/{날짜}-issue-{번호}.md` 작성 → 작업은 이 plan을 1차 참조 → PR Approve 시점에 plan 삭제 후 머지. approve 전 삭제 금지
 - PR: `.github/pull_request_template.md` 양식, Squash and Merge
 
