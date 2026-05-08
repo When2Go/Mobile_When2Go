@@ -1,0 +1,11 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "edit_file|create_file|write_to_file",
+        "command": "bash -c 'FILE=\"$CLAUDE_FILE_PATH\"; if [[ \"$FILE\" == *.ts || \"$FILE\" == *.tsx ]]; then cd \"$(dirname \"$FILE\")\" && npx eslint --fix \"$FILE\" 2>&1 && npx tsc --noEmit 2>&1; fi'",
+        "description": "파일 저장 후 자동 ESLint fix + TypeScript check"
+      }
+    ]
+  }
+}
