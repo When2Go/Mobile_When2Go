@@ -18,6 +18,8 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 4. **훅**: 도메인별 분리 (`hooks/trip/`, `hooks/route/`). 로직 종류 기준 혼합 금지.
 5. **ODsay**: 프론트 직접 호출 금지. Spring Boot 프록시를 통해서만.
 6. **UI 시안 참조**: 화면·컴포넌트 구현 시 상위 폴더 `../design/`(Vite HTML 시안)을 1차 자료로 삼는다. 시안과 다르게 구현하려면 PR 본문에 사유 명시.
+7. **PRD 동기화**: `../PRD_지금나가_v1.1.md` 변경 시 `docs/references/PRD-지금나가-v1.1.md`도 같이 갱신. 레포 안이 단일 진실 원천이 되도록.
+8. **TDD 적용 범위**: 로직(`src/utils/` 출발 시간 계산, `src/hooks/` 상태 변환, `src/stores/` Zustand 액션 등)은 **테스트 먼저 작성**. UI(`src/components/`, `app/` 화면, 애니메이션)는 TDD 비대상 — 사후 인터랙션·시각 회귀 테스트만.
 
 상세: `docs/FRONTEND.md` / `docs/DESIGN.md` / `frontend-code-quality.md`
 
@@ -65,6 +67,12 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript check 실행.
 에러 발생 시 에이전트가 스스로 수정 → 재저장 반복.
 
+## 단위 테스트
+
+- **로컬 강제**: `/review` 커맨드 마지막 단계에서 `npm test` 실행. 실패 시 PR 생성 금지
+- **원격 강제**: `.github/workflows/test.yml`이 push/PR 시 자동 실행. 실패 시 머지 차단
+- **무엇을 테스트할지**: `docs/TESTING.md` 참조 (대상·스타일·예시 포함)
+
 ## docs/ 경로
 
 - `docs/FRONTEND.md` — 코드 컨벤션
@@ -74,6 +82,8 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/design-docs/feedback-log.md` — 피드백 루프 기록
 - `docs/generated/component-inventory.md` — 컴포넌트 목록 (자동 생성)
 - `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성, PR Approve 후 삭제)
+- `docs/references/PRD-지금나가-v1.1.md` — 상위 폴더 PRD 사본 (변경 시 양쪽 동기화)
+- `docs/TESTING.md` — 단위 테스트 가이드 (대상·예시·우선순위)
 - `frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준
 - `folder-structure.md` — 확정 폴더 구조
 
