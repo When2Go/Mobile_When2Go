@@ -45,3 +45,4 @@ app-example
 # editor / tool settings (local only)
 .vscode/
 .claude/settings.json
+.claude/settings.local.json
