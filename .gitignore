@@ -41,3 +41,7 @@ app-example
 # generated native folders
 /ios
 /android
+
+# editor / tool settings (local only)
+.vscode/
+.claude/settings.json
