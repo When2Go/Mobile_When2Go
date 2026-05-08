@@ -90,6 +90,7 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성, PR Approve 후 삭제)
 - `docs/references/PRD-지금나가-v1.1.md` — 상위 폴더 PRD 사본 (변경 시 양쪽 동기화)
 - `docs/TESTING.md` — 단위 테스트 가이드 (대상·예시·우선순위)
+- `docs/DEPLOY.md` — EAS Build / TestFlight / Play 배포 가이드
 - `docs/frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준
 - `docs/folder-structure.md` — 확정 폴더 구조
 

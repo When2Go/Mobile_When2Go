@@ -46,3 +46,8 @@ app-example
 .history
 .vscode/
 .claude/settings.local.json
+
+# EAS / store credentials (never commit)
+play-service-account.json
+*.itc.json
+credentials.json

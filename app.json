@@ -1,17 +1,19 @@
 {
   "expo": {
-    "name": "when2go-scaffold",
-    "slug": "when2go-scaffold",
+    "name": "지금 나가?",
+    "slug": "when2go",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "when2goscaffold",
+    "scheme": "when2go",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "bundleIdentifier": "kr.co.when2go.app",
+      "supportsTablet": false
     },
     "android": {
+      "package": "kr.co.when2go.app",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
