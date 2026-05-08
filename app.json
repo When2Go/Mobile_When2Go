@@ -2,6 +2,7 @@
   "expo": {
     "name": "지금 나가?",
     "slug": "when2go",
+    "owner": "when2go",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
