@@ -19,7 +19,8 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 5. **ODsay**: 프론트 직접 호출 금지. Spring Boot 프록시를 통해서만.
 6. **UI 시안 참조**: 화면·컴포넌트 구현 시 상위 폴더 `../design/`(Vite HTML 시안)을 1차 자료로 삼는다. 시안과 다르게 구현하려면 PR 본문에 사유 명시.
 7. **PRD 동기화**: `../PRD_지금나가_v1.1.md` 변경 시 `docs/references/PRD-지금나가-v1.1.md`도 같이 갱신. 레포 안이 단일 진실 원천이 되도록.
-8. **TDD 적용 범위**: 로직(`src/utils/` 출발 시간 계산, `src/hooks/` 상태 변환, `src/stores/` Zustand 액션 등)은 **테스트 먼저 작성**. UI(`src/components/`, `app/` 화면, 애니메이션)는 TDD 비대상 — 사후 인터랙션·시각 회귀 테스트만.
+8. **TDD 적용 범위**: 비즈니스 로직(`src/utils/` 계산, `src/stores/` Zustand 액션, `src/hooks/` 분기·계산 있는 훅)은 **테스트 먼저 작성**. 단순 wrapper·외부 SDK 어댑터(`src/api/`)·trivial getter는 예외. UI(`src/components/`, `app/`, 애니메이션)는 TDD 비대상.
+9. **테스트 1회 원칙**: TDD로 만든 테스트가 곧 영구 자산. PR 직전에 같은 동작에 대한 테스트를 새로 만들지 않는다(중복 금지). `/review`는 "테스트 누락 여부 확인 + 전체 통과"만 체크.
 
 상세: `docs/FRONTEND.md` / `docs/DESIGN.md` / `frontend-code-quality.md`
 
@@ -69,9 +70,11 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 
 ## 단위 테스트
 
-- **로컬 강제**: `/review` 커맨드 마지막 단계에서 `npm test` 실행. 실패 시 PR 생성 금지
+- **언제 작성**: 로직 영역은 코드 작성 전(TDD). `when2go-logic` 에이전트의 "테스트 작성 규칙" 참조
+- **어떻게 작성**: `docs/TESTING.md` 4축(정상·경계·분기·에러) 기준
+- **로컬 강제**: `/review` 단계 5에서 `npm test` 실행. 신규 로직에 테스트 누락 시 [CRITICAL]
 - **원격 강제**: `.github/workflows/test.yml`이 push/PR 시 자동 실행. 실패 시 머지 차단
-- **무엇을 테스트할지**: `docs/TESTING.md` 참조 (대상·스타일·예시 포함)
+- **PR 체크**: `.github/pull_request_template.md`에 테스트 통과·누락 없음 체크박스
 
 ## docs/ 경로
 
