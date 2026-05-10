@@ -45,9 +45,8 @@
 |------|-----|-------|
 | `Platform`           | `IOS`, `ANDROID` | 사용자 등록 |
 | `TripStatus`         | `PENDING`, `SCHEDULED`, `IN_PROGRESS`, `COMPLETED`, `CANCELLED` | Trip 상태 |
-| `RouteOption`        | `OPTIMAL`, `MIN_TRANSFER`, `SUBWAY_FIRST`, `BUS_ONLY` | 예약 · 경로 탐색 |
+| `RouteOption`        | `DEFAULT`, `BUS_ONLY`, `SUBWAY_ONLY` | 예약 · 경로 탐색 |
 | `RouteType` (Trip)   | `OPTIMAL`, `MIN_TRANSFER`, `MIN_COST` | Trip 생성 시 (※ 명세 차이 — 백엔드와 통일 필요) |
-| `RouteSearchOption`  | `DEFAULT`, `SUBWAY_ONLY`, `BUS_ONLY` | 경로 탐색 전용 (※ 위 RouteOption과 분리 표기됨) |
 | `StepType`           | `WALK`, `SUBWAY`, `BUS` | 경로 단계 |
 | `RepeatDay`          | `MONDAY` ~ `SUNDAY` (대문자) | 예약 반복 요일 |
 | `NotificationMode`   | `SOUND`, `VIBRATE`, `SOUND_AND_VIBRATE` | 알림 모드 |
@@ -205,7 +204,7 @@
 | `nickname` | string | O |  |
 | `originName` / `originLat` / `originLng` | string / number / number | X |  |
 | `destName` / `destLat` / `destLng`       | string / number / number | X |  |
-| `routeOption` | `RouteOption` | X | `OPTIMAL` / `MIN_TRANSFER` / `SUBWAY_FIRST` / `BUS_ONLY` |
+| `routeOption` | `RouteOption` | X | `OPTIMAL`, `MIN_TRANSFER`, `MIN_COST` |
 | `arrivalTime` | string (`HH:mm`) | X | 시각만 |
 | `repeatDays` | `RepeatDay[]` | X | 반복 요일 배열 |
 
@@ -246,7 +245,7 @@
 
 ### GET `/api/routes/search`
 
-> ⚠️ 명세 미확정 — 응답에 비용(`cost`) 필드 추가 여부 논의 중.
+> ⚠️ 명세 미확정 — 응답에 비용(`cost`) 필드 추가 예정
 
 **Query**
 
