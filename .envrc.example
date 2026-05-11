@@ -1,0 +1,11 @@
+# direnv 템플릿 — 이 파일을 .envrc로 복사 후 실제 토큰 채우기
+#
+# 1. https://expo.dev/settings/access-tokens 에서 토큰 생성 (l2juhan 계정 / when2go org 권한)
+# 2. cp .envrc.example .envrc
+# 3. 아래 EXPO_TOKEN 값을 실제 토큰으로 교체
+# 4. direnv allow .   ← 이 폴더 진입 시 자동 로드 허용
+#
+# 작동 확인: 폴더 진입 → `eas whoami` 가 l2juhan 표시되어야 함
+# .envrc 는 .gitignore 에 등록되어 있어 커밋되지 않음
+
+export EXPO_TOKEN=여기에_실제_토큰_붙여넣기
