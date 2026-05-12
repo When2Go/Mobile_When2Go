@@ -6,6 +6,7 @@ import { Mic } from 'lucide-react-native';
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
+import { ICON_SIZE } from '@/constants/icons';
 import SearchInput from '@/components/search/SearchInput';
 import VoiceButton from '@/components/search/VoiceButton';
 import RecentSearchList from '@/components/search/RecentSearchList';
@@ -22,6 +23,8 @@ const MIC_ICON_SIZE = 28;
 const WAVEFORM_HEIGHTS = [3, 6, 9, 5, 11, 7, 4, 10, 6, 8, 5, 9, 4, 7, 3] as const;
 const WAVEFORM_BAR_WIDTH = 6;
 const WAVEFORM_HEIGHT_MULTIPLIER = 3;
+const PULSE_CIRCLE_SIZE = 80;
+const PULSE_CIRCLE_RADIUS = PULSE_CIRCLE_SIZE / 2;
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -72,7 +75,7 @@ export default function SearchScreen() {
   }, [voiceOpen, voiceStage, pulse1, pulse2]);
 
   useEffect(() => {
-    if (voiceStage !== 'processing') {
+    if (!voiceOpen || voiceStage !== 'processing') {
       spinAnim.setValue(0);
       return;
     }
@@ -81,14 +84,17 @@ export default function SearchScreen() {
     );
     anim.start();
     return () => anim.stop();
-  }, [voiceStage, spinAnim]);
+  }, [voiceOpen, voiceStage, spinAnim]);
 
   const startVoice = () => {
     setVoiceStage('listening');
     setVoiceOpen(true);
   };
 
-  const cancelVoice = () => setVoiceOpen(false);
+  const cancelVoice = () => {
+    setVoiceOpen(false);
+    setVoiceStage('listening');
+  };
 
   const handleSelect = (destination: string) => {
     router.push({ pathname: '/setup', params: { destination } });
@@ -100,12 +106,12 @@ export default function SearchScreen() {
   const pulse2Opacity = pulse2.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.2, 0.1, 0] });
   const spin = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
-  const pageBg = isDark ? 'bg-zinc-900' : 'bg-white';
-  const borderColor = isDark ? 'border-zinc-800' : 'border-zinc-100';
+  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
+  const borderColor = isDark ? 'border-zinc-700' : 'border-zinc-100';
   const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
   const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
   const sheetBg = isDark ? 'bg-zinc-900' : 'bg-white';
-  const handleBarBg = isDark ? 'bg-zinc-700' : 'bg-zinc-300';
+  const handleBarBg = isDark ? 'bg-zinc-700' : 'bg-zinc-200';
   const cancelBtnBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
   const cancelBtnText = isDark ? 'text-zinc-300' : 'text-zinc-600';
   const voiceCardBg = isDark ? 'border border-blue-800/40 bg-blue-900/40' : 'bg-blue-50';
@@ -141,7 +147,7 @@ export default function SearchScreen() {
             <View className={`mt-6 rounded-2xl p-5 ${voiceCardBg}`}>
               <View className="mb-2 flex-row items-center gap-3">
                 <View className="h-8 w-8 items-center justify-center rounded-full bg-blue-600">
-                  <Mic size={16} color={PALETTE.white} />
+                  <Mic size={ICON_SIZE.card} color={PALETTE.white} />
                 </View>
                 <Text className={`font-semibold ${voiceHeading}`}>음성으로 편하게 말해보세요</Text>
               </View>
@@ -194,9 +200,9 @@ export default function SearchScreen() {
                 <Animated.View
                   style={{
                     position: 'absolute',
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
+                    width: PULSE_CIRCLE_SIZE,
+                    height: PULSE_CIRCLE_SIZE,
+                    borderRadius: PULSE_CIRCLE_RADIUS,
                     backgroundColor: PALETTE.blue500,
                     opacity: pulse1Opacity,
                     transform: [{ scale: pulse1Scale }],
@@ -205,9 +211,9 @@ export default function SearchScreen() {
                 <Animated.View
                   style={{
                     position: 'absolute',
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
+                    width: PULSE_CIRCLE_SIZE,
+                    height: PULSE_CIRCLE_SIZE,
+                    borderRadius: PULSE_CIRCLE_RADIUS,
                     backgroundColor: PALETTE.blue500,
                     opacity: pulse2Opacity,
                     transform: [{ scale: pulse2Scale }],

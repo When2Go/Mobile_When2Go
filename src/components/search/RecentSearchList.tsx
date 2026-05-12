@@ -29,7 +29,7 @@ export default function RecentSearchList({ onSelect }: Props) {
 
   const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
   const label = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const divider = isDark ? 'border-zinc-800' : 'border-zinc-100';
+  const divider = isDark ? 'border-zinc-700' : 'border-zinc-100';
 
   if (items.length === 0) {
     return (
