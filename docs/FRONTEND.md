@@ -106,10 +106,34 @@ function useArrivalTime() { ... }
 
 단일 axios 인스턴스 (`src/api/axios.ts`). ODsay 직접 호출 금지 (백엔드 프록시).
 
+- baseURL: Spring Boot 백엔드
+- 에러: 인터셉터에서 전역 처리
+- 헤더: **모든 요청에 `X-Device-Id` 자동 주입 (필수)**
+
+### 디바이스 UUID 헤더 — `X-Device-Id`
+
+**규약**: 모든 백엔드 API 요청에 `X-Device-Id: {UUID}` 헤더를 포함한다. 서버는 이 값으로 로그인 없는 사용자를 식별·구분한다.
+
+- **출처**: `useDeviceStore.getState().deviceId` (`src/stores/deviceStore.ts`). 앱 첫 실행 시 UUID v4가 1회 생성되어 AsyncStorage에 영구 저장된다.
+- **부트스트랩**: `app/_layout.tsx`에서 `ensureDeviceId()`를 호출해 1회 발급을 보장한다.
+- **주입 위치**: axios 인스턴스 요청 인터셉터에서 `getState().deviceId`를 읽어 헤더에 붙인다. 화면/훅에서 매번 수동으로 넣지 않는다.
+- **null 처리**: `deviceId === null`인 상태에서 API를 호출하면 안 된다. 부트스트랩이 끝난 뒤 사용한다 (정상 흐름에선 앱 마운트 직후 set됨).
+- **재발급 금지**: 사용자가 명시적으로 초기화하지 않는 한 같은 UUID를 유지. 앱을 삭제·재설치하면 자연스럽게 새 UUID가 발급된다.
+
 ```ts
-// 헤더: X-Device-Id 자동 주입
-// 에러: 인터셉터에서 전역 처리
-// baseURL: Spring Boot 백엔드
+// src/api/axios.ts (예시)
+import axios from 'axios';
+import { useDeviceStore } from '@/stores/deviceStore';
+
+export const api = axios.create({ baseURL: API_BASE_URL });
+
+api.interceptors.request.use((config) => {
+  const deviceId = useDeviceStore.getState().deviceId;
+  if (deviceId) {
+    config.headers['X-Device-Id'] = deviceId;
+  }
+  return config;
+});
 ```
 
 ### 함수 반환 타입 통일
