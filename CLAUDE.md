@@ -71,6 +71,39 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript check 실행.
 에러 발생 시 에이전트가 스스로 수정 → 재저장 반복.
 
+## 빌드/테스트 정책
+
+- **평소 default = iOS 시뮬레이터** (`npx expo run:ios`). 빠른 iteration 우선
+- **실기기 dev build(EAS)** 는 시뮬레이터에서 재현 불가능한 동작 검증이 필요할 때만 사용:
+  - 푸시 알림 권한·페이로드
+  - 위치 권한 백그라운드 동작
+  - 실 디바이스 식별자·OS 차원 보안 동작
+  - 사용자가 명시적으로 "실기기에서 확인하자"라고 요청한 경우
+- 환경 전제: macOS + Xcode + CocoaPods + iOS 시뮬레이터 보유
+
+## 네이티브 모듈 추가 시 자동 시뮬레이터 빌드
+
+새 패키지가 추가됐고 그 패키지가 **네이티브 모듈**(Expo 모듈, `@react-native-*`, `react-native-*` 시리즈 등)이면, 에이전트는 추가 확인 없이 시뮬레이터 dev build를 자동 트리거한다.
+
+**자동 트리거 조건** (모두 만족):
+- 동일 작업 흐름에서 `npx expo install` / `npm install` 등으로 새 패키지가 `package.json`에 추가됨
+- 해당 패키지가 네이티브 코드 동반 (판단 기준: Expo 모듈, `@react-native-*`/`react-native-*` 시리즈, 또는 `ios/`/`android/` 폴더를 가진 패키지)
+- 코드 작성·테스트 검증·커밋이 통과한 뒤 (작업 흐름의 끝)
+
+**실행 명령**:
+```
+npx expo run:ios
+```
+- `run_in_background: true`로 띄우고 빌드 시작 사실을 사용자에게 안내
+- 완료 시 시뮬레이터에서 앱이 자동 실행되며 metro도 함께 뜬다 — 결과를 사용자에게 통지
+
+**EAS 실기기 빌드는 자동 트리거하지 않는다**. 사용자가 명시적으로 요청했거나, 시뮬레이터로 검증 불가능한 항목이 추가됐을 때만 다음을 안내한다:
+```
+eas build --profile development --platform ios
+```
+
+**JS-only 패키지**(zustand, dayjs, lodash 등)는 자동 빌드 대상 아님. 사용자가 "빌드하지 마"/"직접 할게"라고 명시한 경우도 자동 실행 X.
+
 ## 단위 테스트
 
 - **언제 작성**: 로직 영역은 코드 작성 전(TDD). `when2go-logic` 에이전트의 "테스트 작성 규칙" 참조
