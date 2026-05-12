@@ -9,9 +9,9 @@ import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
 const HEADER_HEIGHT_CLASS = 'h-14';
-const BOTTOM_NAV_HEIGHT_CLASS = 'h-[68px]';
-const NAV_ITEM_WIDTH_CLASS = 'w-16';
-const NAV_ITEM_HEIGHT_CLASS = 'h-12';
+const BOTTOM_NAV_HEIGHT_CLASS = 'h-[84px]';
+const NAV_ITEM_WIDTH_CLASS = 'w-20';
+const NAV_ITEM_HEIGHT_CLASS = 'h-14';
 const ACTIVE_COLOR = PALETTE.blue500;
 
 const PAGE_TITLE: Record<string, string> = {
@@ -77,7 +77,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
 
       {!hideBottomNav && (
         <View
-          className={`${BOTTOM_NAV_HEIGHT_CLASS} flex-row items-center justify-around border-t px-2 pb-2 ${navBg}`}
+          className={`${BOTTOM_NAV_HEIGHT_CLASS} flex-row items-center justify-around border-t px-2 pb-3 pt-1 ${navBg}`}
         >
           <NavItem
             icon={<Home size={ICON_SIZE.tab} color={iconColorFor(pathname === '/')} />}
@@ -135,7 +135,7 @@ function NavItem({ icon, label, active, isDark, onPress }: NavItemProps) {
       className={`${NAV_ITEM_WIDTH_CLASS} ${NAV_ITEM_HEIGHT_CLASS} items-center justify-center gap-1 rounded-xl active:opacity-60`}
     >
       {icon}
-      <Text className={`text-[10px] font-medium ${labelColor}`}>{label}</Text>
+      <Text className={`text-xs font-semibold ${labelColor}`}>{label}</Text>
     </Pressable>
   );
 }
