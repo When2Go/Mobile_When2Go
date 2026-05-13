@@ -66,5 +66,5 @@ export const DELETE_ANIM_MS = 220;
 export const SETTLE_ANIM_MS = 200;
 export const SWIPE_ACTIVATE_X = 10;
 
-/** 캘린더 dot 표시 — mock 한정으로 오늘과 내일에만 점 노출 */
-export const MOCK_MARKED_OFFSETS_FROM_TODAY = [0, 1] as const;
+/** 캘린더 dot 표시 — mock 단계에서는 실제 데이터가 있는 날(=오늘)에만 노출. */
+export const MOCK_MARKED_OFFSETS_FROM_TODAY = [0] as const;

@@ -74,10 +74,21 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 ## 빌드/테스트 정책
 
 - **OS별 default**:
-  - macOS (l2juhan) → `npx expo run:ios` (iOS 시뮬레이터)
-  - Windows (kangwook-kim02) → `npx expo run:android` (Android 에뮬레이터, Android Studio 필요)
+  - macOS (l2juhan) → iOS 시뮬레이터
+  - Windows (kangwook-kim02) → Android 에뮬레이터 (Android Studio 필요)
+- **재빌드 vs 재실행 (중요)**: 시뮬레이터/에뮬레이터에 **이전 빌드가 이미 설치돼 있으면 재빌드하지 않는다.** Metro만 띄워서 JS 번들을 갱신한다.
+  - **기본 (JS·TSX·스타일·이미지·상수만 변경)** → `npx expo start`로 Metro만 띄우고, 시뮬레이터에 설치된 앱을 그대로 실행. 빌드 5~10분 대신 10초.
+  - **재빌드 필요 (다음 중 하나라도 해당)** → `npx expo run:ios` (macOS) / `npx expo run:android` (Windows)
+    - 새 네이티브 모듈(`@react-native-*`, `react-native-*`, Expo 모듈) 추가/제거
+    - `ios/`, `android/` 디렉토리 직접 수정
+    - `app.json` / `app.config.*`의 네이티브 설정(번들 ID, 권한, 플러그인 등) 변경
+    - 시뮬레이터/에뮬레이터에 앱이 아예 설치돼 있지 않음 (첫 실행)
+  - JS-only 패키지(zustand, dayjs, lucide-react-native 같은 순수 JS 라이브러리)는 재빌드 불필요.
 - **PR 검증 분업**: 한 PR을 두 OS에서 모두 검증한다. 작성자는 자기 OS, 리뷰어는 반대 OS로 돌려본다. 한쪽만 OK는 [WARNING], 양쪽 OK여야 머지
-- **자동 트리거**: 네이티브 모듈(Expo 모듈, `@react-native-*`, `react-native-*`)이 추가되면 커밋 후 호스트 OS에 맞는 `npx expo run:ios` 또는 `npx expo run:android`를 `run_in_background`로 자동 실행. JS-only 패키지(zustand, dayjs 등)는 제외
+- **자동 트리거**: 화면/컴포넌트가 변경되는 작업이 끝나면 사용자가 바로 확인할 수 있도록 시뮬레이터/에뮬레이터를 띄워준다.
+  - 재빌드 조건에 해당하면 → 호스트 OS에 맞는 `expo run:ios` / `expo run:android`를 `run_in_background`로 실행
+  - 해당하지 않으면 → `expo start`를 `run_in_background`로 실행 (이전 빌드 재사용)
+  - 순수 문서/설정/테스트 변경만이면 자동 실행 X
 - **EAS 실기기 빌드** (`eas build --profile development --platform <ios|android>`)는 자동 트리거 X. 푸시·백그라운드 위치·OS 보안 등 에뮬레이터 재현 불가 동작 또는 사용자 명시 요청 시에만
 - 사용자가 "빌드하지 마" 명시 시 자동 실행 X
 

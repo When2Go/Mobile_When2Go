@@ -99,7 +99,7 @@ export default function ReservationCard({ schedule, onDelete, onTap }: Reservati
   const cardSurfaceClass = (() => {
     if (schedule.isActive) {
       return isDark
-        ? 'bg-blue-900/30 border-blue-700/50'
+        ? 'bg-blue-950 border-blue-700'
         : 'bg-blue-50 border-blue-200';
     }
     return isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
