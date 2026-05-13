@@ -71,6 +71,16 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript check 실행.
 에러 발생 시 에이전트가 스스로 수정 → 재저장 반복.
 
+## 빌드/테스트 정책
+
+- **OS별 default**:
+  - macOS (l2juhan) → `npx expo run:ios` (iOS 시뮬레이터)
+  - Windows (kangwook-kim02) → `npx expo run:android` (Android 에뮬레이터, Android Studio 필요)
+- **PR 검증 분업**: 한 PR을 두 OS에서 모두 검증한다. 작성자는 자기 OS, 리뷰어는 반대 OS로 돌려본다. 한쪽만 OK는 [WARNING], 양쪽 OK여야 머지
+- **자동 트리거**: 네이티브 모듈(Expo 모듈, `@react-native-*`, `react-native-*`)이 추가되면 커밋 후 호스트 OS에 맞는 `npx expo run:ios` 또는 `npx expo run:android`를 `run_in_background`로 자동 실행. JS-only 패키지(zustand, dayjs 등)는 제외
+- **EAS 실기기 빌드** (`eas build --profile development --platform <ios|android>`)는 자동 트리거 X. 푸시·백그라운드 위치·OS 보안 등 에뮬레이터 재현 불가 동작 또는 사용자 명시 요청 시에만
+- 사용자가 "빌드하지 마" 명시 시 자동 실행 X
+
 ## 단위 테스트
 
 - **언제 작성**: 로직 영역은 코드 작성 전(TDD). `when2go-logic` 에이전트의 "테스트 작성 규칙" 참조
