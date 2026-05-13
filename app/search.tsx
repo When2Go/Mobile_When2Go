@@ -87,11 +87,13 @@ export default function SearchScreen() {
         <View className="h-8" />
       </ScrollView>
 
-      <VoiceModal
-        isOpen={voiceOpen}
-        onClose={cancelVoice}
-        onComplete={() => router.push('/setup')}
-      />
+      {voiceOpen && (
+        <VoiceModal
+          isOpen={voiceOpen}
+          onClose={cancelVoice}
+          onComplete={() => { cancelVoice(); router.push('/setup'); }}
+        />
+      )}
     </SafeAreaView>
   );
 }
