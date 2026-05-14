@@ -26,6 +26,7 @@ export const PALETTE = {
   zinc900: '#18181b',
   zinc950: '#09090b',
   // state
+  amber500: '#f59e0b',
   emerald100: '#d1fae5',
   emerald700: '#047857',
   red500: '#ef4444',

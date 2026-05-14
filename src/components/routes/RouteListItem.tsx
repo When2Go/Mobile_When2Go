@@ -66,7 +66,7 @@ export default function RouteListItem({ route, onEdit, onDelete }: RouteListItem
           <View className="flex-row items-center gap-2">
             <Text className={`text-base font-bold ${heading}`}>{route.name}</Text>
             {route.isFavorite && (
-              <Star size={ICON_SIZE.card} color="#f59e0b" fill="#f59e0b" />
+              <Star size={ICON_SIZE.card} color={PALETTE.amber500} fill={PALETTE.amber500} />
             )}
           </View>
           <Pressable

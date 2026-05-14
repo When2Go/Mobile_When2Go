@@ -9,6 +9,7 @@ import { PALETTE } from '@/constants/colors';
 import type { RouteFormData, RouteItem } from '@/types/routes.types';
 
 const SNAP_POINTS = ['85%'];
+const FORM_ICON_SIZE = 18;
 const FIELD_PLACEHOLDER_FROM = '출발지를 입력하세요';
 const FIELD_PLACEHOLDER_TO = '목적지를 입력하세요';
 const FIELD_PLACEHOLDER_NAME = '예: 출근, 헬스장, 학교';
@@ -54,8 +55,8 @@ export default function RouteEditModal({
   const rowBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
   const rowLabel = isDark ? 'text-zinc-200' : 'text-zinc-800';
   const starInactiveColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const starColor = form.isFavorite ? '#f59e0b' : starInactiveColor;
-  const starFill = form.isFavorite ? '#f59e0b' : 'transparent';
+  const starColor = form.isFavorite ? PALETTE.amber500 : starInactiveColor;
+  const starFill = form.isFavorite ? PALETTE.amber500 : 'transparent';
 
   return (
     <BottomSheetModal isOpen={isOpen} onClose={onClose} title={title} snapPoints={SNAP_POINTS}>
@@ -76,7 +77,7 @@ export default function RouteEditModal({
         <View>
           <Text className={`mb-2 text-sm font-semibold ${labelText}`}>출발지</Text>
           <View className={`flex-row items-center gap-3 rounded-xl border px-4 ${rowBg}`}>
-            <MapPin size={18} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
+            <MapPin size={FORM_ICON_SIZE} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
             <BottomSheetTextInput
               value={form.from}
               onChangeText={(v) => setForm((f) => ({ ...f, from: v }))}
@@ -91,7 +92,7 @@ export default function RouteEditModal({
         <View>
           <Text className={`mb-2 text-sm font-semibold ${labelText}`}>목적지</Text>
           <View className={`flex-row items-center gap-3 rounded-xl border px-4 ${rowBg}`}>
-            <MapPin size={18} color={isDark ? PALETTE.emerald100 : PALETTE.emerald700} />
+            <MapPin size={FORM_ICON_SIZE} color={isDark ? PALETTE.emerald100 : PALETTE.emerald700} />
             <BottomSheetTextInput
               value={form.to}
               onChangeText={(v) => setForm((f) => ({ ...f, to: v }))}
@@ -118,7 +119,7 @@ export default function RouteEditModal({
         <View className={`flex-row items-center justify-between rounded-xl border px-4 py-4 ${rowBg}`}>
           <View className="flex-row items-center gap-3">
             <Star
-              size={18}
+              size={FORM_ICON_SIZE}
               color={starColor}
               fill={starFill}
             />
