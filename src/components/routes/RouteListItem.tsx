@@ -13,11 +13,12 @@ const ORIGIN_DOT_SIZE = 8;
 
 interface RouteListItemProps {
   route: RouteItem;
+  onNavigateToSetup: (route: RouteItem) => void;
   onEdit: (route: RouteItem) => void;
   onDelete: (id: number) => void;
 }
 
-export default function RouteListItem({ route, onEdit, onDelete }: RouteListItemProps) {
+export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDelete }: RouteListItemProps) {
   const { isDark } = useTheme();
   const swipeRef = useRef<Swipeable>(null);
 
@@ -57,8 +58,9 @@ export default function RouteListItem({ route, onEdit, onDelete }: RouteListItem
   return (
     <Swipeable ref={swipeRef} renderRightActions={renderRightActions} overshootRight={false}>
       <Pressable
-        onPress={() => onEdit(route)}
+        onPress={() => onNavigateToSetup(route)}
         accessibilityRole="button"
+        accessibilityLabel={`${route.name} 경로로 설정`}
         className={`rounded-2xl border p-4 active:opacity-80 ${cardBg}`}
       >
         {/* Title row */}

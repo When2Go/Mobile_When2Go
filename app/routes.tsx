@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { Clock, Plus } from 'lucide-react-native';
 
 import MobileLayout from '@/components/common/MobileLayout';
@@ -9,6 +10,7 @@ import RouteEditModal from '@/components/routes/RouteEditModal';
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import type { RouteFormData, RouteItem } from '@/types/routes.types';
 
 const MOCK_ROUTES: RouteItem[] = [
@@ -19,13 +21,35 @@ const MOCK_ROUTES: RouteItem[] = [
   { id: 5, name: '병원', from: '집', to: '서울대학교 병원', isFavorite: false, frequency: '월 1회 이용' },
 ];
 
+const EMPTY_FORM: RouteFormData = { name: '', from: '', to: '', isFavorite: false, frequency: '' };
+
 let nextId = MOCK_ROUTES.length + 1;
 
 export default function RoutesScreen() {
+  const router = useRouter();
   const { isDark } = useTheme();
+
   const [routes, setRoutes] = useState<RouteItem[]>(MOCK_ROUTES);
   const [editTarget, setEditTarget] = useState<RouteItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
+  const [draftForm, setDraftForm] = useState<RouteFormData>(EMPTY_FORM);
+
+  // search → routes 위치 선택 복귀 여부 추적
+  const isAwaitingLocationRef = useRef(false);
+
+  // 검색 화면에서 위치 선택 후 복귀했을 때 draft 적용 + 모달 재오픈
+  useFocusEffect(
+    useCallback(() => {
+      if (!isAwaitingLocationRef.current) return;
+      isAwaitingLocationRef.current = false;
+
+      const pending = useRouteDraftStore.getState().consumePendingLocation();
+      if (pending) {
+        setDraftForm((prev) => ({ ...prev, [pending.field]: pending.location }));
+      }
+      setEditOpen(true);
+    }, []),
+  );
 
   const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
   const headerBg = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100';
@@ -39,29 +63,47 @@ export default function RoutesScreen() {
 
   const handleAdd = () => {
     setEditTarget(undefined);
+    setDraftForm(EMPTY_FORM);
     setEditOpen(true);
   };
 
   const handleEdit = (route: RouteItem) => {
     setEditTarget(route);
+    setDraftForm({ name: route.name, from: route.from, to: route.to, isFavorite: route.isFavorite, frequency: route.frequency });
     setEditOpen(true);
+  };
+
+  const handleNavigateToSetup = (route: RouteItem) => {
+    router.push({ pathname: '/setup', params: { destination: route.to } });
   };
 
   const handleDelete = (id: number) => {
     setRoutes((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const handleSave = (data: RouteFormData) => {
+  const handleSave = () => {
     if (editTarget) {
-      setRoutes((prev) => prev.map((r) => (r.id === editTarget.id ? { ...data, id: r.id } : r)));
+      setRoutes((prev) => prev.map((r) => (r.id === editTarget.id ? { ...draftForm, id: r.id } : r)));
     } else {
-      const newRoute: RouteItem = { ...data, id: nextId++ };
+      const newRoute: RouteItem = { ...draftForm, id: nextId++ };
       setRoutes((prev) => [...prev, newRoute]);
     }
     setEditOpen(false);
   };
 
-  const handleClose = () => setEditOpen(false);
+  const handleClose = () => {
+    if (!isAwaitingLocationRef.current) {
+      useRouteDraftStore.getState().consumePendingLocation();
+    }
+    setEditOpen(false);
+  };
+
+  // 출발지/목적지 검색 화면으로 이동 — 복귀 시 모달 재오픈을 위해 ref 설정
+  const handleSelectLocation = (field: 'from' | 'to') => {
+    isAwaitingLocationRef.current = true;
+    setEditOpen(false);
+    router.push({ pathname: '/search', params: { mode: 'select-location', field } });
+  };
 
   return (
     <MobileLayout>
@@ -83,10 +125,7 @@ export default function RoutesScreen() {
           <EmptyState onAddPress={handleAdd} />
         </View>
       ) : (
-        <ScrollView
-          className={`flex-1 ${pageBg}`}
-          showsVerticalScrollIndicator={false}
-        >
+        <ScrollView className={`flex-1 ${pageBg}`} showsVerticalScrollIndicator={false}>
           {/* 경로 요약 배너 */}
           <View className={`relative h-36 w-full ${mapAreaBg}`}>
             <View className="absolute inset-x-0 bottom-4 px-5">
@@ -110,6 +149,7 @@ export default function RoutesScreen() {
                 <RouteListItem
                   key={route.id}
                   route={route}
+                  onNavigateToSetup={handleNavigateToSetup}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
                 />
@@ -124,7 +164,10 @@ export default function RoutesScreen() {
           isOpen={isEditOpen}
           onClose={handleClose}
           onSave={handleSave}
-          initialRoute={editTarget}
+          isEditMode={editTarget !== undefined}
+          form={draftForm}
+          onFormChange={(updates) => setDraftForm((prev) => ({ ...prev, ...updates }))}
+          onSelectLocation={handleSelectLocation}
         />
       )}
     </MobileLayout>
