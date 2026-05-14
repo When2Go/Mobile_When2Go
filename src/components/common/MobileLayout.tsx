@@ -24,6 +24,8 @@ const PAGE_TITLE: Record<string, string> = {
 };
 
 const HIDE_BOTTOM_NAV_PATHS = ['/setup', '/active', '/onboarding'];
+/** 탭 루트 경로 — 뒤로가기 없는 메인 화면. 헤더 자체를 숨긴다. */
+const TAB_ROOT_PATHS = ['/', '/schedule', '/routes', '/mypage'];
 
 interface MobileLayoutProps {
   children: ReactNode;
@@ -34,7 +36,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
   const pathname = usePathname();
   const { isDark } = useTheme();
 
-  const isHome = pathname === '/';
+  const isTabRoot = TAB_ROOT_PATHS.includes(pathname);
   const hideBottomNav = HIDE_BOTTOM_NAV_PATHS.includes(pathname);
 
   const rootBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
@@ -53,7 +55,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
 
   return (
     <SafeAreaView className={`flex-1 ${rootBg}`} edges={['top', 'left', 'right']}>
-      {!isHome && !hideBottomNav && (
+      {!isTabRoot && !hideBottomNav && (
         <View
           className={`${HEADER_HEIGHT_CLASS} flex-row items-center justify-between border-b px-4 ${headerBg}`}
         >
