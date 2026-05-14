@@ -84,12 +84,14 @@ export default function TimeWheelPicker({
     return (
       <View className={`flex-1 justify-center ${alignClass} ${ROW_GAP_CLASS}`}>
         {slots.map((value, i) => {
-          const distance = Math.abs(i - VISIBLE_SIDE_COUNT);
+          const offset = i - VISIBLE_SIDE_COUNT;
+          const distance = Math.abs(offset);
           const isCenter = distance === 0;
           if (value === null) {
             // 빈 슬롯도 높이 유지 — 시안의 opacity-0 span과 동일 의도.
+            // key는 selectedIndex 기준 offset(-2..+2)으로 부여해 의미적으로 unique.
             return (
-              <Text key={`empty-${i}`} className="text-2xl opacity-0">
+              <Text key={`empty-offset-${offset}`} className="text-2xl opacity-0">
                 {' '}
               </Text>
             );
