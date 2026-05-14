@@ -40,7 +40,8 @@ export default function RouteOptionList({ value, onChange }: Props) {
       <View className="flex-row gap-3">
         {ROUTE_OPTIONS.map((opt) => {
           const isActive = value === opt.id;
-          const borderClass = isActive ? `${activeBorder} border-2` : `${inactiveBorder} border`;
+          // 활성·비활성 모두 border-2로 두께를 고정해 1px 레이아웃 시프트 방지(#33 리뷰).
+          const borderClass = `border-2 ${isActive ? activeBorder : inactiveBorder}`;
           const bgClass = isActive ? activeBg : inactiveBg;
           const textClass = isActive ? activeText : inactiveText;
 
