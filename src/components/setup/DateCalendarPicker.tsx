@@ -16,6 +16,8 @@ interface Props {
   onSelect: (date: Date) => void;
   onPrevMonth: () => void;
   onNextMonth: () => void;
+  /** 이 날짜보다 이전 날은 선택 불가(dim 표시). 시·분 무시하고 날짜만 비교. */
+  minDate?: Date;
 }
 
 function isSameDay(a: Date, b: Date) {
@@ -24,6 +26,10 @@ function isSameDay(a: Date, b: Date) {
     a.getMonth() === b.getMonth() &&
     a.getDate() === b.getDate()
   );
+}
+
+function startOfDay(d: Date): Date {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
 /**
@@ -37,6 +43,7 @@ export default function DateCalendarPicker({
   onSelect,
   onPrevMonth,
   onNextMonth,
+  minDate,
 }: Props) {
   const { isDark } = useTheme();
 
@@ -44,28 +51,41 @@ export default function DateCalendarPicker({
   const month = displayMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
+  const minDay = minDate ? startOfDay(minDate) : null;
 
   const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
   const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
   const chevronColor = isDark ? PALETTE.blue400 : PALETTE.blue600;
   const defaultDayText = isDark ? 'text-zinc-100' : 'text-zinc-900';
+  const disabledDayText = isDark ? 'text-zinc-600' : 'text-zinc-300';
   const selectedBg = isDark ? 'bg-blue-500/25' : 'bg-blue-100';
   const selectedText = isDark ? 'text-blue-400' : 'text-blue-600';
 
   const renderDayCell = (day: number) => {
     const dateOfDay = new Date(year, month, day);
     const selected = isSameDay(dateOfDay, selectedDate);
+    const disabled = minDay !== null && dateOfDay.getTime() < minDay.getTime();
 
-    const innerStateClass = selected ? `${selectedBg}` : '';
-    const dayTextClass = selected ? `${selectedText} font-bold` : defaultDayText;
+    let innerStateClass = '';
+    let dayTextClass = defaultDayText;
+    if (selected) {
+      innerStateClass = selectedBg;
+      dayTextClass = `${selectedText} font-bold`;
+    } else if (disabled) {
+      dayTextClass = disabledDayText;
+    }
+
+    const pressableActiveClass = disabled ? '' : 'active:opacity-60';
 
     return (
       <View key={day} className={DAY_CELL_PADDING_CLASS} style={{ width: CELL_BASIS }}>
         <Pressable
           accessibilityRole="button"
-          accessibilityLabel={`${month + 1}월 ${day}일 선택`}
+          accessibilityLabel={`${month + 1}월 ${day}일${disabled ? ' (선택 불가)' : ' 선택'}`}
+          accessibilityState={{ disabled }}
+          disabled={disabled}
           onPress={() => onSelect(dateOfDay)}
-          className={`aspect-square items-center justify-center rounded-full active:opacity-60 ${innerStateClass}`}
+          className={`aspect-square items-center justify-center rounded-full ${pressableActiveClass} ${innerStateClass}`}
         >
           <Text className={`text-base font-medium ${dayTextClass}`}>{day}</Text>
         </Pressable>

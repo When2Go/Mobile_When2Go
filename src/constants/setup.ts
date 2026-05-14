@@ -37,9 +37,14 @@ export const DEFAULT_PERIOD: Period = '오후';
 export const DEFAULT_HOUR = 10;
 export const DEFAULT_MINUTE = 30;
 
-/** 안전 버퍼(분). 출발 시간에 더해지는 여유 시간. */
-export const SAFETY_BUFFER_MIN = 10;
-export const SAFETY_BUFFER_TEXT = `안전 버퍼 시간 ${SAFETY_BUFFER_MIN}분 적용됨`;
+/**
+ * 안전 버퍼 안내 텍스트 포맷.
+ * 실제 기본값은 `useSettingsStore.bufferMinutes` (마이페이지에서 사용자 설정).
+ * 경로 설정에서는 store를 건드리지 않고 local override만 표시한다.
+ */
+export const formatSafetyBufferText = (minutes: number): string =>
+  `안전 버퍼 시간 ${minutes}분 적용됨`;
+export const SAFETY_BUFFER_SHEET_TITLE = '안전 버퍼 시간';
 
 /** 시간 상한 안내. */
 export const TIME_RANGE_NOTICE = '오전 06:00 ~ 오후 10:59 사이만 설정 가능';

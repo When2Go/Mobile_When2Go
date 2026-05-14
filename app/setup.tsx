@@ -13,14 +13,18 @@ import {
   DEFAULT_MINUTE,
   DEFAULT_PERIOD,
   DEFAULT_ROUTE_OPTION,
+  SAFETY_BUFFER_SHEET_TITLE,
   SCREEN_TITLE,
   type Period,
   type RouteOptionId,
 } from '@/constants/setup';
+import { useSettingsStore } from '@/stores/settingsStore';
 import DestinationHeader from '@/components/setup/DestinationHeader';
 import ArrivalTimePicker from '@/components/setup/ArrivalTimePicker';
 import RouteOptionList from '@/components/setup/RouteOptionList';
 import DepartButton from '@/components/setup/DepartButton';
+import BottomSheetModal from '@/components/common/BottomSheetModal';
+import BufferSheetBody from '@/components/common/BufferSheetBody';
 import type { PickerMode } from '@/components/setup/ArrivalChipHeader';
 
 function formatDateChip(date: Date): string {
@@ -49,6 +53,18 @@ export default function SetupScreen() {
   const [minute, setMinute] = useState<number>(DEFAULT_MINUTE);
 
   const [routeType, setRouteType] = useState<RouteOptionId>(DEFAULT_ROUTE_OPTION);
+
+  // 사용자 default 안전 버퍼(마이페이지). 이 경로에서는 store를 직접 수정하지 않고
+  // local override만 둔다. 표시값 = override ?? defaultFromStore.
+  const defaultBufferMin = useSettingsStore((s) => s.bufferMinutes);
+  const [routeBufferOverride, setRouteBufferOverride] = useState<number | null>(null);
+  const safetyBufferMin = routeBufferOverride ?? defaultBufferMin;
+  const [isBufferSheetOpen, setBufferSheetOpen] = useState(false);
+
+  const handleSaveBuffer = (next: number) => {
+    setRouteBufferOverride(next);
+    setBufferSheetOpen(false);
+  };
 
   const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
   const cardBg = isDark ? 'bg-zinc-900' : 'bg-white';
@@ -113,6 +129,7 @@ export default function SetupScreen() {
             onSelectDate={setSelectedDate}
             onPrevMonth={handlePrevMonth}
             onNextMonth={handleNextMonth}
+            minDate={today}
             period={period}
             hour={hour}
             minute={minute}
@@ -121,6 +138,8 @@ export default function SetupScreen() {
             onMinuteChange={setMinute}
             dateLabel={formatDateChip(selectedDate)}
             timeLabel={formatTimeChip(period, hour, minute)}
+            safetyBufferMin={safetyBufferMin}
+            onPressSafetyBuffer={() => setBufferSheetOpen(true)}
           />
         </View>
 
@@ -133,6 +152,20 @@ export default function SetupScreen() {
       <View className={`border-t p-5 pt-3 ${cardBg} ${dividerBorder}`}>
         <DepartButton disabled={disabled} onPress={handleDepart} />
       </View>
+
+      {isBufferSheetOpen ? (
+        <BottomSheetModal
+          isOpen={isBufferSheetOpen}
+          onClose={() => setBufferSheetOpen(false)}
+          title={SAFETY_BUFFER_SHEET_TITLE}
+        >
+          <BufferSheetBody
+            value={safetyBufferMin}
+            onSave={handleSaveBuffer}
+            onCancel={() => setBufferSheetOpen(false)}
+          />
+        </BottomSheetModal>
+      ) : null}
     </SafeAreaView>
   );
 }

@@ -7,7 +7,7 @@ import { ICON_SIZE } from '@/constants/icons';
 import {
   ARRIVAL_SECTION_TITLE,
   SAFETY_BUFFER_ACTION_LABEL,
-  SAFETY_BUFFER_TEXT,
+  formatSafetyBufferText,
   type Period,
 } from '@/constants/setup';
 import ArrivalChipHeader, {
@@ -35,12 +35,17 @@ interface Props {
   onHourChange: (hour: number) => void;
   onMinuteChange: (minute: number) => void;
 
+  // date 모드 — 오늘 이전 날짜 비활성화
+  minDate?: Date;
+
   // 칩 라벨 텍스트
   dateLabel: string;
   timeLabel: string;
 
-  // 안전 버퍼 설정 콜백(mock — 미사용 시 no-op)
-  onPressSafetyBuffer?: () => void;
+  // 안전 버퍼(분) — 이 경로에만 적용되는 override 값. 사용자 default와 분리.
+  safetyBufferMin: number;
+  /** 안전 버퍼 박스 우측 `설정` 탭 콜백. 부모가 BottomSheet 열기를 담당. */
+  onPressSafetyBuffer: () => void;
 }
 
 /**
@@ -61,8 +66,10 @@ export default function ArrivalTimePicker({
   onPeriodChange,
   onHourChange,
   onMinuteChange,
+  minDate,
   dateLabel,
   timeLabel,
+  safetyBufferMin,
   onPressSafetyBuffer,
 }: Props) {
   const { isDark } = useTheme();
@@ -109,6 +116,7 @@ export default function ArrivalTimePicker({
             onSelect={onSelectDate}
             onPrevMonth={onPrevMonth}
             onNextMonth={onNextMonth}
+            minDate={minDate}
           />
         )}
       </View>
@@ -118,7 +126,9 @@ export default function ArrivalTimePicker({
       >
         <View className="flex-row items-center gap-2">
           <ShieldCheck size={ICON_SIZE.header} color={shieldColor} />
-          <Text className={`text-sm font-medium ${bufferText}`}>{SAFETY_BUFFER_TEXT}</Text>
+          <Text className={`text-sm font-medium ${bufferText}`}>
+            {formatSafetyBufferText(safetyBufferMin)}
+          </Text>
         </View>
         <Pressable
           onPress={onPressSafetyBuffer}
