@@ -9,6 +9,7 @@ import { ICON_SIZE } from '@/constants/icons';
 import type { RouteItem } from '@/types/routes.types';
 
 const DELETE_BTN_WIDTH = 80;
+const FULL_SWIPE_THRESHOLD = 260;
 const ORIGIN_DOT_SIZE = 8;
 
 interface RouteListItemProps {
@@ -21,6 +22,7 @@ interface RouteListItemProps {
 export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDelete }: RouteListItemProps) {
   const { isDark } = useTheme();
   const swipeRef = useRef<Swipeable>(null);
+  const maxDragRef = useRef(0);
 
   const cardBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
   const divider = isDark ? 'border-zinc-700' : 'border-zinc-100';
@@ -33,10 +35,19 @@ export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDele
     onDelete(route.id);
   };
 
-  const renderRightActions = (_: unknown, dragX: Animated.AnimatedInterpolation<number>) => {
+  const renderRightActions = (
+    _: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    dragX.addListener(({ value }) => {
+      const dist = -value;
+      if (dist > maxDragRef.current) maxDragRef.current = dist;
+    });
+
+    // 임계값 초과 시 버튼이 살짝 커져 "놓으면 삭제됩니다" 시각적 피드백
     const scale = dragX.interpolate({
-      inputRange: [-DELETE_BTN_WIDTH, 0],
-      outputRange: [1, 0.8],
+      inputRange: [-FULL_SWIPE_THRESHOLD, -DELETE_BTN_WIDTH, 0],
+      outputRange: [1.15, 1, 0.8],
       extrapolate: 'clamp',
     });
 
@@ -55,8 +66,21 @@ export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDele
     );
   };
 
+  const handleSwipeableOpen = (direction: 'left' | 'right') => {
+    const wasFullSwipe = maxDragRef.current >= FULL_SWIPE_THRESHOLD;
+    maxDragRef.current = 0;
+    if (direction === 'right' && wasFullSwipe) {
+      handleDelete();
+    }
+  };
+
   return (
-    <Swipeable ref={swipeRef} renderRightActions={renderRightActions} overshootRight={false}>
+    <Swipeable
+      ref={swipeRef}
+      renderRightActions={renderRightActions}
+      onSwipeableOpen={handleSwipeableOpen}
+      onSwipeableClose={() => { maxDragRef.current = 0; }}
+    >
       <Pressable
         onPress={() => onNavigateToSetup(route)}
         accessibilityRole="button"
