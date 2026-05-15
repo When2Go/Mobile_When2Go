@@ -11,11 +11,11 @@ import {
   ARRIVAL_TARGET_PREFIX,
   CONFIRM_REDIRECT_DELAY_MS,
   MOCK_ROUTES,
-  SAFETY_BUFFER_MIN,
   SCREEN_TITLE,
   SELECT_ROUTE_HEADING,
   type MockRoute,
 } from '@/constants/result';
+import { useSettingsStore } from '@/stores/settingsStore';
 import AdSlot from '@/components/common/AdSlot';
 import DepartureTimeHeader from '@/components/result/DepartureTimeHeader';
 import RouteCard from '@/components/result/RouteCard';
@@ -26,6 +26,7 @@ const SCHEDULE_PATH = '/schedule';
 export default function ResultScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
+  const safetyBufferMin = useSettingsStore((s) => s.bufferMinutes);
 
   const [selectedRoute, setSelectedRoute] = useState<MockRoute | null>(null);
   const [confirmed, setConfirmed] = useState(false);
@@ -94,7 +95,7 @@ export default function ResultScreen() {
         <DepartureTimeHeader
           targetPrefix={ARRIVAL_TARGET_PREFIX}
           heading={SELECT_ROUTE_HEADING}
-          safetyBufferMin={SAFETY_BUFFER_MIN}
+          safetyBufferMin={safetyBufferMin}
         />
 
         <View className="gap-3 px-5">
@@ -113,13 +114,15 @@ export default function ResultScreen() {
         <AdSlot type="banner" />
       </View>
 
-      <ReservationCompleteModal
-        isOpen={selectedRoute !== null}
-        route={selectedRoute}
-        confirmed={confirmed}
-        onClose={handleCloseModal}
-        onConfirm={handleConfirm}
-      />
+      {selectedRoute ? (
+        <ReservationCompleteModal
+          isOpen={selectedRoute !== null}
+          route={selectedRoute}
+          confirmed={confirmed}
+          onClose={handleCloseModal}
+          onConfirm={handleConfirm}
+        />
+      ) : null}
     </SafeAreaView>
   );
 }

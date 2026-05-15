@@ -16,6 +16,7 @@ export interface MockRoute {
   durationLabel: string;
   steps: readonly string[];
   transferCount: number;
+  fareLabel: string;
   icon: TransitIcon;
 }
 
@@ -34,6 +35,7 @@ export const MOCK_ROUTES: readonly MockRoute[] = [
     durationLabel: '1시간 15분',
     steps: ['인하대역', '오이도역', '강남역'],
     transferCount: 1,
+    fareLabel: '1,850원',
     icon: 'train',
   },
   {
@@ -44,6 +46,7 @@ export const MOCK_ROUTES: readonly MockRoute[] = [
     durationLabel: '1시간 20분',
     steps: ['인하대역', '신도림역', '강남역'],
     transferCount: 1,
+    fareLabel: '1,950원',
     icon: 'train',
   },
   {
@@ -54,6 +57,7 @@ export const MOCK_ROUTES: readonly MockRoute[] = [
     durationLabel: '1시간 30분',
     steps: ['현위치', '직행버스', '강남역'],
     transferCount: 0,
+    fareLabel: '1,450원',
     icon: 'bus',
   },
 ] as const;
@@ -70,11 +74,9 @@ export const DEPART_SUFFIX = '출발';
 export const ARRIVAL_SUFFIX_FORMAT = (arrivalTime: string): string => `${arrivalTime} 도착`;
 export const TRANSFER_META_FORMAT = (durationLabel: string, transferCount: number): string =>
   `${durationLabel} · 환승 ${transferCount}회`;
+export const FARE_LABEL_FORMAT = (fareLabel: string): string => `요금 ${fareLabel}`;
 export const SAFETY_BUFFER_NOTICE_FORMAT = (minutes: number): string =>
   `+${minutes}분 안전 버퍼 적용`;
-
-/** mock 단계 안전 버퍼 분 (Setup의 useSettingsStore 연동은 별도 이슈). */
-export const SAFETY_BUFFER_MIN = 10;
 
 /** 예약 완료 후 schedule 화면으로 리다이렉트되기 전 머무는 시간(ms). */
 export const CONFIRM_REDIRECT_DELAY_MS = 800;

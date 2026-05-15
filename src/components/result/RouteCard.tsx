@@ -8,6 +8,7 @@ import {
   ARRIVAL_SUFFIX_FORMAT,
   BADGE_LABEL,
   DEPART_SUFFIX,
+  FARE_LABEL_FORMAT,
   TRANSFER_META_FORMAT,
   type MockRoute,
   type RouteBadgeId,
@@ -135,6 +136,11 @@ export default function RouteCard({ route, onPress }: RouteCardProps) {
           </Fragment>
         ))}
       </View>
+
+      {/* 요금 — 카드 우측 하단 */}
+      <Text className={`mt-2 text-right text-xs font-medium ${subText}`}>
+        {FARE_LABEL_FORMAT(route.fareLabel)}
+      </Text>
     </Pressable>
   );
 }
