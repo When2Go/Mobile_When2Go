@@ -47,7 +47,7 @@ export default function ReservationCompleteModal({
     ? 'bg-zinc-800 border-zinc-700'
     : 'bg-zinc-50 border-zinc-100';
   const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const noticeText = isDark ? 'text-zinc-400' : 'text-zinc-500';
+  const departureText = isDark ? 'text-blue-400' : 'text-blue-500';
 
   const confirmBg = confirmed ? 'bg-emerald-500' : 'bg-blue-600';
 
@@ -71,13 +71,13 @@ export default function ReservationCompleteModal({
               <Text className={`ml-2 text-xs ${subText}`}>{route.durationLabel}</Text>
             </View>
             <View className="flex-row items-baseline">
-              <Text className="text-2xl font-black text-blue-500">{route.departureTime}</Text>
+              <Text className={`text-2xl font-black ${departureText}`}>{route.departureTime}</Text>
               <Text className={`ml-2 text-sm font-semibold ${subText}`}>{DEPART_SUFFIX}</Text>
             </View>
             <Text className={`mt-1 text-sm ${subText}`}>{route.steps.join(STEPS_JOINER)}</Text>
           </View>
 
-          <Text className={`mb-5 text-center text-sm ${noticeText}`}>{NOTIFICATION_NOTICE}</Text>
+          <Text className={`mb-5 text-center text-sm ${subText}`}>{NOTIFICATION_NOTICE}</Text>
 
           <Pressable
             onPress={onConfirm}

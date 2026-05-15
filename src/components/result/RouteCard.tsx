@@ -85,6 +85,7 @@ export default function RouteCard({ route, onPress }: RouteCardProps) {
     : 'bg-white border-zinc-200';
   const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
   const stepText = isDark ? 'text-zinc-300' : 'text-zinc-700';
+  const departureText = isDark ? 'text-blue-400' : 'text-blue-500';
   const chevronColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
 
   const badgeBg = BADGE_BG_CLASS[route.badge];
@@ -109,7 +110,7 @@ export default function RouteCard({ route, onPress }: RouteCardProps) {
 
       {/* 중단: 출발 시각 강조 + 도착 보조 */}
       <View className="mb-3 flex-row items-baseline">
-        <Text className="text-2xl font-black text-blue-500">{route.departureTime}</Text>
+        <Text className={`text-2xl font-black ${departureText}`}>{route.departureTime}</Text>
         <Text className={`ml-2 text-sm font-semibold ${subText}`}>{DEPART_SUFFIX}</Text>
         <View className="flex-1" />
         <Text className={`text-xs ${subText}`}>{ARRIVAL_SUFFIX_FORMAT(route.arrivalTime)}</Text>
