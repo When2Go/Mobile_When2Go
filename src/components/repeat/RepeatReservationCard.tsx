@@ -18,6 +18,7 @@ import type { RepeatItem } from '@/types/repeat.types';
 const PAN_ACTIVATE_OFFSET = 10;
 const SWIPE_REVEAL_THRESHOLD = -40;
 const SWIPE_DELETE_THRESHOLD = -200;
+const TAP_MAX_DISTANCE = 10;
 const DELETE_BTN_WIDTH = 88;
 const CARD_OFFSCREEN = 500;
 const DELETE_ANIM_MS = 220;
@@ -26,6 +27,9 @@ const DELETE_BTN_WIDTH_CLASS = 'w-[88px]';
 
 const DAY_DOT_SIZE_CLASS = 'h-7 w-7';
 const ARRIVAL_LABEL = '도착 시간';
+/** 카드 내부 오른쪽 padding(16px=4) + 토글 컴포넌트 폭(w-12=48px)에 맞춘 절대 위치 오프셋. */
+const TOGGLE_OFFSET_RIGHT_CLASS = 'right-4';
+const TOGGLE_OFFSET_TOP_CLASS = 'top-4';
 
 interface RepeatReservationCardProps {
   item: RepeatItem;
@@ -38,25 +42,16 @@ function formatArrival(period: string, hour: number, minute: number): string {
   return `${period} ${hour}:${String(minute).padStart(2, '0')}`;
 }
 
-/** 작은 토글 스위치. 카드 탭 이벤트는 흘려 보내지 않도록 onPress에서 stopPropagation 대용으로 별도 Pressable. */
-function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
-  const { isDark } = useTheme();
+function Toggle({ enabled, isDark }: { enabled: boolean; isDark: boolean }) {
   const trackBg = (() => {
     if (enabled) return 'bg-blue-600';
     return isDark ? 'bg-zinc-600' : 'bg-zinc-300';
   })();
   const thumbPosition = enabled ? 'translate-x-6' : 'translate-x-1';
-
   return (
-    <Pressable
-      onPress={onToggle}
-      accessibilityRole="switch"
-      accessibilityState={{ checked: enabled }}
-      hitSlop={6}
-      className={`relative h-7 w-12 shrink-0 justify-center rounded-full ${trackBg}`}
-    >
+    <View className={`relative h-7 w-12 justify-center rounded-full ${trackBg}`}>
       <View className={`h-5 w-5 rounded-full bg-white ${thumbPosition}`} />
-    </Pressable>
+    </View>
   );
 }
 
@@ -114,6 +109,14 @@ export default function RepeatReservationCard({
       }
     });
 
+  const tap = Gesture.Tap()
+    .maxDistance(TAP_MAX_DISTANCE)
+    .onEnd((_e, success) => {
+      if (success) runOnJS(handlePress)();
+    });
+
+  const composed = Gesture.Race(pan, tap);
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
   }));
@@ -135,28 +138,22 @@ export default function RepeatReservationCard({
         </Pressable>
       </View>
 
-      <GestureDetector gesture={pan}>
-        <Animated.View
-          style={animatedStyle}
-          className={`relative z-10 rounded-2xl border p-4 ${cardBg} ${cardOpacity}`}
-        >
-          <Pressable
-            onPress={handlePress}
-            accessibilityRole="button"
-            accessibilityLabel={`${item.name} 반복 예약 수정`}
-          >
-            {/* 상단: 이름 + 목적지 + 토글 */}
-            <View className="mb-3 flex-row items-center justify-between">
-              <View className="mr-3 min-w-0 flex-1">
-                <Text className={`text-base font-bold ${heading}`}>{item.name}</Text>
-                <View className="mt-0.5 flex-row items-center gap-1.5">
-                  <MapPin size={ICON_SIZE.caption + 2} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
-                  <Text className={`flex-1 text-sm ${sub}`} numberOfLines={1}>
-                    {item.destination}
-                  </Text>
-                </View>
+      <Animated.View style={animatedStyle} className="relative z-10">
+        <GestureDetector gesture={composed}>
+          <View className={`rounded-2xl border ${cardBg}`}>
+            <View className={`p-4 ${cardOpacity}`}>
+            {/* 상단: 이름 + 목적지 (토글은 절대 위치로 별도 오버레이) */}
+            <View className="mb-3 pr-14">
+              <Text className={`text-base font-bold ${heading}`}>{item.name}</Text>
+              <View className="mt-0.5 flex-row items-center gap-1.5">
+                <MapPin
+                  size={ICON_SIZE.caption + 2}
+                  color={isDark ? PALETTE.zinc400 : PALETTE.zinc500}
+                />
+                <Text className={`flex-1 text-sm ${sub}`} numberOfLines={1}>
+                  {item.destination}
+                </Text>
               </View>
-              <Toggle enabled={item.enabled} onToggle={handleToggle} />
             </View>
 
             {/* 요일 dot */}
@@ -184,9 +181,22 @@ export default function RepeatReservationCard({
                 {formatArrival(item.arrivalPeriod, item.arrivalHour, item.arrivalMinute)}
               </Text>
             </View>
-          </Pressable>
-        </Animated.View>
-      </GestureDetector>
+            </View>
+          </View>
+        </GestureDetector>
+
+        {/* 토글 — GestureDetector 바깥에 절대 위치로 띄워 탭이 새지 않게 */}
+        <Pressable
+          onPress={handleToggle}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: item.enabled }}
+          accessibilityLabel={`${item.name} 반복 예약 ${item.enabled ? '비활성화' : '활성화'}`}
+          hitSlop={8}
+          className={`absolute ${TOGGLE_OFFSET_RIGHT_CLASS} ${TOGGLE_OFFSET_TOP_CLASS} active:opacity-70`}
+        >
+          <Toggle enabled={item.enabled} isDark={isDark} />
+        </Pressable>
+      </Animated.View>
     </View>
   );
 }

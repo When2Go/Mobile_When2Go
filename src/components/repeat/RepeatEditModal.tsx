@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { Check, ChevronDown, ChevronRight, Clock, MapPin, Navigation, Trash2 } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
 import TimeWheelPicker from '@/components/setup/TimeWheelPicker';
@@ -224,10 +224,10 @@ export default function RepeatEditModal({
             ) : null}
           </View>
 
-          {/* 경로 옵션 */}
+          {/* 경로 옵션 — 항상 한 줄(3개 균등) */}
           <View>
             <Text className={`mb-3 text-sm font-semibold ${labelText}`}>{LABEL_ROUTE}</Text>
-            <View className="flex-row flex-wrap gap-2">
+            <View className="flex-row gap-2">
               {ROUTE_OPTIONS.map((opt) => {
                 const isActive = form.routeOption === opt.id;
                 const btnBg = isActive ? routeActiveBg : routeInactiveBg;
@@ -241,12 +241,11 @@ export default function RepeatEditModal({
                     onPress={() => onFormChange({ routeOption: opt.id })}
                     accessibilityRole="button"
                     accessibilityLabel={`경로 옵션 ${opt.label}`}
-                    className={`min-w-[45%] flex-1 flex-row items-center justify-between rounded-xl border p-3 active:opacity-70 ${btnBg}`}
+                    className={`flex-1 items-center justify-center rounded-xl border px-2 py-3 active:opacity-70 ${btnBg}`}
                   >
-                    <Text className={`text-sm font-medium ${btnText}`}>{opt.label}</Text>
-                    {isActive ? (
-                      <Check size={ICON_SIZE.card} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
-                    ) : null}
+                    <Text className={`text-sm font-medium ${btnText}`} numberOfLines={1}>
+                      {opt.label}
+                    </Text>
                   </Pressable>
                 );
               })}
