@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
-import { Clock, Plus } from 'lucide-react-native';
+import { Plus } from 'lucide-react-native';
 
 import MobileLayout from '@/components/common/MobileLayout';
+import AdSlot from '@/components/common/AdSlot';
 import RouteListItem from '@/components/routes/RouteListItem';
 import EmptyState from '@/components/routes/EmptyState';
 import RouteEditModal from '@/components/routes/RouteEditModal';
@@ -56,9 +57,6 @@ export default function RoutesScreen() {
   const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
   const addBtnBg = isDark ? 'bg-blue-900/50' : 'bg-blue-50';
   const addBtnText = isDark ? 'text-blue-400' : 'text-blue-600';
-  const mapAreaBg = isDark ? 'bg-zinc-900' : 'bg-zinc-200';
-  const summaryCardBg = isDark ? 'bg-zinc-800/80 border-zinc-700/50' : 'bg-white/80 border-zinc-200/50';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
   const listHeading = isDark ? 'text-zinc-100' : 'text-zinc-900';
 
   const handleAdd = () => {
@@ -126,19 +124,9 @@ export default function RoutesScreen() {
         </View>
       ) : (
         <ScrollView className={`flex-1 ${pageBg}`} showsVerticalScrollIndicator={false}>
-          {/* 경로 요약 배너 */}
-          <View className={`relative h-36 w-full ${mapAreaBg}`}>
-            <View className="absolute inset-x-0 bottom-4 px-5">
-              <View className={`rounded-2xl border p-4 ${summaryCardBg}`}>
-                <View className="mb-1 flex-row items-center gap-2">
-                  <Clock size={ICON_SIZE.card} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
-                  <Text className={`text-xs font-semibold ${sub}`}>경로 요약</Text>
-                </View>
-                <Text className={`text-sm font-bold ${listHeading}`}>
-                  총 {routes.length}개의 자주 쓰는 경로
-                </Text>
-              </View>
-            </View>
+          {/* F-AD01 광고 배너 슬롯 */}
+          <View className="px-5 pt-4">
+            <AdSlot type="banner" />
           </View>
 
           {/* 경로 목록 */}
