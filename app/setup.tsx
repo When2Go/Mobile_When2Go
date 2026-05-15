@@ -85,8 +85,7 @@ export default function SetupScreen() {
   };
 
   const handleDepart = () => {
-    // `/result` 라우트는 별도 이슈에서 추가 예정. 라우트 추가 전까지는 타입 우회.
-    router.push('/result' as never);
+    router.push('/result');
   };
 
   // mock 단계에서는 destination이 비어있을 때만 비활성. 시간 기본값이 항상 세팅돼 있어 추가 검증은 X.
