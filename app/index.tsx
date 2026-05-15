@@ -12,7 +12,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 
 const SHEET_SNAP_POINTS = ['25%', '62%'];
-const SHEET_INITIAL_INDEX = 1;
+const SHEET_INITIAL_INDEX = 0;
 const SHEET_TOP_RADIUS = 24;
 const PANEL_BOTTOM_PADDING = 24;
 const SECTION_GAP = 20;

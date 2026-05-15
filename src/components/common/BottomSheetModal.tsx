@@ -3,6 +3,7 @@ import { Pressable, Text, View } from 'react-native';
 import {
   BottomSheetBackdrop,
   BottomSheetModal as RNBottomSheetModal,
+  BottomSheetScrollView,
   BottomSheetView,
   type BottomSheetBackdropProps,
 } from '@gorhom/bottom-sheet';
@@ -23,6 +24,8 @@ interface BottomSheetModalProps {
   onClose: () => void;
   title?: string;
   snapPoints?: string[];
+  /** 콘텐츠가 시트 높이를 넘으면 스크롤되도록 BottomSheetScrollView로 감싼다. */
+  scrollable?: boolean;
   children: ReactNode;
 }
 
@@ -31,6 +34,7 @@ export default function BottomSheetModal({
   onClose,
   title,
   snapPoints = DEFAULT_SNAP_POINTS,
+  scrollable = false,
   children,
 }: BottomSheetModalProps) {
   const ref = useRef<RNBottomSheetModal>(null);
@@ -79,24 +83,45 @@ export default function BottomSheetModal({
       handleComponent={renderHandle}
       backgroundStyle={backgroundStyle}
     >
-      <BottomSheetView>
-        {title ? (
-          <View
-            className={`flex-row items-center justify-between border-b px-5 py-3 ${dividerBorder}`}
-          >
-            <Text className={`text-base font-bold ${headingText}`}>{title}</Text>
-            <Pressable
-              onPress={onClose}
-              accessibilityRole="button"
-              accessibilityLabel="닫기"
-              className="-mr-2 rounded-full p-2 active:opacity-60"
+      {scrollable ? (
+        <BottomSheetScrollView showsVerticalScrollIndicator={false}>
+          {title ? (
+            <View
+              className={`flex-row items-center justify-between border-b px-5 py-3 ${dividerBorder}`}
             >
-              <X size={ICON_SIZE.header} color={closeIconColor} />
-            </Pressable>
-          </View>
-        ) : null}
-        <View className="px-5 pb-10 pt-3">{children}</View>
-      </BottomSheetView>
+              <Text className={`text-base font-bold ${headingText}`}>{title}</Text>
+              <Pressable
+                onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="닫기"
+                className="-mr-2 rounded-full p-2 active:opacity-60"
+              >
+                <X size={ICON_SIZE.header} color={closeIconColor} />
+              </Pressable>
+            </View>
+          ) : null}
+          <View className="px-5 pb-10 pt-3">{children}</View>
+        </BottomSheetScrollView>
+      ) : (
+        <BottomSheetView>
+          {title ? (
+            <View
+              className={`flex-row items-center justify-between border-b px-5 py-3 ${dividerBorder}`}
+            >
+              <Text className={`text-base font-bold ${headingText}`}>{title}</Text>
+              <Pressable
+                onPress={onClose}
+                accessibilityRole="button"
+                accessibilityLabel="닫기"
+                className="-mr-2 rounded-full p-2 active:opacity-60"
+              >
+                <X size={ICON_SIZE.header} color={closeIconColor} />
+              </Pressable>
+            </View>
+          ) : null}
+          <View className="px-5 pb-10 pt-3">{children}</View>
+        </BottomSheetView>
+      )}
     </RNBottomSheetModal>
   );
 }

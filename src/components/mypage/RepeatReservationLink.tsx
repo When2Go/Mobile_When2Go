@@ -8,7 +8,6 @@ import { PALETTE } from '@/constants/colors';
 
 const LABEL = '반복 예약';
 const ROW_GAP_CLASS = 'gap-3';
-// 현재 /repeat 라우트는 미존재 — 추후 화면 추가 시 자동 연결되도록 placeholder push 유지
 const REPEAT_ROUTE = '/repeat' as Href;
 const MOCK_REPEAT_COUNT = 2;
 

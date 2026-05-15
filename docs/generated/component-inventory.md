@@ -1,6 +1,6 @@
 # 컴포넌트 목록
 
-> `/gc` 커맨드가 `src/components/` 스캔 후 갱신. 마지막 갱신: 2026-05-14.
+> `/gc` 커맨드가 `src/components/` 스캔 후 갱신. 마지막 갱신: 2026-05-15.
 > 본 파일은 자동 생성을 의도하지만 현재는 수동 갱신 중. 컴포넌트 추가/삭제/이동 시 같은 PR에 같이 반영.
 
 ---
@@ -13,7 +13,6 @@
 | BottomSheetModal | `common/BottomSheetModal.tsx` | `@gorhom/bottom-sheet` 래퍼. 모든 시트는 이 래퍼만 사용 |
 | BufferSheetBody | `common/BufferSheetBody.tsx` | 안전 버퍼(분) 슬라이더 시트 본문. 마이페이지·Setup 양쪽에서 재사용 |
 | MobileLayout | `common/MobileLayout.tsx` | 하단 탭 + SafeArea 포함 모바일 셸 |
-| RoutePlaceholder | `common/RoutePlaceholder.tsx` | 미구현 화면용 placeholder |
 
 ## Home (`src/components/home/`)
 
@@ -33,6 +32,30 @@
 | SearchResultList | `search/SearchResultList.tsx` | 검색 결과 mock 필터 리스트 |
 | VoiceButton | `search/VoiceButton.tsx` | 음성 입력 트리거 버튼 |
 | VoiceModal | `search/VoiceModal.tsx` | 음성 인식 listening / processing 모달 |
+
+## Routes (`src/components/routes/`)
+
+| 컴포넌트 | 경로 | 설명 |
+|---|---|---|
+| EmptyState | `routes/EmptyState.tsx` | 경로 없을 때 빈 상태 + 추가 CTA |
+| RouteEditModal | `routes/RouteEditModal.tsx` | 경로 추가/수정 BottomSheet (이름·출발·목적·빈도) |
+| RouteListItem | `routes/RouteListItem.tsx` | 경로 카드 + 좌측 스와이프 삭제 |
+
+## Result (`src/components/result/`)
+
+| 컴포넌트 | 경로 | 설명 |
+|---|---|---|
+| DepartureTimeHeader | `result/DepartureTimeHeader.tsx` | 결과 화면 상단 출발 시간 헤더 |
+| ReservationCompleteModal | `result/ReservationCompleteModal.tsx` | 예약 완료 BottomSheet |
+| RouteCard | `result/RouteCard.tsx` | 다중 경로 결과 카드 |
+
+## Repeat (`src/components/repeat/`)
+
+| 컴포넌트 | 경로 | 설명 |
+|---|---|---|
+| EmptyState | `repeat/EmptyState.tsx` | 반복 예약 없을 때 빈 상태 + 첫 예약 CTA |
+| RepeatEditModal | `repeat/RepeatEditModal.tsx` | 반복 예약 추가/수정 BottomSheet (요일 멀티셀렉트 + 시간 wheel + 경로 옵션) |
+| RepeatReservationCard | `repeat/RepeatReservationCard.tsx` | 반복 예약 카드 + 활성/비활성 토글 + 좌측 스와이프 삭제 |
 
 ## Schedule (`src/components/schedule/`)
 
@@ -80,10 +103,10 @@
 | `/search` | `app/search.tsx` | 검색 (mock) |
 | `/setup` | `app/setup.tsx` | 도착 시간 + 경로 옵션 (mock, PR #33) |
 | `/schedule` | `app/schedule.tsx` | 일정 |
-| `/routes` | `app/routes.tsx` | placeholder |
+| `/routes` | `app/routes.tsx` | 자주 쓰는 경로 관리 (mock, PR #37) |
+| `/result` | `app/result.tsx` | 출발 시간 결과 + 다중 경로 (mock, PR #38) |
+| `/repeat` | `app/repeat.tsx` | 반복 예약 관리 (mock, PR #42) |
 | `/mypage` | `app/mypage.tsx` | 마이페이지 |
-
-`/result` 라우트는 미구현 — 별도 이슈에서 추가 예정.
 
 ---
 
