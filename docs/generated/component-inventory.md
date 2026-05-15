@@ -13,7 +13,6 @@
 | BottomSheetModal | `common/BottomSheetModal.tsx` | `@gorhom/bottom-sheet` 래퍼. 모든 시트는 이 래퍼만 사용 |
 | BufferSheetBody | `common/BufferSheetBody.tsx` | 안전 버퍼(분) 슬라이더 시트 본문. 마이페이지·Setup 양쪽에서 재사용 |
 | MobileLayout | `common/MobileLayout.tsx` | 하단 탭 + SafeArea 포함 모바일 셸 |
-| RoutePlaceholder | `common/RoutePlaceholder.tsx` | 미구현 화면용 placeholder |
 
 ## Home (`src/components/home/`)
 
