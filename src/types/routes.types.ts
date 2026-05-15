@@ -3,7 +3,6 @@ export interface RouteItem {
   name: string;
   from: string;
   to: string;
-  isFavorite: boolean;
   frequency: string;
 }
 

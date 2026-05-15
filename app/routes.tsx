@@ -14,14 +14,14 @@ import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import type { RouteFormData, RouteItem } from '@/types/routes.types';
 
 const MOCK_ROUTES: RouteItem[] = [
-  { id: 1, name: '출근', from: '인하대 정문', to: '강남역 2호선', isFavorite: true, frequency: '주 5회 이용' },
-  { id: 2, name: '퇴근', from: '강남역 2호선', to: '인하대 정문', isFavorite: true, frequency: '주 5회 이용' },
-  { id: 3, name: '헬스장', from: '집', to: '애니타임 피트니스', isFavorite: false, frequency: '주 3회 이용' },
-  { id: 4, name: '부모님댁', from: '집', to: '수원역', isFavorite: false, frequency: '월 2회 이용' },
-  { id: 5, name: '병원', from: '집', to: '서울대학교 병원', isFavorite: false, frequency: '월 1회 이용' },
+  { id: 1, name: '출근', from: '인하대 정문', to: '강남역 2호선', frequency: '주 5회 이용' },
+  { id: 2, name: '퇴근', from: '강남역 2호선', to: '인하대 정문', frequency: '주 5회 이용' },
+  { id: 3, name: '헬스장', from: '집', to: '애니타임 피트니스', frequency: '주 3회 이용' },
+  { id: 4, name: '부모님댁', from: '집', to: '수원역', frequency: '월 2회 이용' },
+  { id: 5, name: '병원', from: '집', to: '서울대학교 병원', frequency: '월 1회 이용' },
 ];
 
-const EMPTY_FORM: RouteFormData = { name: '', from: '', to: '', isFavorite: false, frequency: '' };
+const EMPTY_FORM: RouteFormData = { name: '', from: '', to: '', frequency: '' };
 
 let nextId = MOCK_ROUTES.length + 1;
 
@@ -69,7 +69,7 @@ export default function RoutesScreen() {
 
   const handleEdit = (route: RouteItem) => {
     setEditTarget(route);
-    setDraftForm({ name: route.name, from: route.from, to: route.to, isFavorite: route.isFavorite, frequency: route.frequency });
+    setDraftForm({ name: route.name, from: route.from, to: route.to, frequency: route.frequency });
     setEditOpen(true);
   };
 

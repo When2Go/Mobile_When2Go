@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Animated, Pressable, Text, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
-import { MapPin, Pencil, Star, Trash2 } from 'lucide-react-native';
+import { MapPin, Pencil, Trash2 } from 'lucide-react-native';
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
@@ -67,9 +67,6 @@ export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDele
         <View className="mb-3 flex-row items-start justify-between">
           <View className="flex-row items-center gap-2">
             <Text className={`text-base font-bold ${heading}`}>{route.name}</Text>
-            {route.isFavorite && (
-              <Star size={ICON_SIZE.card} color={PALETTE.amber500} fill={PALETTE.amber500} />
-            )}
           </View>
           <Pressable
             onPress={() => onEdit(route)}

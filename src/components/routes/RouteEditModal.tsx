@@ -1,13 +1,13 @@
-import { Pressable, Switch, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { ChevronRight, MapPin, Star } from 'lucide-react-native';
+import { ChevronRight, MapPin } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import type { RouteFormData } from '@/types/routes.types';
 
-const SNAP_POINTS = ['85%'];
+const SNAP_POINTS = ['75%'];
 const FORM_ICON_SIZE = 18;
 const FIELD_PLACEHOLDER_FROM = '출발지를 검색하세요';
 const FIELD_PLACEHOLDER_TO = '목적지를 검색하세요';
@@ -48,12 +48,7 @@ export default function RouteEditModal({
   const placeholderColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
   const labelText = isDark ? 'text-zinc-200' : 'text-zinc-800';
   const rowBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
-  const rowLabel = isDark ? 'text-zinc-200' : 'text-zinc-800';
   const chevronColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
-
-  const starInactiveColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const starColor = form.isFavorite ? PALETTE.amber500 : starInactiveColor;
-  const starFill = form.isFavorite ? PALETTE.amber500 : 'transparent';
 
   const locationValueText = isDark ? 'text-zinc-100' : 'text-zinc-900';
   const locationPlaceholderText = isDark ? 'text-zinc-500' : 'text-zinc-400';
@@ -117,20 +112,6 @@ export default function RouteEditModal({
             placeholder={FIELD_PLACEHOLDER_FREQ}
             placeholderTextColor={placeholderColor}
             className={`rounded-xl border px-4 py-3 text-base ${inputBg}`}
-          />
-        </View>
-
-        {/* 즐겨찾기 */}
-        <View className={`flex-row items-center justify-between rounded-xl border px-4 py-4 ${rowBg}`}>
-          <View className="flex-row items-center gap-3">
-            <Star size={FORM_ICON_SIZE} color={starColor} fill={starFill} />
-            <Text className={`text-sm font-medium ${rowLabel}`}>즐겨찾기에 추가</Text>
-          </View>
-          <Switch
-            value={form.isFavorite}
-            onValueChange={(v) => onFormChange({ isFavorite: v })}
-            trackColor={{ false: isDark ? PALETTE.zinc700 : PALETTE.zinc200, true: PALETTE.blue600 }}
-            thumbColor={PALETTE.white}
           />
         </View>
 
