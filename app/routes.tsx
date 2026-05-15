@@ -125,7 +125,9 @@ export default function RoutesScreen() {
       ) : (
         <ScrollView className={`flex-1 ${pageBg}`} showsVerticalScrollIndicator={false}>
           {/* F-AD01 광고 배너 슬롯 */}
-          <AdSlot type="banner" className="mx-5 mt-4" />
+          <View className="px-5 pt-4">
+            <AdSlot type="banner" />
+          </View>
 
           {/* 경로 목록 */}
           <View className="px-5 pb-6 pt-5">
