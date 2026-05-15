@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Mic } from 'lucide-react-native';
+import { ArrowLeft, Mic } from 'lucide-react-native';
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
@@ -37,6 +37,8 @@ export default function SearchScreen() {
 
   const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
   const borderColor = isDark ? 'border-zinc-700' : 'border-zinc-100';
+  const backBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
+  const backIconColor = isDark ? PALETTE.zinc300 : PALETTE.zinc500;
   const voiceCardBg = isDark ? 'border border-blue-800/40 bg-blue-900/40' : 'bg-blue-50';
   const voiceHeading = isDark ? 'text-blue-200' : 'text-blue-900';
   const voiceDesc = isDark ? 'text-blue-300/80' : 'text-blue-700/80';
@@ -45,6 +47,15 @@ export default function SearchScreen() {
     <SafeAreaView className={`flex-1 ${pageBg}`} edges={['top', 'left', 'right', 'bottom']}>
       {/* Search Bar */}
       <View className={`flex-row items-center gap-3 border-b px-5 py-3 ${borderColor}`}>
+        <Pressable
+          onPress={() => router.back()}
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
+          hitSlop={8}
+          className={`h-9 w-9 items-center justify-center rounded-full active:opacity-70 ${backBg}`}
+        >
+          <ArrowLeft size={ICON_SIZE.header} color={backIconColor} />
+        </Pressable>
         <SearchInput
           value={query}
           onChangeText={setQuery}

@@ -47,6 +47,7 @@ app-example
 .history
 .vscode/
 .claude/settings.local.json
+.claude/scheduled_tasks.lock
 
 # EAS / store credentials (never commit)
 play-service-account.json
