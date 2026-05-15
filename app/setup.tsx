@@ -27,6 +27,9 @@ import BottomSheetModal from '@/components/common/BottomSheetModal';
 import BufferSheetBody from '@/components/common/BufferSheetBody';
 import type { PickerMode } from '@/components/setup/ArrivalChipHeader';
 
+const SEARCH_PATH = '/search';
+const RESULT_PATH = '/result';
+
 function formatDateChip(date: Date): string {
   return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}.`;
 }
@@ -81,12 +84,11 @@ export default function SetupScreen() {
   };
 
   const handleChangeDestination = () => {
-    router.push('/search');
+    router.push(SEARCH_PATH);
   };
 
   const handleDepart = () => {
-    // `/result` 라우트는 별도 이슈에서 추가 예정. 라우트 추가 전까지는 타입 우회.
-    router.push('/result' as never);
+    router.push(RESULT_PATH);
   };
 
   // mock 단계에서는 destination이 비어있을 때만 비활성. 시간 기본값이 항상 세팅돼 있어 추가 검증은 X.
