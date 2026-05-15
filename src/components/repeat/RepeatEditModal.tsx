@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { Pressable, Text, View } from 'react-native';
+import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
@@ -29,7 +29,6 @@ import type { RepeatFormData } from '@/types/repeat.types';
 
 const SNAP_POINTS = ['85%'];
 const FORM_ICON_SIZE = 18;
-const MAX_FORM_SCROLL_HEIGHT = 420;
 
 type Mode = 'add' | 'edit';
 
@@ -103,10 +102,7 @@ export default function RepeatEditModal({
 
   return (
     <BottomSheetModal isOpen={isOpen} onClose={onClose} title={title} snapPoints={SNAP_POINTS}>
-      <ScrollView
-        style={{ maxHeight: MAX_FORM_SCROLL_HEIGHT }}
-        showsVerticalScrollIndicator={false}
-      >
+      <BottomSheetScrollView showsVerticalScrollIndicator={false}>
         <View className="gap-5 pb-2">
           {/* 예약 이름 */}
           <View>
@@ -252,7 +248,7 @@ export default function RepeatEditModal({
             </View>
           </View>
         </View>
-      </ScrollView>
+      </BottomSheetScrollView>
 
       {/* 액션 버튼 */}
       <View className="mt-4 flex-row gap-3">

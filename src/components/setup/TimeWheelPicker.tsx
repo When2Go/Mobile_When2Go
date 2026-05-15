@@ -47,11 +47,12 @@ export default function TimeWheelPicker({
   const noticeBg = isDark ? 'bg-red-900/20' : 'bg-red-50';
   const noticeText = isDark ? 'text-red-400' : 'text-red-500';
 
-  /** 중앙 강조 박스 — absolute로 중앙에 깔리는 mock 가이드. */
+  // Android: overflow-hidden + absolute 형제 조합에서 z-order가 역전될 수 있어
+  // 중앙 박스(z-0)와 컬럼 컨테이너(z-10)에 z-index를 명시한다.
   const renderCenterBar = () => (
     <View
-      pointerEvents="none"
-      className={`absolute inset-x-3 top-1/2 -mt-5 h-10 rounded-xl ${centerBoxBg}`}
+      style={{ pointerEvents: 'none' }}
+      className={`absolute inset-x-3 top-1/2 -mt-5 z-0 h-10 rounded-xl ${centerBoxBg}`}
     />
   );
 
@@ -127,7 +128,7 @@ export default function TimeWheelPicker({
     <View>
       <View className={`relative overflow-hidden ${WHEEL_HEIGHT_CLASS}`}>
         {renderCenterBar()}
-        <View className="relative h-full flex-row">
+        <View className="relative z-10 h-full flex-row">
           {renderWheelColumn<Period>(PERIOD_OPTIONS, period, onPeriodChange, formatPeriod, 'end')}
           {renderWheelColumn<number>(HOUR_OPTIONS, hour, onHourChange, formatHour, 'center')}
           {renderWheelColumn<number>(MINUTE_OPTIONS, minute, onMinuteChange, formatMinute, 'start')}
