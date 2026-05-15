@@ -17,8 +17,6 @@ export default function SearchEntryBar() {
   const { isDark } = useTheme();
 
   const barBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-100';
-  const placeholderText = isDark ? 'text-zinc-400' : 'text-zinc-400';
-  const iconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc400;
 
   return (
     <Pressable
@@ -27,15 +25,15 @@ export default function SearchEntryBar() {
       accessibilityLabel="목적지 검색"
       className={`h-14 w-full flex-row items-center gap-3 rounded-2xl border px-4 active:opacity-80 ${barBg}`}
       style={{
-        shadowColor: '#000',
+        shadowColor: PALETTE.zinc950,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: isDark ? 0.4 : 0.12,
         shadowRadius: 12,
         elevation: 4,
       }}
     >
-      <Search size={ICON_SIZE.header} color={iconColor} />
-      <Text className={`flex-1 text-base ${placeholderText}`}>{PLACEHOLDER}</Text>
+      <Search size={ICON_SIZE.header} color={PALETTE.zinc400} />
+      <Text className="flex-1 text-base text-zinc-400">{PLACEHOLDER}</Text>
     </Pressable>
   );
 }

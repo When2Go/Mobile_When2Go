@@ -6,7 +6,7 @@ import BottomSheetModal from '@/components/common/BottomSheetModal';
 import AdSlot from '@/components/common/AdSlot';
 import ProfileHeader from '@/components/mypage/ProfileHeader';
 import SafetyBufferRow from '@/components/mypage/SafetyBufferRow';
-import BufferSheetBody from '@/components/mypage/BufferSheetBody';
+import BufferSheetBody from '@/components/common/BufferSheetBody';
 import NotificationSettingsRow from '@/components/mypage/NotificationSettingsRow';
 import RepeatReservationLink from '@/components/mypage/RepeatReservationLink';
 import DarkModeRow from '@/components/mypage/DarkModeRow';
