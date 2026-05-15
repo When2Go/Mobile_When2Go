@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
-import { BottomSheetScrollView, BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
@@ -101,9 +101,14 @@ export default function RepeatEditModal({
   };
 
   return (
-    <BottomSheetModal isOpen={isOpen} onClose={onClose} title={title} snapPoints={SNAP_POINTS}>
-      <BottomSheetScrollView showsVerticalScrollIndicator={false}>
-        <View className="gap-5 pb-2">
+    <BottomSheetModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      snapPoints={SNAP_POINTS}
+      scrollable
+    >
+      <View className="gap-5 pb-2">
           {/* 예약 이름 */}
           <View>
             <Text className={`mb-2 text-sm font-semibold ${labelText}`}>{LABEL_NAME}</Text>
@@ -247,8 +252,7 @@ export default function RepeatEditModal({
               })}
             </View>
           </View>
-        </View>
-      </BottomSheetScrollView>
+      </View>
 
       {/* 액션 버튼 */}
       <View className="mt-4 flex-row gap-3">
