@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Mic } from 'lucide-react-native';
 
 import { useTheme } from '@/contexts/ThemeContext';
@@ -12,10 +12,13 @@ import VoiceButton from '@/components/search/VoiceButton';
 import VoiceModal from '@/components/search/VoiceModal';
 import RecentSearchList from '@/components/search/RecentSearchList';
 import SearchResultList from '@/components/search/SearchResultList';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
 
 export default function SearchScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
+  const { mode, field } = useLocalSearchParams<{ mode?: string; field?: string }>();
+  const setPendingLocation = useRouteDraftStore((s) => s.setPendingLocation);
 
   const [query, setQuery] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -24,6 +27,11 @@ export default function SearchScreen() {
   const cancelVoice = () => setVoiceOpen(false);
 
   const handleSelect = (destination: string) => {
+    if (mode === 'select-location') {
+      setPendingLocation(destination, (field ?? 'from') as 'from' | 'to');
+      router.back();
+      return;
+    }
     router.push({ pathname: '/setup', params: { destination } });
   };
 
