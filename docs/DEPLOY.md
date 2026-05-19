@@ -118,7 +118,7 @@ eas submit -p ios --latest
 ### 2-3. 팀원을 Internal Tester로 등록
 
 **경로**: App Store Connect → 본인 앱 → **TestFlight** 탭 → **내부 테스트** 그룹 → 테스터 추가
-- 이메일: `cocacolra741@naver.com`
+- 이메일: 로컬 `.env` 의 `WHEN2GO_TESTER_APPLE_EMAIL` 값 사용 (PII라 문서에 직접 기재 금지, `.env` 는 gitignore)
 - 단, 해당 이메일이 Apple ID로 등록되어 있어야 함. 안 되어 있으면 https://appleid.apple.com 에서 먼저 가입
 
 → 팀원 메일 수신 → TestFlight 앱(앱스토어에서 무료 다운로드) 설치 → 코드 수락 → 빌드 다운로드.
@@ -144,7 +144,7 @@ eas submit -p android --latest
 
 **경로**: Play Console → 앱 → 테스트 → 내부 테스트 → 테스터 → 이메일 목록(또는 Google 그룹) 추가
 - 등록 이메일: 팀원의 **Google 계정 이메일**(Gmail 또는 Google 가입 이메일)
-- ⚠️ `cocacolra741@naver.com`는 Apple ID. Google Play엔 별도 Google 계정 필요 — 팀원과 확인
+- ⚠️ `WHEN2GO_TESTER_APPLE_EMAIL`(.env)은 Apple ID. Google Play엔 별도 Google 계정 필요 — 팀원과 확인
 
 ---
 
