@@ -106,9 +106,10 @@ function useArrivalTime() { ... }
 
 단일 axios 인스턴스 (`src/api/axios.ts`). ODsay 직접 호출 금지 (백엔드 프록시).
 
-- baseURL: Spring Boot 백엔드
-- 에러: 인터셉터에서 전역 처리
-- 헤더: **모든 요청에 `X-Device-Id` 자동 주입 (필수)**
+- baseURL: Spring Boot 백엔드 (`EXPO_PUBLIC_API_BASE_URL`)
+- 인터셉터는 모듈로 분리: `src/api/interceptors/auth.ts`(요청 헤더 주입) / `src/api/interceptors/error.ts`(에러 정규화). `axios.ts`는 조립만.
+- 헤더: **모든 요청에 `X-Device-Id` 자동 주입 (필수)** — 화면/훅/도메인 함수에서 수동으로 넣지 않는다.
+- 에러: 응답 인터셉터가 401/403/400/5xx/네트워크/타임아웃을 `ApiFailure`(`{ ok:false, reason }`)로 정규화해 `reject`. 공통 타입은 `src/types/api.types.ts`.
 
 ### 디바이스 UUID 헤더 — `X-Device-Id`
 
@@ -120,20 +121,49 @@ function useArrivalTime() { ... }
 - **null 처리**: `deviceId === null`인 상태에서 API를 호출하면 안 된다. 부트스트랩이 끝난 뒤 사용한다 (정상 흐름에선 앱 마운트 직후 set됨).
 - **재발급 금지**: 사용자가 명시적으로 초기화하지 않는 한 같은 UUID를 유지. 앱을 삭제·재설치하면 자연스럽게 새 UUID가 발급된다.
 
+실제 구현은 `src/api/interceptors/auth.ts`의 `attachDeviceId`가 담당하며 `axios.ts`가 이를 등록한다. 헤더 주입 로직을 새로 작성하지 말 것.
+
+### 도메인 API 작성 규약 (엔드포인트 추가 시)
+
+> #14에서 깐 공통 인프라(인스턴스 + 자동 헤더 + 에러 정규화 + `ApiResult`) 위에 백엔드 엔드포인트를 붙일 때 **반드시 이 패턴**을 따른다. 도메인마다 제각각 래핑하면 인프라가 무의미해진다.
+
+**규칙**
+
+1. 위치: `src/api/{도메인}/index.ts`(함수) + `src/api/{도메인}/types.ts`(요청/응답 타입). 도메인은 `docs/generated/api-schema.md` 기준 (`user` / `trip` / `route` / `reservation` / `parse`).
+2. 반환 타입은 **항상** `Promise<ApiResult<T>>` (`src/types/api.types.ts`). 화면/훅은 `result.ok` 한 가지만 분기한다.
+3. 호출은 공통 `api` 인스턴스만 사용. 새 axios 인스턴스 생성 금지. `X-Device-Id`·baseURL·타임아웃은 인스턴스가 처리하므로 손대지 않는다.
+4. 성공 시 백엔드 봉투(`{ success, data, message }`)에서 `data`를 꺼내 `{ ok: true, data }`로 감싼다.
+5. 실패는 직접 try/catch로 분류하지 않는다. error 인터셉터가 이미 `ApiFailure`로 정규화해 `reject`하므로 그대로 반환한다.
+6. 함수명은 `동사 + 명사` (`getTripList`, `registerUser`). 함수 안에 analytics·네비게이션 같은 숨은 부수효과 금지.
+
 ```ts
-// src/api/axios.ts (예시)
-import axios from 'axios';
-import { useDeviceStore } from '@/stores/deviceStore';
+// src/api/user/index.ts — POST /api/users 예시
+import { api } from '@/api/axios';
+import type { ApiResult, ApiEnvelope } from '@/types/api.types';
+import type { User } from './types';
 
-export const api = axios.create({ baseURL: API_BASE_URL });
-
-api.interceptors.request.use((config) => {
-  const deviceId = useDeviceStore.getState().deviceId;
-  if (deviceId) {
-    config.headers['X-Device-Id'] = deviceId;
+export async function registerUser(
+  platform: 'IOS' | 'ANDROID',
+): Promise<ApiResult<User>> {
+  try {
+    // X-Device-Id 는 인터셉터가 자동 주입 — 여기서 신경 쓰지 않는다
+    const res = await api.post<ApiEnvelope<User>>('/api/users', { platform });
+    return { ok: true, data: res.data.data as User };
+  } catch (failure) {
+    // error 인터셉터가 { ok:false, reason } 로 정규화해 reject한 값
+    return failure as ApiResult<User>;
   }
-  return config;
-});
+}
+```
+
+```ts
+// 호출처(훅/화면) — 항상 ok 한 가지만 분기
+const result = await registerUser('IOS');
+if (result.ok) {
+  /* result.data 사용 */
+} else if (result.reason === 'NETWORK') {
+  /* 오프라인 안내 */
+}
 ```
 
 ### 함수 반환 타입 통일
