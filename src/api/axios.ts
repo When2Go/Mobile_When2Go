@@ -9,7 +9,7 @@ function resolveBaseURL(): string {
   const url = process.env.EXPO_PUBLIC_API_BASE_URL;
   if (!url) {
     throw new Error(
-      'EXPO_PUBLIC_API_BASE_URL 가 비어있다. .env.example 을 .env 로 복사하고 EC2 URL 을 채워라.',
+      'EXPO_PUBLIC_API_BASE_URL 가 비어있다. `cp .env.example .env` 후 백엔드 도메인을 채워라.',
     );
   }
   return url;
