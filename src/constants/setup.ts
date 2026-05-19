@@ -22,8 +22,8 @@ export const DEFAULT_ROUTE_OPTION: RouteOptionId = 'subway_bus';
 /** 시간 휠: 1~12시. */
 export const HOUR_OPTIONS: readonly number[] = Array.from({ length: 12 }, (_, i) => i + 1);
 
-/** 분 휠: 5분 단위 (0, 5, 10, ..., 55). */
-export const MINUTE_STEP = 5;
+/** 분 휠: 1분 단위 (0, 1, 2, ..., 59). */
+export const MINUTE_STEP = 1;
 export const MINUTE_OPTIONS: readonly number[] = Array.from(
   { length: 60 / MINUTE_STEP },
   (_, i) => i * MINUTE_STEP,

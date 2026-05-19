@@ -87,6 +87,9 @@ function WheelColumn<T>({
   // 현재 외부 선택 index 의 최신값(콜백 클로저 stale 방지).
   const selectedIndexRef = useRef(selectedIndex);
   selectedIndexRef.current = selectedIndex;
+  // 마운트 가드: 초기 위치는 contentOffset 로 이미 잡히므로 첫 effect 실행
+  // (마운트)에서의 animated scrollTo 는 같은 위치로의 불필요한 호출. 건너뛴다.
+  const didMountRef = useRef(false);
 
   const scrollToIndex = useCallback((index: number, animated: boolean) => {
     scrollRef.current?.scrollTo({ y: indexToOffset(index, WHEEL_ITEM_HEIGHT), animated });
@@ -95,6 +98,11 @@ function WheelColumn<T>({
   // 외부 prop(칩/period 전환 등) 변경 → 해당 index 로 동기화.
   // 가드: 프로그램적 타깃으로 마킹해 결과 멈춤 콜백이 onSelect 를 되쏘지 않게 함.
   useEffect(() => {
+    if (!didMountRef.current) {
+      // 마운트: contentOffset 가 이미 selectedIndex 위치라 스크롤 불필요.
+      didMountRef.current = true;
+      return;
+    }
     programmaticIndexRef.current = selectedIndex;
     scrollToIndex(selectedIndex, true);
     scrollY.value = indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT);
