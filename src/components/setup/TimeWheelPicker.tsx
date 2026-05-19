@@ -1,4 +1,12 @@
-import { Pressable, Text, View } from 'react-native';
+import { useCallback, useEffect, useRef } from 'react';
+import { Pressable, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import Animated, {
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+  type AnimatedScrollViewProps,
+} from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 
 import { useTheme } from '@/contexts/ThemeContext';
 import {
@@ -6,13 +14,23 @@ import {
   MINUTE_OPTIONS,
   PERIOD_OPTIONS,
   TIME_RANGE_NOTICE,
+  WHEEL_ITEM_HEIGHT,
+  WHEEL_VISIBLE_SIDE_COUNT,
   type Period,
 } from '@/constants/setup';
+import { clampIndex, indexToOffset, offsetToIndex } from '@/utils/wheelPicker';
 
-const WHEEL_HEIGHT_CLASS = 'h-56';
-/** 중앙 강조 박스 위/아래에 보일 mock 항목 수. */
-const VISIBLE_SIDE_COUNT = 2;
-const ROW_GAP_CLASS = 'gap-1.5';
+/** 휠 전체 높이 = (양옆 보이는 칸 + 중앙 1칸) * 항목 높이. */
+const WHEEL_HEIGHT = (WHEEL_VISIBLE_SIDE_COUNT * 2 + 1) * WHEEL_ITEM_HEIGHT;
+/** 첫/마지막 항목도 중앙 라인에 닿도록 위·아래에 두는 스페이서 높이. */
+const SPACER_HEIGHT = WHEEL_VISIBLE_SIDE_COUNT * WHEEL_ITEM_HEIGHT;
+/** 중앙에서 멀어질수록 적용할 최소 opacity / scale (페이드 끝값). */
+const MIN_OPACITY = 0.25;
+const MIN_SCALE = 0.82;
+/** opacity·scale 보간을 적용할 거리(칸 수) 범위. */
+const FADE_DISTANCE = WHEEL_VISIBLE_SIDE_COUNT + 1;
+
+const AnimatedScrollView = Animated.ScrollView;
 
 interface Props {
   period: Period;
@@ -23,12 +41,183 @@ interface Props {
   onMinuteChange: (minute: number) => void;
 }
 
+type ColumnAlign = 'start' | 'center' | 'end';
+
+interface WheelColumnProps<T> {
+  options: readonly T[];
+  selected: T;
+  onSelect: (value: T) => void;
+  format: (value: T) => string;
+  align: ColumnAlign;
+  itemText: string;
+}
+
+/** 열 정렬별 항목 className (시안: period=우측, hour=중앙, minute=좌측). */
+const ITEM_ALIGN_CLASS: Record<ColumnAlign, string> = {
+  start: 'items-start pl-3',
+  end: 'items-end pr-3',
+  center: 'items-center',
+};
+
 /**
- * iOS 스타일 시간 휠(mock).
- * - 3열 grid: 오전·오후 / 시 / 분
- * - 중앙 강조 박스 + 위아래 페이딩(opacity)으로 휠 정렬을 흉내.
- * - 휠 제스처는 mock — 항목 탭으로만 선택 변경.
- * - 하단 빨간 안내 박스: 시간 상한.
+ * 휠 한 열(period | hour | minute 공통).
+ * - 세로 ScrollView + snapToInterval=WHEEL_ITEM_HEIGHT 로 항상 한 칸에 정렬.
+ * - 상·하단 SPACER_HEIGHT 스페이서 → 첫/마지막 항목도 중앙 도달(비순환).
+ * - 스크롤 멈춤(onMomentumScrollEnd/onScrollEndDrag)에서 offset→index→clamp 후
+ *   외부 selected 와 다를 때만 onSelect + Haptics.selectionAsync() 1회.
+ * - 외부 prop 변경 시 해당 index 로 scrollTo. 프로그램적 스크롤 타깃을
+ *   programmaticIndexRef 로 들고, 그로 인한 멈춤 콜백의 재-onSelect 를 가드.
+ * - 거리 기반 opacity/scale 페이드는 Reanimated scrollY 로 프레임 단위 보간(튐 없음).
+ */
+function WheelColumn<T>({
+  options,
+  selected,
+  onSelect,
+  format,
+  align,
+  itemText,
+}: WheelColumnProps<T>) {
+  const length = options.length;
+  const selectedIndex = clampIndex(Math.max(0, options.indexOf(selected)), length);
+
+  const scrollRef = useRef<Animated.ScrollView>(null);
+  const scrollY = useSharedValue(indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT));
+  // 프로그램적으로 스크롤 보낸 목표 index. 그로 인한 멈춤 콜백은 onSelect 재호출 금지.
+  const programmaticIndexRef = useRef<number | null>(null);
+  // 현재 외부 선택 index 의 최신값(콜백 클로저 stale 방지).
+  const selectedIndexRef = useRef(selectedIndex);
+  selectedIndexRef.current = selectedIndex;
+
+  const scrollToIndex = useCallback((index: number, animated: boolean) => {
+    scrollRef.current?.scrollTo({ y: indexToOffset(index, WHEEL_ITEM_HEIGHT), animated });
+  }, []);
+
+  // 외부 prop(칩/period 전환 등) 변경 → 해당 index 로 동기화.
+  // 가드: 프로그램적 타깃으로 마킹해 결과 멈춤 콜백이 onSelect 를 되쏘지 않게 함.
+  useEffect(() => {
+    programmaticIndexRef.current = selectedIndex;
+    scrollToIndex(selectedIndex, true);
+    scrollY.value = indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT);
+  }, [selectedIndex, scrollToIndex, scrollY]);
+
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
+    },
+  });
+
+  const settleToIndex = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const nextIndex = offsetToIndex(
+      event.nativeEvent.contentOffset.y,
+      WHEEL_ITEM_HEIGHT,
+      length,
+    );
+
+    // 프로그램적 스크롤로 도달한 지점이면 가드 해제만 하고 콜백 금지(피드백 루프 차단).
+    if (programmaticIndexRef.current !== null) {
+      if (programmaticIndexRef.current === nextIndex) {
+        programmaticIndexRef.current = null;
+        return;
+      }
+      programmaticIndexRef.current = null;
+    }
+
+    // 실제 선택 index 가 바뀔 때만 onSelect + 햅틱 1회.
+    if (nextIndex !== selectedIndexRef.current) {
+      void Haptics.selectionAsync();
+      onSelect(options[nextIndex]);
+    }
+  };
+
+  const commonScrollProps: AnimatedScrollViewProps = {
+    showsVerticalScrollIndicator: false,
+    snapToInterval: WHEEL_ITEM_HEIGHT,
+    decelerationRate: 'fast',
+    scrollEventThrottle: 16,
+    onScroll: scrollHandler,
+    onMomentumScrollEnd: settleToIndex,
+    // 짧은 드래그(관성 없음)에서도 정착하도록 폴백.
+    onScrollEndDrag: settleToIndex,
+    contentOffset: { x: 0, y: indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT) },
+  };
+
+  return (
+    <View className="flex-1" style={{ height: WHEEL_HEIGHT }}>
+      <AnimatedScrollView
+        ref={scrollRef}
+        {...commonScrollProps}
+        contentContainerStyle={{ paddingVertical: SPACER_HEIGHT }}
+      >
+        {options.map((value, index) => (
+          <WheelItem
+            key={format(value)}
+            label={format(value)}
+            index={index}
+            scrollY={scrollY}
+            align={align}
+            itemText={itemText}
+            onPress={() => {
+              // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
+              programmaticIndexRef.current = index;
+              scrollToIndex(index, true);
+              if (index !== selectedIndexRef.current) {
+                void Haptics.selectionAsync();
+                onSelect(options[index]);
+              }
+            }}
+          />
+        ))}
+      </AnimatedScrollView>
+    </View>
+  );
+}
+
+interface WheelItemProps {
+  label: string;
+  index: number;
+  scrollY: ReturnType<typeof useSharedValue<number>>;
+  align: ColumnAlign;
+  itemText: string;
+  onPress: () => void;
+}
+
+/** 휠 항목 1개. 중앙으로부터 거리에 따라 opacity·scale 보간(프레임 단위). */
+function WheelItem({
+  label,
+  index,
+  scrollY,
+  align,
+  itemText,
+  onPress,
+}: WheelItemProps) {
+  const animatedStyle = useAnimatedStyle(() => {
+    const centeredIndex = scrollY.value / WHEEL_ITEM_HEIGHT;
+    const distance = Math.min(Math.abs(index - centeredIndex), FADE_DISTANCE);
+    const t = distance / FADE_DISTANCE;
+    return {
+      opacity: 1 - (1 - MIN_OPACITY) * t,
+      transform: [{ scale: 1 - (1 - MIN_SCALE) * t }],
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[animatedStyle, { height: WHEEL_ITEM_HEIGHT }]}
+      className={`justify-center ${ITEM_ALIGN_CLASS[align]}`}
+    >
+      <Pressable onPress={onPress} accessibilityRole="button" hitSlop={4}>
+        <Text className={`text-2xl font-medium ${itemText}`}>{label}</Text>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+/**
+ * iOS 스타일 시간 휠.
+ * - 3열: 오전·오후 / 시 / 분. 각 열은 손가락 드래그로 스크롤되며
+ *   가운데 항목이 항상 선택값(snap). 외부 period/hour/minute 와 양방향 동기화.
+ * - 중앙 강조 박스(renderCenterBar) + 다크모드 z-order 의도 유지.
+ * - 끝단 비순환(clamp) — 시안이 선형 리스트라 일치.
  */
 export default function TimeWheelPicker({
   period,
@@ -41,9 +230,8 @@ export default function TimeWheelPicker({
   const { isDark } = useTheme();
 
   const centerBoxBg = isDark ? 'bg-zinc-700/60' : 'bg-white';
-  const activeText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const baseText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const dimText = isDark ? 'text-zinc-500' : 'text-zinc-400';
+  // 항목 색은 단일 톤 — 중앙 강조는 거리 기반 opacity/scale 페이드가 담당.
+  const itemText = isDark ? 'text-zinc-100' : 'text-zinc-900';
   const noticeBg = isDark ? 'bg-red-900/20' : 'bg-red-50';
   const noticeText = isDark ? 'text-red-400' : 'text-red-500';
 
@@ -51,74 +239,10 @@ export default function TimeWheelPicker({
   // 중앙 박스(z-0)와 컬럼 컨테이너(z-10)에 z-index를 명시한다.
   const renderCenterBar = () => (
     <View
-      style={{ pointerEvents: 'none' }}
-      className={`absolute inset-x-3 top-1/2 -mt-5 z-0 h-10 rounded-xl ${centerBoxBg}`}
+      style={{ pointerEvents: 'none', height: WHEEL_ITEM_HEIGHT, marginTop: -(WHEEL_ITEM_HEIGHT / 2) }}
+      className={`absolute inset-x-3 top-1/2 z-0 rounded-xl ${centerBoxBg}`}
     />
   );
-
-  /**
-   * 중앙 정렬 휠 컬럼 mock.
-   * - selectedIndex 기준 위/아래로 VISIBLE_SIDE_COUNT 만큼 옆 항목을 dim 처리해서 보여준다.
-   * - 탭하면 해당 값으로 onSelect 호출.
-   */
-  const renderWheelColumn = <T,>(
-    options: readonly T[],
-    selected: T,
-    onSelect: (value: T) => void,
-    format: (value: T) => string,
-    align: 'start' | 'center' | 'end',
-  ) => {
-    const selectedIndex = Math.max(0, options.indexOf(selected));
-    const slots: (T | null)[] = [];
-    for (let offset = -VISIBLE_SIDE_COUNT; offset <= VISIBLE_SIDE_COUNT; offset += 1) {
-      const idx = selectedIndex + offset;
-      slots.push(idx >= 0 && idx < options.length ? options[idx] : null);
-    }
-
-    const alignByPosition: Record<typeof align, string> = {
-      start: 'items-start pl-3',
-      end: 'items-end pr-3',
-      center: 'items-center',
-    };
-    const alignClass = alignByPosition[align];
-
-    return (
-      <View className={`flex-1 justify-center ${alignClass} ${ROW_GAP_CLASS}`}>
-        {slots.map((value, i) => {
-          const offset = i - VISIBLE_SIDE_COUNT;
-          const distance = Math.abs(offset);
-          const isCenter = distance === 0;
-          if (value === null) {
-            // 빈 슬롯도 높이 유지 — 시안의 opacity-0 span과 동일 의도.
-            // key는 selectedIndex 기준 offset(-2..+2)으로 부여해 의미적으로 unique.
-            return (
-              <Text key={`empty-offset-${offset}`} className="text-2xl opacity-0">
-                {' '}
-              </Text>
-            );
-          }
-          let textClass: string;
-          if (isCenter) {
-            textClass = `text-2xl font-medium ${activeText}`;
-          } else if (distance === 1) {
-            textClass = `text-2xl ${baseText}`;
-          } else {
-            textClass = `text-xl opacity-50 ${dimText}`;
-          }
-          return (
-            <Pressable
-              key={`${i}-${format(value)}`}
-              onPress={() => onSelect(value)}
-              accessibilityRole="button"
-              hitSlop={4}
-            >
-              <Text className={textClass}>{format(value)}</Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    );
-  };
 
   const formatHour = (h: number) => String(h);
   const formatMinute = (m: number) => String(m).padStart(2, '0');
@@ -126,12 +250,33 @@ export default function TimeWheelPicker({
 
   return (
     <View>
-      <View className={`relative overflow-hidden ${WHEEL_HEIGHT_CLASS}`}>
+      <View className="relative overflow-hidden" style={{ height: WHEEL_HEIGHT }}>
         {renderCenterBar()}
         <View className="relative z-10 h-full flex-row">
-          {renderWheelColumn<Period>(PERIOD_OPTIONS, period, onPeriodChange, formatPeriod, 'end')}
-          {renderWheelColumn<number>(HOUR_OPTIONS, hour, onHourChange, formatHour, 'center')}
-          {renderWheelColumn<number>(MINUTE_OPTIONS, minute, onMinuteChange, formatMinute, 'start')}
+          <WheelColumn<Period>
+            options={PERIOD_OPTIONS}
+            selected={period}
+            onSelect={onPeriodChange}
+            format={formatPeriod}
+            align="end"
+            itemText={itemText}
+          />
+          <WheelColumn<number>
+            options={HOUR_OPTIONS}
+            selected={hour}
+            onSelect={onHourChange}
+            format={formatHour}
+            align="center"
+            itemText={itemText}
+          />
+          <WheelColumn<number>
+            options={MINUTE_OPTIONS}
+            selected={minute}
+            onSelect={onMinuteChange}
+            format={formatMinute}
+            align="start"
+            itemText={itemText}
+          />
         </View>
       </View>
 
