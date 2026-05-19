@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Pressable, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
+import { NativeViewGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedScrollHandler,
   useAnimatedStyle,
@@ -68,6 +69,9 @@ const ITEM_ALIGN_CLASS: Record<ColumnAlign, string> = {
  * - 외부 prop 변경 시 해당 index 로 scrollTo. 프로그램적 스크롤 타깃을
  *   programmaticIndexRef 로 들고, 그로 인한 멈춤 콜백의 재-onSelect 를 가드.
  * - 거리 기반 opacity/scale 페이드는 Reanimated scrollY 로 프레임 단위 보간(튐 없음).
+ * - NativeViewGestureHandler(disallowInterruption) 로 래핑: 휠 세로 드래그가
+ *   조상 스크롤/팬(바텀시트 content pan · BottomSheetScrollView · 페이지 ScrollView)
+ *   에게 양보되지 않도록 터치를 독점. gorhom 공식 트러블슈팅 권장 방식.
  */
 function WheelColumn<T>({
   options,
@@ -151,31 +155,33 @@ function WheelColumn<T>({
 
   return (
     <View className="flex-1" style={{ height: WHEEL_HEIGHT }}>
-      <AnimatedScrollView
-        ref={scrollRef}
-        {...commonScrollProps}
-        contentContainerStyle={{ paddingVertical: SPACER_HEIGHT }}
-      >
-        {options.map((value, index) => (
-          <WheelItem
-            key={format(value)}
-            label={format(value)}
-            index={index}
-            scrollY={scrollY}
-            align={align}
-            itemText={itemText}
-            onPress={() => {
-              // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
-              programmaticIndexRef.current = index;
-              scrollToIndex(index, true);
-              if (index !== selectedIndexRef.current) {
-                void Haptics.selectionAsync();
-                onSelect(options[index]);
-              }
-            }}
-          />
-        ))}
-      </AnimatedScrollView>
+      <NativeViewGestureHandler disallowInterruption>
+        <AnimatedScrollView
+          ref={scrollRef}
+          {...commonScrollProps}
+          contentContainerStyle={{ paddingVertical: SPACER_HEIGHT }}
+        >
+          {options.map((value, index) => (
+            <WheelItem
+              key={format(value)}
+              label={format(value)}
+              index={index}
+              scrollY={scrollY}
+              align={align}
+              itemText={itemText}
+              onPress={() => {
+                // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
+                programmaticIndexRef.current = index;
+                scrollToIndex(index, true);
+                if (index !== selectedIndexRef.current) {
+                  void Haptics.selectionAsync();
+                  onSelect(options[index]);
+                }
+              }}
+            />
+          ))}
+        </AnimatedScrollView>
+      </NativeViewGestureHandler>
     </View>
   );
 }
