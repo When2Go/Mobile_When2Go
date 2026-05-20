@@ -30,6 +30,12 @@ const MIN_OPACITY = 0.25;
 const MIN_SCALE = 0.82;
 /** opacity·scale 보간을 적용할 거리(칸 수) 범위. */
 const FADE_DISTANCE = WHEEL_VISIBLE_SIDE_COUNT + 1;
+/** 휠 항목 Pressable 의 hitSlop(작은 글자 탭 보조). */
+const WHEEL_ITEM_HIT_SLOP = 4;
+/** Reanimated onScroll 의 호출 간격(ms). 60fps ≈ 16ms 와 일치. */
+const SCROLL_EVENT_THROTTLE_MS = 16;
+/** 중앙 강조 박스를 정확히 가운데 칸에 맞추기 위한 음수 마진(절반 높이만큼 위로). */
+const CENTER_BAR_MARGIN_TOP = -(WHEEL_ITEM_HEIGHT / 2);
 
 const AnimatedScrollView = Animated.ScrollView;
 
@@ -94,6 +100,10 @@ function WheelColumn<T>({
   // 마운트 가드: 초기 위치는 contentOffset 로 이미 잡히므로 첫 effect 실행
   // (마운트)에서의 animated scrollTo 는 같은 위치로의 불필요한 호출. 건너뛴다.
   const didMountRef = useRef(false);
+  // 이중 발화 가드: 관성 있는 드래그는 onScrollEndDrag → onMomentumScrollEnd 순으로
+  // settle 콜백이 두 번 발화한다. onMomentumScrollBegin 으로 관성 시작 여부를
+  // 표시해, onScrollEndDrag 는 짧은 드래그(관성 없음) 폴백 시에만 settle.
+  const isMomentumScrollRef = useRef(false);
 
   const scrollToIndex = useCallback((index: number, animated: boolean) => {
     scrollRef.current?.scrollTo({ y: indexToOffset(index, WHEEL_ITEM_HEIGHT), animated });
@@ -118,12 +128,8 @@ function WheelColumn<T>({
     },
   });
 
-  const settleToIndex = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const nextIndex = offsetToIndex(
-      event.nativeEvent.contentOffset.y,
-      WHEEL_ITEM_HEIGHT,
-      length,
-    );
+  const settleToOffset = (offsetY: number) => {
+    const nextIndex = offsetToIndex(offsetY, WHEEL_ITEM_HEIGHT, length);
 
     // 프로그램적 스크롤로 도달한 지점이면 가드 해제만 하고 콜백 금지(피드백 루프 차단).
     if (programmaticIndexRef.current !== null) {
@@ -141,15 +147,40 @@ function WheelColumn<T>({
     }
   };
 
+  const handleScrollBeginDrag = () => {
+    isMomentumScrollRef.current = false;
+  };
+
+  const handleMomentumScrollBegin = () => {
+    isMomentumScrollRef.current = true;
+  };
+
+  // 짧은 드래그(관성 없음) 폴백: 한 프레임 양보 후 관성이 시작되지 않았으면 직접 settle.
+  // 관성이 시작되면 onMomentumScrollEnd 가 단독으로 settle 하므로 이중 발화 방지.
+  const handleScrollEndDrag = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    requestAnimationFrame(() => {
+      if (!isMomentumScrollRef.current) {
+        settleToOffset(offsetY);
+      }
+    });
+  };
+
+  const handleMomentumScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    isMomentumScrollRef.current = false;
+    settleToOffset(event.nativeEvent.contentOffset.y);
+  };
+
   const commonScrollProps: AnimatedScrollViewProps = {
     showsVerticalScrollIndicator: false,
     snapToInterval: WHEEL_ITEM_HEIGHT,
     decelerationRate: 'fast',
-    scrollEventThrottle: 16,
+    scrollEventThrottle: SCROLL_EVENT_THROTTLE_MS,
     onScroll: scrollHandler,
-    onMomentumScrollEnd: settleToIndex,
-    // 짧은 드래그(관성 없음)에서도 정착하도록 폴백.
-    onScrollEndDrag: settleToIndex,
+    onScrollBeginDrag: handleScrollBeginDrag,
+    onMomentumScrollBegin: handleMomentumScrollBegin,
+    onScrollEndDrag: handleScrollEndDrag,
+    onMomentumScrollEnd: handleMomentumScrollEnd,
     contentOffset: { x: 0, y: indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT) },
   };
 
@@ -219,7 +250,7 @@ function WheelItem({
       style={[animatedStyle, { height: WHEEL_ITEM_HEIGHT }]}
       className={`justify-center ${ITEM_ALIGN_CLASS[align]}`}
     >
-      <Pressable onPress={onPress} accessibilityRole="button" hitSlop={4}>
+      <Pressable onPress={onPress} accessibilityRole="button" hitSlop={WHEEL_ITEM_HIT_SLOP}>
         <Text className={`text-2xl font-medium ${itemText}`}>{label}</Text>
       </Pressable>
     </Animated.View>
@@ -253,7 +284,7 @@ export default function TimeWheelPicker({
   // 중앙 박스(z-0)와 컬럼 컨테이너(z-10)에 z-index를 명시한다.
   const renderCenterBar = () => (
     <View
-      style={{ pointerEvents: 'none', height: WHEEL_ITEM_HEIGHT, marginTop: -(WHEEL_ITEM_HEIGHT / 2) }}
+      style={{ pointerEvents: 'none', height: WHEEL_ITEM_HEIGHT, marginTop: CENTER_BAR_MARGIN_TOP }}
       className={`absolute inset-x-3 top-1/2 z-0 rounded-xl ${centerBoxBg}`}
     />
   );
