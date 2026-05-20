@@ -21,11 +21,7 @@ closes #
 
 ## 직접 확인하는 법
 
-<!-- 실행 명령 + 리뷰어가 체크할 항목 -->
-```bash
-npm install
-npx expo start
-```
+<!-- 앱에서 확인할 항목만. npm install / npx expo start / npm test 같은 범용 명령 블록은 넣지 않는다 (docs/PR-writing-guide.md). 이 변경에만 필요한 특수 명령이 있을 때만 적는다. -->
 
 - [ ] 
 

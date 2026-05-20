@@ -22,8 +22,8 @@ export const DEFAULT_ROUTE_OPTION: RouteOptionId = 'subway_bus';
 /** 시간 휠: 1~12시. */
 export const HOUR_OPTIONS: readonly number[] = Array.from({ length: 12 }, (_, i) => i + 1);
 
-/** 분 휠: 5분 단위 (0, 5, 10, ..., 55). */
-export const MINUTE_STEP = 5;
+/** 분 휠: 1분 단위 (0, 1, 2, ..., 59). */
+export const MINUTE_STEP = 1;
 export const MINUTE_OPTIONS: readonly number[] = Array.from(
   { length: 60 / MINUTE_STEP },
   (_, i) => i * MINUTE_STEP,
@@ -31,6 +31,15 @@ export const MINUTE_OPTIONS: readonly number[] = Array.from(
 
 export type Period = '오전' | '오후';
 export const PERIOD_OPTIONS: readonly Period[] = ['오전', '오후'] as const;
+
+/**
+ * 시간 휠 레이아웃 상수.
+ * - WHEEL_ITEM_HEIGHT: 한 항목(=중앙 강조 박스) 높이(px). 시안 중앙 박스 h-11(44px) 기준.
+ * - WHEEL_VISIBLE_SIDE_COUNT: 중앙 위/아래로 보일 항목 수. 휠 전체 높이 = (2*side+1)*item.
+ *   2 → 5칸 노출, 220px (기존 mock h-56≈224px 와 시각적으로 동일선).
+ */
+export const WHEEL_ITEM_HEIGHT = 44;
+export const WHEEL_VISIBLE_SIDE_COUNT = 2;
 
 /** mock 단계의 도착 시간 기본값 — 오후 10:30. */
 export const DEFAULT_PERIOD: Period = '오후';
