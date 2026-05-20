@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Trash2 } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Shield, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
+import BufferSlider from '@/components/common/BufferSlider';
 import TimeWheelPicker from '@/components/setup/TimeWheelPicker';
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
@@ -12,10 +13,15 @@ import { ROUTE_OPTIONS } from '@/constants/setup';
 import {
   ADD_MODAL_TITLE,
   ARRIVAL_TAP_HINT,
+  BUFFER_BADGE_GLOBAL,
+  BUFFER_BADGE_OVERRIDE,
+  BUFFER_GLOBAL_HINT,
+  BUFFER_RESET_LABEL,
   DAYS,
   DELETE_LABEL,
   EDIT_MODAL_TITLE,
   LABEL_ARRIVAL,
+  LABEL_BUFFER,
   LABEL_DAYS,
   LABEL_LOCATIONS,
   LABEL_NAME,
@@ -25,7 +31,9 @@ import {
   PLACEHOLDER_ORIGIN,
   SAVE_LABEL,
 } from '@/constants/repeat';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { RepeatFormData } from '@/types/repeat.types';
+import { resolveRepeatBufferMinutes } from '@/utils/repeatBuffer';
 
 const SNAP_POINTS = ['85%'];
 const FORM_ICON_SIZE = 18;
@@ -59,6 +67,10 @@ export default function RepeatEditModal({
 }: RepeatEditModalProps) {
   const { isDark } = useTheme();
   const [isTimeExpanded, setTimeExpanded] = useState(false);
+  const [isBufferExpanded, setBufferExpanded] = useState(false);
+  const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
+  const hasBufferOverride = form.safetyBufferMin !== undefined;
+  const effectiveBufferMin = resolveRepeatBufferMinutes(form, globalBufferMin);
 
   const title = mode === 'edit' ? EDIT_MODAL_TITLE : ADD_MODAL_TITLE;
   const isValid = form.name.trim().length > 0 && form.days.length > 0;
@@ -83,6 +95,11 @@ export default function RepeatEditModal({
   const routeInactiveBg = isDark
     ? 'border-zinc-700 bg-zinc-800'
     : 'border-zinc-200 bg-white';
+  const bufferBadgeActiveBg = isDark ? 'bg-blue-900/40' : 'bg-blue-50';
+  const bufferBadgeActiveText = isDark ? 'text-blue-300' : 'text-blue-700';
+  const bufferBadgeGlobalBg = isDark ? 'bg-zinc-700' : 'bg-zinc-200';
+  const bufferBadgeGlobalText = isDark ? 'text-zinc-300' : 'text-zinc-600';
+  const bufferResetText = isDark ? 'text-blue-400' : 'text-blue-600';
 
   const locationPlaceholderText = isDark ? 'text-zinc-500' : 'text-zinc-400';
   const locationValueText = isDark ? 'text-zinc-100' : 'text-zinc-900';
@@ -98,6 +115,14 @@ export default function RepeatEditModal({
 
   const handleSavePress = () => {
     if (isValid) onSave();
+  };
+
+  const handleBufferChange = (next: number) => {
+    onFormChange({ safetyBufferMin: Math.round(next) });
+  };
+
+  const handleBufferReset = () => {
+    onFormChange({ safetyBufferMin: undefined });
   };
 
   return (
@@ -251,6 +276,59 @@ export default function RepeatEditModal({
                 );
               })}
             </View>
+          </View>
+
+          {/* 안전 버퍼 (collapsible) — 미설정 시 전역 설정값 fallback */}
+          <View>
+            <Text className={`mb-2 text-sm font-semibold ${labelText}`}>{LABEL_BUFFER}</Text>
+            <Pressable
+              onPress={() => setBufferExpanded((p) => !p)}
+              accessibilityRole="button"
+              accessibilityLabel={`${LABEL_BUFFER} ${isBufferExpanded ? '접기' : '펼치기'}`}
+              className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${arrivalBoxBg}`}
+            >
+              <Shield size={ICON_SIZE.header} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+              <Text className={`text-base font-semibold ${labelText}`}>{`${effectiveBufferMin}분`}</Text>
+              <View className="ml-auto flex-row items-center gap-2">
+                <View
+                  className={`rounded-full px-2 py-1 ${
+                    hasBufferOverride ? bufferBadgeActiveBg : bufferBadgeGlobalBg
+                  }`}
+                >
+                  <Text
+                    className={`text-[11px] font-semibold ${
+                      hasBufferOverride ? bufferBadgeActiveText : bufferBadgeGlobalText
+                    }`}
+                  >
+                    {hasBufferOverride
+                      ? BUFFER_BADGE_OVERRIDE(effectiveBufferMin)
+                      : BUFFER_BADGE_GLOBAL}
+                  </Text>
+                </View>
+                <ChevronDown size={ICON_SIZE.card} color={placeholderColor} />
+              </View>
+            </Pressable>
+            {isBufferExpanded ? (
+              <View className={`mt-2 rounded-xl border px-4 py-4 ${arrivalBoxBg}`}>
+                <BufferSlider value={effectiveBufferMin} onChange={handleBufferChange} />
+                {hasBufferOverride ? (
+                  <Pressable
+                    onPress={handleBufferReset}
+                    accessibilityRole="button"
+                    accessibilityLabel={BUFFER_RESET_LABEL}
+                    className="mt-3 self-center px-2 py-1 active:opacity-60"
+                  >
+                    <Text className={`text-xs font-semibold ${bufferResetText}`}>
+                      {BUFFER_RESET_LABEL}
+                    </Text>
+                  </Pressable>
+                ) : (
+                  <Text className={`mt-3 text-center text-xs ${sub}`}>
+                    {BUFFER_GLOBAL_HINT(globalBufferMin)}
+                  </Text>
+                )}
+              </View>
+            ) : null}
           </View>
       </View>
 

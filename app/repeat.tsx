@@ -51,6 +51,7 @@ export default function RepeatScreen() {
       arrivalHour: item.arrivalHour,
       arrivalMinute: item.arrivalMinute,
       routeOption: item.routeOption,
+      safetyBufferMin: item.safetyBufferMin,
     });
     setEditOpen(true);
   };

@@ -5,6 +5,8 @@ import type { Period, RouteOptionId } from '@/constants/setup';
  * - days: 0(일) ~ 6(토). 시안의 DAYS 인덱스와 일치.
  * - arrivalPeriod / Hour / Minute: setup `TimeWheelPicker`와 동일 구조 (mock).
  * - routeOption: `ROUTE_OPTIONS`의 id를 재사용.
+ * - safetyBufferMin: 반복 예약별 안전 버퍼(분). undefined 이면 전역 설정값을 따른다.
+ *   해석은 `resolveRepeatBufferMinutes` 한 군데서만.
  */
 export interface RepeatItem {
   id: number;
@@ -17,6 +19,7 @@ export interface RepeatItem {
   arrivalMinute: number;
   routeOption: RouteOptionId;
   enabled: boolean;
+  safetyBufferMin?: number;
 }
 
 /** 폼은 id/enabled를 제외한 나머지. */
