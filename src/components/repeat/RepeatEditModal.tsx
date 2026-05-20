@@ -35,8 +35,8 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import type { RepeatFormData } from '@/types/repeat.types';
 import { resolveRepeatBufferMinutes } from '@/utils/repeatBuffer';
 
-const SNAP_POINTS = ['85%'];
-const FORM_ICON_SIZE = 18;
+/** 안전 버퍼 섹션이 펼쳐졌을 때도 들어갈 만한 높이. */
+const EDIT_SHEET_SNAP_POINTS = ['85%'];
 
 type Mode = 'add' | 'edit';
 
@@ -130,7 +130,7 @@ export default function RepeatEditModal({
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      snapPoints={SNAP_POINTS}
+      snapPoints={EDIT_SHEET_SNAP_POINTS}
       scrollable
     >
       <View className="gap-5 pb-2">
@@ -157,7 +157,7 @@ export default function RepeatEditModal({
                 className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${fieldRowBg}`}
               >
                 <Navigation
-                  size={FORM_ICON_SIZE}
+                  size={ICON_SIZE.formInline}
                   color={isDark ? PALETTE.blue400 : PALETTE.blue500}
                 />
                 <Text
@@ -166,7 +166,7 @@ export default function RepeatEditModal({
                 >
                   {form.origin || PLACEHOLDER_ORIGIN}
                 </Text>
-                <ChevronRight size={FORM_ICON_SIZE} color={placeholderColor} />
+                <ChevronRight size={ICON_SIZE.formInline} color={placeholderColor} />
               </Pressable>
               <View className="items-center justify-center py-0.5">
                 <View className={`h-2 w-px ${dividerLine}`} />
@@ -178,7 +178,7 @@ export default function RepeatEditModal({
                 className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${fieldRowBg}`}
               >
                 <MapPin
-                  size={FORM_ICON_SIZE}
+                  size={ICON_SIZE.formInline}
                   color={isDark ? PALETTE.rose400 : PALETTE.red500}
                 />
                 <Text
@@ -187,7 +187,7 @@ export default function RepeatEditModal({
                 >
                   {form.destination || PLACEHOLDER_DESTINATION}
                 </Text>
-                <ChevronRight size={FORM_ICON_SIZE} color={placeholderColor} />
+                <ChevronRight size={ICON_SIZE.formInline} color={placeholderColor} />
               </Pressable>
             </View>
           </View>

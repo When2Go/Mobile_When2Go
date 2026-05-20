@@ -5,10 +5,10 @@ import { ChevronRight, MapPin } from 'lucide-react-native';
 import BottomSheetModal from '@/components/common/BottomSheetModal';
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
+import { ICON_SIZE } from '@/constants/icons';
 import type { RouteFormData } from '@/types/routes.types';
 
 const SNAP_POINTS = ['75%'];
-const FORM_ICON_SIZE = 18;
 const FIELD_PLACEHOLDER_FROM = '출발지를 검색하세요';
 const FIELD_PLACEHOLDER_TO = '목적지를 검색하세요';
 const FIELD_PLACEHOLDER_NAME = '예: 출근, 헬스장, 학교';
@@ -78,11 +78,11 @@ export default function RouteEditModal({
             accessibilityLabel="출발지 검색"
             className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${rowBg}`}
           >
-            <MapPin size={FORM_ICON_SIZE} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
+            <MapPin size={ICON_SIZE.formInline} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
             <Text className={`flex-1 text-base ${locationFieldText(form.from)}`} numberOfLines={1}>
               {form.from || FIELD_PLACEHOLDER_FROM}
             </Text>
-            <ChevronRight size={FORM_ICON_SIZE} color={chevronColor} />
+            <ChevronRight size={ICON_SIZE.formInline} color={chevronColor} />
           </Pressable>
         </View>
 
@@ -95,11 +95,11 @@ export default function RouteEditModal({
             accessibilityLabel="목적지 검색"
             className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${rowBg}`}
           >
-            <MapPin size={FORM_ICON_SIZE} color={isDark ? PALETTE.emerald100 : PALETTE.emerald700} />
+            <MapPin size={ICON_SIZE.formInline} color={isDark ? PALETTE.emerald100 : PALETTE.emerald700} />
             <Text className={`flex-1 text-base ${locationFieldText(form.to)}`} numberOfLines={1}>
               {form.to || FIELD_PLACEHOLDER_TO}
             </Text>
-            <ChevronRight size={FORM_ICON_SIZE} color={chevronColor} />
+            <ChevronRight size={ICON_SIZE.formInline} color={chevronColor} />
           </Pressable>
         </View>
 
