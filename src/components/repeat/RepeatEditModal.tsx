@@ -13,10 +13,6 @@ import { ROUTE_OPTIONS } from '@/constants/setup';
 import {
   ADD_MODAL_TITLE,
   ARRIVAL_TAP_HINT,
-  BUFFER_BADGE_GLOBAL,
-  BUFFER_BADGE_OVERRIDE,
-  BUFFER_GLOBAL_HINT,
-  BUFFER_RESET_LABEL,
   DAYS,
   DELETE_LABEL,
   EDIT_MODAL_TITLE,
@@ -69,7 +65,6 @@ export default function RepeatEditModal({
   const [isTimeExpanded, setTimeExpanded] = useState(false);
   const [isBufferExpanded, setBufferExpanded] = useState(false);
   const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
-  const hasBufferOverride = form.safetyBufferMin !== undefined;
   const effectiveBufferMin = resolveRepeatBufferMinutes(form, globalBufferMin);
 
   const title = mode === 'edit' ? EDIT_MODAL_TITLE : ADD_MODAL_TITLE;
@@ -95,11 +90,6 @@ export default function RepeatEditModal({
   const routeInactiveBg = isDark
     ? 'border-zinc-700 bg-zinc-800'
     : 'border-zinc-200 bg-white';
-  const bufferBadgeActiveBg = isDark ? 'bg-blue-900/40' : 'bg-blue-50';
-  const bufferBadgeActiveText = isDark ? 'text-blue-300' : 'text-blue-700';
-  const bufferBadgeGlobalBg = isDark ? 'bg-zinc-700' : 'bg-zinc-200';
-  const bufferBadgeGlobalText = isDark ? 'text-zinc-300' : 'text-zinc-600';
-  const bufferResetText = isDark ? 'text-blue-400' : 'text-blue-600';
 
   const locationPlaceholderText = isDark ? 'text-zinc-500' : 'text-zinc-400';
   const locationValueText = isDark ? 'text-zinc-100' : 'text-zinc-900';
@@ -119,10 +109,6 @@ export default function RepeatEditModal({
 
   const handleBufferChange = (next: number) => {
     onFormChange({ safetyBufferMin: Math.round(next) });
-  };
-
-  const handleBufferReset = () => {
-    onFormChange({ safetyBufferMin: undefined });
   };
 
   return (
@@ -289,44 +275,13 @@ export default function RepeatEditModal({
             >
               <Shield size={ICON_SIZE.header} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
               <Text className={`text-base font-semibold ${labelText}`}>{`${effectiveBufferMin}분`}</Text>
-              <View className="ml-auto flex-row items-center gap-2">
-                <View
-                  className={`rounded-full px-2 py-1 ${
-                    hasBufferOverride ? bufferBadgeActiveBg : bufferBadgeGlobalBg
-                  }`}
-                >
-                  <Text
-                    className={`text-[11px] font-semibold ${
-                      hasBufferOverride ? bufferBadgeActiveText : bufferBadgeGlobalText
-                    }`}
-                  >
-                    {hasBufferOverride
-                      ? BUFFER_BADGE_OVERRIDE(effectiveBufferMin)
-                      : BUFFER_BADGE_GLOBAL}
-                  </Text>
-                </View>
+              <View className="ml-auto">
                 <ChevronDown size={ICON_SIZE.card} color={placeholderColor} />
               </View>
             </Pressable>
             {isBufferExpanded ? (
               <View className={`mt-2 rounded-xl border px-4 py-4 ${arrivalBoxBg}`}>
                 <BufferSlider value={effectiveBufferMin} onChange={handleBufferChange} />
-                {hasBufferOverride ? (
-                  <Pressable
-                    onPress={handleBufferReset}
-                    accessibilityRole="button"
-                    accessibilityLabel={BUFFER_RESET_LABEL}
-                    className="mt-3 self-center px-2 py-1 active:opacity-60"
-                  >
-                    <Text className={`text-xs font-semibold ${bufferResetText}`}>
-                      {BUFFER_RESET_LABEL}
-                    </Text>
-                  </Pressable>
-                ) : (
-                  <Text className={`mt-3 text-center text-xs ${sub}`}>
-                    {BUFFER_GLOBAL_HINT(globalBufferMin)}
-                  </Text>
-                )}
               </View>
             ) : null}
           </View>

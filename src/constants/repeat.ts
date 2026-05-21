@@ -78,13 +78,6 @@ export const LABEL_ARRIVAL = '도착 시간';
 export const LABEL_ROUTE = '경로 옵션';
 export const LABEL_BUFFER = '안전 버퍼 시간';
 
-/** 안전 버퍼 섹션 카피. */
-export const BUFFER_BADGE_GLOBAL = '전역 설정 사용';
-export const BUFFER_BADGE_OVERRIDE = (m: number) => `직접 설정 · ${m}분`;
-export const BUFFER_RESET_LABEL = '전역 설정으로 되돌리기';
-export const BUFFER_GLOBAL_HINT = (m: number) =>
-  `미설정 시 마이페이지 설정값(${m}분)을 따라요`;
-
 /** 폼 placeholder. */
 export const PLACEHOLDER_NAME = '예: 출근, 헬스장, 학원';
 export const PLACEHOLDER_ORIGIN = '출발지 선택';
