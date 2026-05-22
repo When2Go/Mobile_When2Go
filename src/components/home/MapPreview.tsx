@@ -32,7 +32,7 @@ export default function MapPreview() {
     <View className="flex-1" accessibilityLabel="카카오 지도">
       <KakaoMapView
         style={{ flex: 1 }}
-        camera={{ lat, lng, zoomLevel: DEFAULT_ZOOM_LEVEL }}
+        initialCamera={{ lat, lng, zoomLevel: DEFAULT_ZOOM_LEVEL }}
         language="ko"
       />
       {isGranted && (
