@@ -3,15 +3,17 @@
  * 매핑 근거: docs/DESIGN.md §8
  *
  * Tailwind 사이즈 클래스 대응:
- * - tab    : h-7 w-7  (28px)
- * - header : h-5 w-5  (20px)
- * - card   : h-4 w-4  (16px)
- * - caption: h-3 w-3  (12px)
+ * - tab        : h-7 w-7   (28px)
+ * - header     : h-5 w-5   (20px)
+ * - formInline : h-[18px] w-[18px] (18px) — 폼 행 안 인라인 아이콘
+ * - card       : h-4 w-4   (16px)
+ * - caption    : h-3 w-3   (12px)
  */
 
 export const ICON_SIZE = {
   tab: 28,
   header: 20,
+  formInline: 18,
   card: 16,
   caption: 12,
 } as const;
@@ -19,6 +21,7 @@ export const ICON_SIZE = {
 export const ICON_TW_CLASS = {
   tab: 'h-7 w-7',
   header: 'h-5 w-5',
+  formInline: 'h-[18px] w-[18px]',
   card: 'h-4 w-4',
   caption: 'h-3 w-3',
 } as const;

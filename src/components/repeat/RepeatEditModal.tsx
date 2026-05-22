@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
-import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Trash2 } from 'lucide-react-native';
+import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Shield, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
+import BufferSlider from '@/components/common/BufferSlider';
 import TimeWheelPicker from '@/components/setup/TimeWheelPicker';
 import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
@@ -16,6 +17,7 @@ import {
   DELETE_LABEL,
   EDIT_MODAL_TITLE,
   LABEL_ARRIVAL,
+  LABEL_BUFFER,
   LABEL_DAYS,
   LABEL_LOCATIONS,
   LABEL_NAME,
@@ -25,10 +27,12 @@ import {
   PLACEHOLDER_ORIGIN,
   SAVE_LABEL,
 } from '@/constants/repeat';
+import { useSettingsStore } from '@/stores/settingsStore';
 import type { RepeatFormData } from '@/types/repeat.types';
+import { resolveRepeatBufferMinutes } from '@/utils/repeatBuffer';
 
-const SNAP_POINTS = ['85%'];
-const FORM_ICON_SIZE = 18;
+/** 안전 버퍼 섹션이 펼쳐졌을 때도 들어갈 만한 높이. */
+const EDIT_SHEET_SNAP_POINTS = ['85%'];
 
 type Mode = 'add' | 'edit';
 
@@ -59,6 +63,9 @@ export default function RepeatEditModal({
 }: RepeatEditModalProps) {
   const { isDark } = useTheme();
   const [isTimeExpanded, setTimeExpanded] = useState(false);
+  const [isBufferExpanded, setBufferExpanded] = useState(false);
+  const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
+  const effectiveBufferMin = resolveRepeatBufferMinutes(form, globalBufferMin);
 
   const title = mode === 'edit' ? EDIT_MODAL_TITLE : ADD_MODAL_TITLE;
   const isValid = form.name.trim().length > 0 && form.days.length > 0;
@@ -100,12 +107,16 @@ export default function RepeatEditModal({
     if (isValid) onSave();
   };
 
+  const handleBufferChange = (next: number) => {
+    onFormChange({ safetyBufferMin: Math.round(next) });
+  };
+
   return (
     <BottomSheetModal
       isOpen={isOpen}
       onClose={onClose}
       title={title}
-      snapPoints={SNAP_POINTS}
+      snapPoints={EDIT_SHEET_SNAP_POINTS}
       scrollable
     >
       <View className="gap-5 pb-2">
@@ -132,7 +143,7 @@ export default function RepeatEditModal({
                 className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${fieldRowBg}`}
               >
                 <Navigation
-                  size={FORM_ICON_SIZE}
+                  size={ICON_SIZE.formInline}
                   color={isDark ? PALETTE.blue400 : PALETTE.blue500}
                 />
                 <Text
@@ -141,7 +152,7 @@ export default function RepeatEditModal({
                 >
                   {form.origin || PLACEHOLDER_ORIGIN}
                 </Text>
-                <ChevronRight size={FORM_ICON_SIZE} color={placeholderColor} />
+                <ChevronRight size={ICON_SIZE.formInline} color={placeholderColor} />
               </Pressable>
               <View className="items-center justify-center py-0.5">
                 <View className={`h-2 w-px ${dividerLine}`} />
@@ -153,7 +164,7 @@ export default function RepeatEditModal({
                 className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${fieldRowBg}`}
               >
                 <MapPin
-                  size={FORM_ICON_SIZE}
+                  size={ICON_SIZE.formInline}
                   color={isDark ? PALETTE.rose400 : PALETTE.red500}
                 />
                 <Text
@@ -162,7 +173,7 @@ export default function RepeatEditModal({
                 >
                   {form.destination || PLACEHOLDER_DESTINATION}
                 </Text>
-                <ChevronRight size={FORM_ICON_SIZE} color={placeholderColor} />
+                <ChevronRight size={ICON_SIZE.formInline} color={placeholderColor} />
               </Pressable>
             </View>
           </View>
@@ -251,6 +262,28 @@ export default function RepeatEditModal({
                 );
               })}
             </View>
+          </View>
+
+          {/* 안전 버퍼 (collapsible) — 미설정 시 전역 설정값 fallback */}
+          <View>
+            <Text className={`mb-2 text-sm font-semibold ${labelText}`}>{LABEL_BUFFER}</Text>
+            <Pressable
+              onPress={() => setBufferExpanded((p) => !p)}
+              accessibilityRole="button"
+              accessibilityLabel={`${LABEL_BUFFER} ${isBufferExpanded ? '접기' : '펼치기'}`}
+              className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${arrivalBoxBg}`}
+            >
+              <Shield size={ICON_SIZE.header} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+              <Text className={`text-base font-semibold ${labelText}`}>{`${effectiveBufferMin}분`}</Text>
+              <View className="ml-auto">
+                <ChevronDown size={ICON_SIZE.card} color={placeholderColor} />
+              </View>
+            </Pressable>
+            {isBufferExpanded ? (
+              <View className={`mt-2 rounded-xl border px-4 py-4 ${arrivalBoxBg}`}>
+                <BufferSlider value={effectiveBufferMin} onChange={handleBufferChange} />
+              </View>
+            ) : null}
           </View>
       </View>
 

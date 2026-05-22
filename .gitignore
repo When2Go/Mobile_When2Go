@@ -49,6 +49,9 @@ app-example
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
 
+# wiki auto-sync log (scripts/sync-wiki.sh)
+.wiki-sync.log
+
 # EAS / store credentials (never commit)
 play-service-account.json
 *.itc.json

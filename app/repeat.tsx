@@ -51,6 +51,7 @@ export default function RepeatScreen() {
       arrivalHour: item.arrivalHour,
       arrivalMinute: item.arrivalMinute,
       routeOption: item.routeOption,
+      safetyBufferMin: item.safetyBufferMin,
     });
     setEditOpen(true);
   };
@@ -83,9 +84,10 @@ export default function RepeatScreen() {
     setEditOpen(false);
   };
 
-  // mock 단계 — 검색 화면 연동은 후속 이슈. 콜백만 받아두고 동작 X.
+  // mock 단계 — 검색 화면 연동은 후속 이슈(#TBD: 반복 예약 ↔ search.tsx).
+  // 콜백만 받아 두고 동작은 비워 둔다. UI 동선·prop 시그니처만 먼저 굳히기 위한 stub.
   const handleSelectLocation = (_field: 'origin' | 'destination') => {
-    // intentional no-op: 후속 이슈에서 검색 화면과 연결.
+    // no-op
   };
 
   return (
