@@ -28,8 +28,8 @@ export default function ResultScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
   const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
-  const params = useLocalSearchParams<{ [key: string]: string }>();
-  const bufferMinParam = params[BUFFER_MIN_PARAM];
+  const rawParams = useLocalSearchParams<{ bufferMin?: string }>();
+  const bufferMinParam = rawParams[BUFFER_MIN_PARAM];
   const safetyBufferMin = bufferMinParam !== undefined ? Number(bufferMinParam) : globalBufferMin;
 
   const [selectedRoute, setSelectedRoute] = useState<MockRoute | null>(null);
