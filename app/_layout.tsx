@@ -15,7 +15,14 @@ const KAKAO_APP_KEY = process.env.EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY ?? '';
 export default function RootLayout() {
   useEffect(() => {
     void useDeviceStore.getState().ensureDeviceId();
-    void KakaoMap.initializeKakaoMapSDK(KAKAO_APP_KEY);
+
+    if (!KAKAO_APP_KEY) {
+      console.warn('[KakaoMap] EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY가 설정되지 않았습니다.');
+      return;
+    }
+    KakaoMap.initializeKakaoMapSDK(KAKAO_APP_KEY).catch(e => {
+      console.error('[KakaoMap] SDK 초기화 실패:', e);
+    });
   }, []);
 
   return (

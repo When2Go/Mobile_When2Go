@@ -14,6 +14,10 @@ export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
 
   const loadingBg = isDark ? 'bg-zinc-800' : 'bg-zinc-200';
+  const markerDot = isDark ? 'bg-blue-500' : 'bg-blue-600';
+  const markerPulse = isDark ? 'bg-blue-500/20' : 'bg-blue-600/20';
+  const markerBorder = isDark ? 'border-zinc-900' : 'border-white';
+  const markerInner = isDark ? 'bg-zinc-900' : 'bg-white';
 
   if (isLoading) {
     return (
@@ -41,15 +45,15 @@ export default function MapPreview() {
             style={{ width: MARKER_PULSE_SIZE, height: MARKER_PULSE_SIZE }}
           >
             <View
-              className="absolute rounded-full bg-blue-500/20"
+              className={`absolute rounded-full ${markerPulse}`}
               style={{ width: MARKER_PULSE_SIZE, height: MARKER_PULSE_SIZE }}
             />
             <View
-              className="items-center justify-center rounded-full border-2 border-white bg-blue-500"
+              className={`items-center justify-center rounded-full border-2 ${markerBorder} ${markerDot}`}
               style={{ width: MARKER_DOT_SIZE, height: MARKER_DOT_SIZE }}
             >
               <View
-                className="rounded-full bg-white"
+                className={`rounded-full ${markerInner}`}
                 style={{ width: MARKER_INNER_DOT, height: MARKER_INNER_DOT }}
               />
             </View>
