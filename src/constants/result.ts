@@ -78,5 +78,8 @@ export const FARE_LABEL_FORMAT = (fareLabel: string): string => `요금 ${fareLa
 export const SAFETY_BUFFER_NOTICE_FORMAT = (minutes: number): string =>
   `+${minutes}분 안전 버퍼 적용`;
 
+/** setup → result 화면으로 넘기는 안전 버퍼 라우트 파라미터 키. */
+export const BUFFER_MIN_PARAM = 'bufferMin';
+
 /** 예약 완료 후 schedule 화면으로 리다이렉트되기 전 머무는 시간(ms). */
 export const CONFIRM_REDIRECT_DELAY_MS = 800;
