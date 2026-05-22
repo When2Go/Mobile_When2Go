@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 
 import { useTheme } from '@/contexts/ThemeContext';
@@ -9,6 +9,7 @@ import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
   ARRIVAL_TARGET_PREFIX,
+  BUFFER_MIN_PARAM,
   CONFIRM_REDIRECT_DELAY_MS,
   MOCK_ROUTES,
   SCREEN_TITLE,
@@ -26,7 +27,10 @@ const SCHEDULE_PATH = '/schedule';
 export default function ResultScreen() {
   const router = useRouter();
   const { isDark } = useTheme();
-  const safetyBufferMin = useSettingsStore((s) => s.bufferMinutes);
+  const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
+  const params = useLocalSearchParams<{ [key: string]: string }>();
+  const bufferMinParam = params[BUFFER_MIN_PARAM];
+  const safetyBufferMin = bufferMinParam !== undefined ? Number(bufferMinParam) : globalBufferMin;
 
   const [selectedRoute, setSelectedRoute] = useState<MockRoute | null>(null);
   const [confirmed, setConfirmed] = useState(false);
