@@ -95,7 +95,7 @@ export default function RouteEditModal({
             accessibilityLabel="목적지 검색"
             className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${rowBg}`}
           >
-            <MapPin size={ICON_SIZE.formInline} color={isDark ? PALETTE.emerald100 : PALETTE.emerald700} />
+            <MapPin size={ICON_SIZE.formInline} color={isDark ? PALETTE.emerald400 : PALETTE.emerald600} />
             <Text className={`flex-1 text-base ${locationFieldText(form.to)}`} numberOfLines={1}>
               {form.to || FIELD_PLACEHOLDER_TO}
             </Text>

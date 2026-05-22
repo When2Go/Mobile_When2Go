@@ -6,8 +6,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { BUFFER_MAX_MINUTES, BUFFER_MIN_MINUTES } from '@/stores/settingsStore';
 
 const SLIDER_STEP = 5;
-// settingsStore 의 BUFFER_MIN/MAX(0~30, 5분 step)와 동일 범위. store 상수 변경 시 같이 갱신.
-const TICK_MARK_MINUTES = [0, 10, 20, 30];
+// settingsStore 의 BUFFER_MIN/MAX 범위에서 양끝 + 1/3·2/3 지점 4개. store 범위 변경 시 자동 추종.
+const TICK_MARK_MINUTES = [
+  BUFFER_MIN_MINUTES,
+  Math.round(BUFFER_MAX_MINUTES / 3),
+  Math.round((BUFFER_MAX_MINUTES * 2) / 3),
+  BUFFER_MAX_MINUTES,
+];
 const HELPER_TEMPLATE = (m: number) => `실제 출발 예정 시간에서 ${m}분 먼저 알려드려요`;
 
 interface BufferSliderProps {
