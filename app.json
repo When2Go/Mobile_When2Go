@@ -13,7 +13,9 @@
       "bundleIdentifier": "kr.co.when2go.app",
       "supportsTablet": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSLocationWhenInUseUsageDescription": "현재 위치를 지도에 표시하고 출발 시간을 계산하는 데 사용합니다.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "현재 위치를 지도에 표시하고 출발 시간을 계산하는 데 사용합니다."
       }
     },
     "android": {

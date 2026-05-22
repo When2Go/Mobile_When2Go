@@ -8,7 +8,7 @@ export default ({ config }: ConfigContext): ExpoConfig =>
       [
         '@react-native-kakao/core',
         {
-          nativeAppKey: process.env.EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY ?? '',
+          nativeAppKey: process.env.EXPO_PUBLIC_KAKAO_NATIVE_APP_KEY || 'placeholder',
           ios: {
             handleKakaoOpenUrl: false,
           },
