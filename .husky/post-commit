@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# 하네스 변경 시 GitHub Wiki 자동 동기화 트리거
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+SCRIPT="$REPO_ROOT/scripts/sync-wiki.sh"
+[ -x "$SCRIPT" ] && "$SCRIPT" || true
