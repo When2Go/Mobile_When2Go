@@ -4,7 +4,7 @@ import { useDeviceStore } from '@/stores/deviceStore';
 
 /**
  * 디바이스 식별 헤더명. 백엔드는 모든 요청에서 이 헤더로 사용자를 식별한다
- * (`docs/generated/api-schema.md` 인증 헤더 / `docs/FRONTEND.md` §5).
+ * (`docs/references/api-schema.md` 인증 헤더 / `docs/FRONTEND.md` §5).
  */
 export const DEVICE_ID_HEADER = 'X-Device-Id';
 

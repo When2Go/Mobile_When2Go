@@ -7,7 +7,7 @@
 ## 점검 항목
 
 1. `docs/generated/component-inventory.md` ↔ 실제 `src/components/` 파일 일치 여부
-2. `docs/generated/naver-maps-api-schema.md` ↔ 실제 지도 사용 코드 일치 여부 (사용 컴포넌트·hook·금지 API 목록 정합성)
+2. `docs/references/naver-maps-api-schema.md` ↔ 실제 지도 사용 코드 일치 여부 (사용 컴포넌트·hook·금지 API 목록 정합성)
 3. `docs/FRONTEND.md` 규칙 ↔ `.eslintrc.js` 규칙 일치 여부
    - 문서에만 있고 ESLint 규칙 없는 것 → Level 2 승격 제안
    - ESLint 교정 지시가 불충분한 것 → Level 2.5 업데이트 제안

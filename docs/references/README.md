@@ -11,9 +11,9 @@
 | 파일 | 설명 |
 |------|------|
 | `PRD-지금나가-v1.1.md` | 프로젝트 PRD 사본 (상위 폴더 원본과 동기화) |
+| `api-schema.md` | Spring Boot 백엔드 API 스키마 (도메인·요청/응답·공통 봉투·인증 헤더). API 함수 작성 1차 자료 |
 | `kakao-local-api.md` | 카카오 로컬 REST API — 키워드 검색·좌표 변환·인증 헤더 (#15 연동 참조) |
-
-> 지도 SDK(`@mj-studio/react-native-naver-map`) 사용 범위는 외부 라이브러리 레퍼런스가 아닌 자동 생성 문서 `docs/generated/naver-maps-api-schema.md`에 정리한다. 비용 정책 + 채택 컴포넌트 + 함정 포함.
+| `naver-maps-api-schema.md` | `@mj-studio/react-native-naver-map` 사용 범위 + 비용 정책 (Mobile Dynamic Map SDK 한정). 지도 작업 1차 자료 |
 
 ## 등록 예정
 

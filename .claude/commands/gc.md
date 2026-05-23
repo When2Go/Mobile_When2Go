@@ -11,7 +11,7 @@
 - `docs/FRONTEND.md` 패턴 vs 실제 코드 대조
 - `docs/DESIGN.md` 디자인 토큰 vs 실제 스타일 클래스
 - `docs/generated/component-inventory.md` vs 실제 컴포넌트 파일 목록
-- `docs/generated/naver-maps-api-schema.md` vs 실제 지도 사용 코드(`src/**/*Map*.tsx`, `src/hooks/location/`) — 사용 컴포넌트·hook props·금지 API 목록 정합성
+- `docs/references/naver-maps-api-schema.md` vs 실제 지도 사용 코드(`src/**/*Map*.tsx`, `src/hooks/location/`) — 사용 컴포넌트·hook props·금지 API 목록 정합성
 - 불일치 목록 + 자동 갱신 제안
 
 ### 2단계: 패턴 드리프트 스캔
@@ -50,7 +50,7 @@ grep -rn "odsay\|odcloud" src/ --include="*.ts"
 ### 5단계: 보고서 + docs/ 갱신
 
 - `docs/generated/component-inventory.md` 업데이트
-- `docs/generated/naver-maps-api-schema.md` 업데이트 (지도 컴포넌트·hook 변경 시)
+- `docs/references/naver-maps-api-schema.md` 업데이트 (지도 컴포넌트·hook 변경 시)
 - `docs/QUALITY_SCORE.md` 업데이트
 
 ---
