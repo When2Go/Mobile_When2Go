@@ -61,6 +61,14 @@ const config: ExpoConfig = {
         },
       },
     ],
+    [
+      'expo-build-properties',
+      {
+        android: {
+          extraMavenRepos: ['https://repository.map.naver.com/archive/maven'],
+        },
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
