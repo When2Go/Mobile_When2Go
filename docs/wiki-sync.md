@@ -60,8 +60,18 @@ rm -f .git/hooks/post-commit
 | `.claude/commands/*.md` | `Commands` |
 | `.claude/settings.json` | `Hooks-and-Automation` |
 | `CLAUDE.md` | `Home`, `Workflow` (영향받는 섹션) |
+| `docs/FRONTEND.md`, `docs/DESIGN.md`, `docs/folder-structure.md`, `docs/TESTING.md` 등 | `Architecture` 의 `docs/` 트리·관련 섹션 갱신 |
+| `docs/wiki-sync.md` | `Hooks-and-Automation` (Wiki 자동 동기화 섹션) |
+| `docs/references/README.md` | `References` 인덱스 |
+| `docs/references/{파일}.md` | `Reference-{슬러그}` 페이지 (영문 슬러그). 본문 그대로 미러 |
 
-그 외 파일만 변경된 commit 은 트리거되지 않는다.
+**트리거되지 않는 경로** (sync-wiki.sh 에서 사전 제외):
+
+- `docs/exec-plans/` — 이슈 작업 임시 plan
+- `docs/generated/` — 자동 생성 산출물 (component-inventory · api-schema 등)
+- `docs/design-docs/` 내 파일은 트리거되지만 wiki 미러 페이지가 없어 본문 갱신 작업은 발생하지 않는다 (필요 시 `Home` 의 관련 문서 목록만 점검)
+
+그 외 경로(`src/`, `app/`, `.github/`, `scripts/` 등) 변경만 있는 commit 은 트리거되지 않는다.
 
 ## 환경 변수
 
