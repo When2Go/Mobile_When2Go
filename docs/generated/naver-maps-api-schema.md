@@ -15,7 +15,7 @@
 | Geocoding (주소 → 좌표) | ❌ 금지 | 과금. 필요 시 별도 이슈에서 정책 재검토 |
 | Reverse Geocoding (좌표 → 주소) | ❌ 금지 | 동상 |
 | Static Map | ❌ 금지 | 동상 |
-| Directions / 길찾기 | ❌ 금지 | 동상. 대중교통 경로는 ODsay가 담당 |
+| Directions / 길찾기 | ❌ 금지 | 동상. 대중교통 경로는 백엔드가 담당 |
 
 **검색은 카카오 Local API 유지** (일 100K 무료, 지도 SDK와 독립). `docs/references/kakao-local-api.md` 참조.
 
@@ -133,7 +133,26 @@ When2Go에서 채택한 주요 props:
 | `caption` / `subCaption` | `CaptionType` / `SubCaptionType` | (미사용) | 마커 라벨 |
 | `onTap` | `() => void` | (미사용) | 마커 탭 콜백 |
 
-### 4.3 미사용 컴포넌트 (필요 시 도입)
+### 4.3 위치 추적 (ref API)
+
+prop이 아니라 `NaverMapViewRef`의 명령형 메서드로 제어한다.
+
+```ts
+type LocationTrackingMode = 'None' | 'NoFollow' | 'Follow' | 'Face';
+
+mapRef.current?.setLocationTrackingMode(mode);
+```
+
+| 모드 | 동작 |
+|---|---|
+| `None` | 위치 추적 비활성. 카메라가 사용자 이동과 무관하게 고정 |
+| `NoFollow` | 위치 오버레이는 추적 활성. 카메라는 고정 |
+| `Follow` | 위치 오버레이 + 카메라가 사용자 위치를 따라간다. **사용자가 지도를 드래그하거나 ref API로 임의 카메라 이동 시 SDK가 자동으로 `NoFollow`로 강등** |
+| `Face` | Follow + 베어링(방향)까지 추적. 운전/내비 화면용 |
+
+When2Go의 `MapPreview`는 `useCurrentLocation` 훅의 `isGranted` 상태에 따라 마운트/허용 변화 시 `Follow` 또는 `None`을 호출한다. 카메라 follow는 SDK가 OS 위치 서비스를 직접 사용하므로 expo-location의 권한과 동일한 OS 권한을 공유한다 (사용자에게 권한 다이얼로그가 한 번만 뜸).
+
+### 4.4 미사용 컴포넌트 (필요 시 도입)
 
 같은 패키지에서 제공되며, 본 프로젝트 향후 작업(F-M05 경로 결과 화면 등)에서 도입 가능:
 
@@ -175,12 +194,14 @@ const { lat, lng, isGranted, isLoading, error } = useCurrentLocation();
 
 ## 6. 사용 예시 (`src/components/home/MapPreview.tsx`)
 
-홈 화면 지도 미리보기. 현재 위치 마커만 표시.
+홈 화면 지도 미리보기. 현재 위치 마커 + Follow 모드 카메라 추적.
 
 ```tsx
+import { useEffect, useRef } from 'react';
 import {
   NaverMapMarkerOverlay,
   NaverMapView,
+  type NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
@@ -189,6 +210,12 @@ const INITIAL_ZOOM = 15;
 
 export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
+  const mapRef = useRef<NaverMapViewRef>(null);
+
+  useEffect(() => {
+    if (isLoading) return;
+    mapRef.current?.setLocationTrackingMode(isGranted ? 'Follow' : 'None');
+  }, [isGranted, isLoading]);
 
   if (isLoading) {
     return <View className="..." accessibilityLabel="지도 미리보기 로딩 중" />;
@@ -197,6 +224,7 @@ export default function MapPreview() {
   return (
     <View className="flex-1" accessibilityLabel="지도 미리보기">
       <NaverMapView
+        ref={mapRef}
         style={{ flex: 1 }}
         initialCamera={{ latitude: lat, longitude: lng, zoom: INITIAL_ZOOM }}
         isShowLocationButton={false}

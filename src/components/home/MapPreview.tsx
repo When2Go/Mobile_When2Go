@@ -1,7 +1,9 @@
+import { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
 import {
   NaverMapMarkerOverlay,
   NaverMapView,
+  type NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 
 import { useTheme } from '@/contexts/ThemeContext';
@@ -13,10 +15,16 @@ const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표
 export default function MapPreview() {
   const { isDark } = useTheme();
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
+  const mapRef = useRef<NaverMapViewRef>(null);
 
   const baseBg = isDark ? 'bg-zinc-800' : 'bg-zinc-200';
   const captionText = isDark ? 'text-zinc-400' : 'text-zinc-500';
   const captionBg = isDark ? 'bg-zinc-900/70' : 'bg-white/80';
+
+  useEffect(() => {
+    if (isLoading) return;
+    mapRef.current?.setLocationTrackingMode(isGranted ? 'Follow' : 'None');
+  }, [isGranted, isLoading]);
 
   if (isLoading) {
     return (
@@ -30,6 +38,7 @@ export default function MapPreview() {
   return (
     <View className="flex-1" accessibilityLabel="지도 미리보기">
       <NaverMapView
+        ref={mapRef}
         style={{ flex: 1 }}
         initialCamera={{ latitude: lat, longitude: lng, zoom: INITIAL_ZOOM }}
         isShowLocationButton={false}
