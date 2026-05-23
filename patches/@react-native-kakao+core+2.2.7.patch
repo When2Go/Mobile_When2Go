@@ -1,0 +1,18 @@
+diff --git a/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js b/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js
+index d86cfbe..eba7bc7 100644
+--- a/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js
++++ b/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js
+@@ -5,9 +5,10 @@ const config_plugins_1 = require("expo/config-plugins");
+ const withAndroid = (config, { android: { authCodeHandlerActivity, forwardKakaoLinkIntentFilterToMainActivity, followChannelHandlerActivity, }, nativeAppKey, }) => {
+     config = (0, config_plugins_1.withAndroidManifest)(config, (config) => {
+         const mainApplication = config_plugins_1.AndroidConfig.Manifest.getMainApplicationOrThrow(config.modResults);
+-        mainApplication.activity?.push({
+-            $: {},
+-        });
++        // PATCH: 업스트림은 여기서 `mainApplication.activity?.push({ $: {} })`로 빈 activity를
++        // 무조건 한 번 주입하지만, AGP의 manifest merger가 name 없는 activity를 거부해
++        // `processDebugMainManifest`가 실패한다. 빈 push는 원래 의도된 효과가 없는 잔존 코드로
++        // 보여 안전하게 제거. 아래의 injectActivity는 옵션이 켜졌을 때만 동작하므로 영향 없음.
+         const injectActivity = ({ activityName, activity, }) => {
+             mainApplication.activity = [
+                 ...(mainApplication.activity || []).filter((a) => a && a.$ && a.$['android:name'] !== activityName && a.$['android:name']),
