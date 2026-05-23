@@ -2,7 +2,7 @@
  * 백엔드 공통 응답 봉투 + 프론트 정규화 결과 타입.
  *
  * Spring Boot 백엔드는 성공/실패 모두 `{ success, data, message }` 형태로 응답한다
- * (`docs/generated/api-schema.md` 공통 응답 봉투 참조). 프론트는 이 봉투와
+ * (`docs/references/api-schema.md` 공통 응답 봉투 참조). 프론트는 이 봉투와
  * axios 에러를 단일 Discriminated Union(`ApiResult`)으로 정규화해, 호출처가
  * 매번 응답 형태를 추론하지 않고 `ok` 한 가지만 확인하도록 한다
  * (`docs/FRONTEND.md` 함수 반환 타입 통일 / `docs/frontend-code-quality.md` 2-2).
