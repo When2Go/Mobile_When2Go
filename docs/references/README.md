@@ -13,9 +13,10 @@
 | `PRD-지금나가-v1.1.md` | 프로젝트 PRD 사본 (상위 폴더 원본과 동기화) |
 | `kakao-local-api.md` | 카카오 로컬 REST API — 키워드 검색·좌표 변환·인증 헤더 (#15 연동 참조) |
 
+> 지도 SDK(`@mj-studio/react-native-naver-map`) 사용 범위는 외부 라이브러리 레퍼런스가 아닌 자동 생성 문서 `docs/generated/naver-maps-api-schema.md`에 정리한다. 비용 정책 + 채택 컴포넌트 + 함정 포함.
+
 ## 등록 예정
 
-- `kakao-maps.md` — 카카오 Maps SDK (지도 UI, #39 연동 참조)
 - `nativewind-reference.md`
 - `expo-router-reference.md`
 - `gorhom-bottom-sheet-reference.md`

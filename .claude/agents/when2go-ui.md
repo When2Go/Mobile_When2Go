@@ -33,7 +33,7 @@
 | 바텀시트 | `src/components/common/BottomSheetModal.tsx` 래퍼 사용 |
 | 애니메이션 | react-native-reanimated v3 |
 | 제스처 | react-native-gesture-handler |
-| 지도 | `src/components/common/MapView.tsx` 래퍼 사용 |
+| 지도 | `@mj-studio/react-native-naver-map`의 `NaverMapView` + `NaverMapMarkerOverlay` 직접 사용. Mobile Dynamic Map SDK 한정(과금 API 금지). 상세: `docs/generated/naver-maps-api-schema.md` |
 
 ---
 

@@ -109,6 +109,7 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/design-docs/core-beliefs.md` — 프로젝트 설계 철학
 - `docs/design-docs/feedback-log.md` — 피드백 루프 기록
 - `docs/generated/component-inventory.md` — 컴포넌트 목록 (자동 생성)
+- `docs/generated/naver-maps-api-schema.md` — `@mj-studio/react-native-naver-map` 사용 범위 + 비용 정책. **지도 관련 작업 1차 자료**
 - `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성, PR Approve 후 삭제)
 - `docs/references/PRD-지금나가-v1.1.md` — 상위 폴더 PRD 사본 (변경 시 양쪽 동기화)
 - `docs/TESTING.md` — 단위 테스트 가이드 (대상·예시·우선순위)
