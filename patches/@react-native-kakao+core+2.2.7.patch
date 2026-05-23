@@ -1,3 +1,18 @@
+diff --git a/node_modules/@react-native-kakao/core/android/src/main/java/net/mjstudio/rnkakao/core/util/RNCKakaoUtil.kt b/node_modules/@react-native-kakao/core/android/src/main/java/net/mjstudio/rnkakao/core/util/RNCKakaoUtil.kt
+index b1f42f8..8f80f2a 100644
+--- a/node_modules/@react-native-kakao/core/android/src/main/java/net/mjstudio/rnkakao/core/util/RNCKakaoUtil.kt
++++ b/node_modules/@react-native-kakao/core/android/src/main/java/net/mjstudio/rnkakao/core/util/RNCKakaoUtil.kt
+@@ -77,7 +77,9 @@ fun ReadableArray.filterIsReadableMap(): List<ReadableMap> {
+   val ret = mutableListOf<ReadableMap>()
+   for (i in 0 until this.size()) {
+     if (getType(i) == ReadableType.Map) {
+-      ret.add(getMap(i))
++      // RN 0.81에서 ReadableArray.getMap(i)의 반환 타입이 ReadableMap?로 변경됨.
++      // 직전 getType 가드로 null일 수 없으므로 !!로 컴파일러를 만족시킨다.
++      ret.add(getMap(i)!!)
+     }
+   }
+   return ret
 diff --git a/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js b/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js
 index d86cfbe..eba7bc7 100644
 --- a/node_modules/@react-native-kakao/core/expo-config-plugin/build/withAndroid.js
