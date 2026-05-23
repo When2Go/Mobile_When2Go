@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
 
 import { registerFcmToken } from '@/api/notification';
 
@@ -11,8 +11,16 @@ const FCM_ALERT_TITLE = '알림 설정 실패';
 const FCM_ALERT_MESSAGE = '알림 설정 중 오류가 발생했습니다. 앱을 다시 실행해 주세요.';
 const FCM_ALERT_BUTTON = '확인';
 
-async function requestAndroidPermission(): Promise<boolean> {
-  if (Platform.OS !== 'android' || Platform.Version < ANDROID_MIN_NOTIFICATION_API) return true;
+async function requestNotificationPermission(): Promise<boolean> {
+  if (Platform.OS === 'ios') {
+    const status = await messaging().requestPermission();
+    return (
+      status === AuthorizationStatus.AUTHORIZED ||
+      status === AuthorizationStatus.PROVISIONAL
+    );
+  }
+
+  if (Platform.Version < ANDROID_MIN_NOTIFICATION_API) return true;
   const result = await PermissionsAndroid.request(
     PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
   );
@@ -32,14 +40,13 @@ async function sendTokenWithRetry(token: string, retriesLeft: number): Promise<v
 }
 
 function exitApp(): void {
-  // Android: BackHandler / iOS: 추후 react-native-exit-app 연동 예정
   BackHandler.exitApp();
 }
 
 export function useFcmToken(): void {
   useEffect(() => {
     const init = async () => {
-      const hasPermission = await requestAndroidPermission();
+      const hasPermission = await requestNotificationPermission();
       if (!hasPermission) return;
 
       const token = await messaging().getToken();
