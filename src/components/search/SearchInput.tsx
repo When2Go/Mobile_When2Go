@@ -13,7 +13,7 @@ interface Props {
   value: string;
   onChangeText: (text: string) => void;
   onClear: () => void;
-  onSubmit: () => void;
+  onSubmit?: () => void;
 }
 
 export default function SearchInput({ value, onChangeText, onClear, onSubmit }: Props) {

@@ -1,18 +1,29 @@
 import axios from 'axios';
 
+import { normalizeAxiosError } from '@/api/interceptors/error';
 import type { KakaoSearchResponse, Place } from './types';
 
 const KAKAO_BASE_URL = 'https://dapi.kakao.com/v2/local';
 const REQUEST_TIMEOUT_MS = 10_000;
 const SEARCH_SIZE = 15;
 
+function resolveKakaoKey(): string {
+  const key = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY;
+  if (!key) {
+    throw new Error(
+      'EXPO_PUBLIC_KAKAO_REST_API_KEY 가 비어있다. .env 에 채우고 `npx expo start --clear` 로 재시작해라.',
+    );
+  }
+  return key;
+}
+
 const kakaoApi = axios.create({
   baseURL: KAKAO_BASE_URL,
   timeout: REQUEST_TIMEOUT_MS,
-  headers: {
-    Authorization: `KakaoAK ${process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY}`,
-  },
+  headers: { Authorization: `KakaoAK ${resolveKakaoKey()}` },
 });
+
+kakaoApi.interceptors.response.use((r) => r, normalizeAxiosError);
 
 export async function searchPlaces(query: string): Promise<Place[]> {
   const response = await kakaoApi.get<KakaoSearchResponse>('/search/keyword.json', {

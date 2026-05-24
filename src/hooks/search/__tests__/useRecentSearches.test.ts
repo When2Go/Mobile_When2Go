@@ -12,6 +12,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 
 import { STORAGE_KEYS } from '@/constants/storageKeys';
+import { useRecentSearchesStore } from '@/stores/recentSearchesStore';
 import type { Place } from '@/api/kakao/types';
 
 // eslint-disable-next-line import/first -- jest.mock must execute before the SUT import
@@ -33,12 +34,13 @@ describe('useRecentSearches', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetItem.mockResolvedValue(null);
+    useRecentSearchesStore.setState({ recentPlaces: [], _isHydrated: false });
   });
 
   // ─── 정상 ────────────────────────────────────────────────────────────────
 
   describe('정상', () => {
-    it('addRecentPlace 호출 시 recentPlaces에 추가된다', async () => {
+    it('addRecentPlace 호출 시 recentPlaces에 추가되고 AsyncStorage에 persist된다', async () => {
       const { result } = renderHook(() => useRecentSearches());
 
       const place = makePlace('1');
@@ -49,6 +51,10 @@ describe('useRecentSearches', () => {
 
       expect(result.current.recentPlaces).toHaveLength(1);
       expect(result.current.recentPlaces[0]).toEqual(place);
+      expect(mockSetItem).toHaveBeenCalledWith(
+        STORAGE_KEYS.RECENT_SEARCHES,
+        JSON.stringify([place]),
+      );
     });
 
     it('AsyncStorage에 저장된 데이터가 있으면 초기 로드 시 recentPlaces에 반영된다', async () => {
@@ -120,7 +126,7 @@ describe('useRecentSearches', () => {
       expect(result.current.recentPlaces[1].id).toBe('2');
     });
 
-    it('removeRecentPlace(id) 호출 시 해당 id의 장소가 제거된다', async () => {
+    it('removeRecentPlace(id) 호출 시 해당 id의 장소가 제거되고 AsyncStorage에 persist된다', async () => {
       const { result } = renderHook(() => useRecentSearches());
 
       const placeA = makePlace('1');
@@ -137,6 +143,10 @@ describe('useRecentSearches', () => {
 
       expect(result.current.recentPlaces).toHaveLength(1);
       expect(result.current.recentPlaces[0].id).toBe('2');
+      expect(mockSetItem).toHaveBeenLastCalledWith(
+        STORAGE_KEYS.RECENT_SEARCHES,
+        JSON.stringify([placeB]),
+      );
     });
 
     it('clearAll() 호출 시 recentPlaces가 빈 배열로 초기화된다', async () => {
@@ -166,7 +176,6 @@ describe('useRecentSearches', () => {
 
       const { result } = renderHook(() => useRecentSearches());
 
-      // getItem이 reject되더라도 훅이 정상적으로 마운트되어야 함
       await waitFor(() => {
         expect(mockGetItem).toHaveBeenCalledWith(STORAGE_KEYS.RECENT_SEARCHES);
       });

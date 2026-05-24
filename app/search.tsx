@@ -67,7 +67,6 @@ export default function SearchScreen() {
           value={query}
           onChangeText={setQuery}
           onClear={() => setQuery('')}
-          onSubmit={() => {}}
         />
         <VoiceButton onPress={startVoice} />
       </View>

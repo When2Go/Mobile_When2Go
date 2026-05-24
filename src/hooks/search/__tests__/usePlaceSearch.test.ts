@@ -2,7 +2,9 @@ import { act, renderHook } from '@testing-library/react-native';
 
 import { usePlaceSearch } from '../usePlaceSearch';
 
-jest.mock('@/api/kakao/search');
+jest.mock('@/api/kakao/search', () => ({
+  searchPlaces: jest.fn(),
+}));
 
 import { searchPlaces } from '@/api/kakao/search';
 
