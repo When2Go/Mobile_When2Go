@@ -1,62 +1,68 @@
+import { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
+import {
+  NaverMapMarkerOverlay,
+  NaverMapView,
+  type NaverMapViewRef,
+} from '@mj-studio/react-native-naver-map';
 
 import { useTheme } from '@/contexts/ThemeContext';
+import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 
-const MARKER_PULSE_SIZE = 56;
-const MARKER_DOT_SIZE = 28;
-const MARKER_INNER_DOT = 10;
+const INITIAL_ZOOM = 15;
+const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
 
-/**
- * 네이버 지도 SDK 연동 전 임시 placeholder.
- * 실제 SDK 래퍼는 별도 이슈에서 `MapView`로 교체.
- */
 export default function MapPreview() {
   const { isDark } = useTheme();
+  const { lat, lng, isGranted, isLoading } = useCurrentLocation();
+  const mapRef = useRef<NaverMapViewRef>(null);
 
   const baseBg = isDark ? 'bg-zinc-800' : 'bg-zinc-200';
-  const gridLine = isDark ? 'bg-zinc-700' : 'bg-zinc-300';
-  const captionText = isDark ? 'text-zinc-500' : 'text-zinc-400';
+  const captionText = isDark ? 'text-zinc-400' : 'text-zinc-500';
+  const captionBg = isDark ? 'bg-zinc-900/70' : 'bg-white/80';
+
+  useEffect(() => {
+    if (isLoading) return;
+    mapRef.current?.setLocationTrackingMode(isGranted ? 'Follow' : 'None');
+  }, [isGranted, isLoading]);
+
+  if (isLoading) {
+    return (
+      <View
+        className={`flex-1 items-center justify-center ${baseBg}`}
+        accessibilityLabel="지도 미리보기 로딩 중"
+      />
+    );
+  }
 
   return (
-    <View className={`flex-1 ${baseBg}`} accessibilityLabel="지도 미리보기">
-      <View className="absolute inset-0">
-        <View className={`absolute left-0 right-0 top-1/4 h-px ${gridLine}`} />
-        <View className={`absolute left-0 right-0 top-2/4 h-px ${gridLine}`} />
-        <View className={`absolute left-0 right-0 top-3/4 h-px ${gridLine}`} />
-        <View className={`absolute top-0 bottom-0 left-1/4 w-px ${gridLine}`} />
-        <View className={`absolute top-0 bottom-0 left-2/4 w-px ${gridLine}`} />
-        <View className={`absolute top-0 bottom-0 left-3/4 w-px ${gridLine}`} />
-      </View>
-
-      <View
-        className="absolute left-1/2 top-[38%] items-center justify-center"
-        style={{
-          width: MARKER_PULSE_SIZE,
-          height: MARKER_PULSE_SIZE,
-          marginLeft: -MARKER_PULSE_SIZE / 2,
-          marginTop: -MARKER_PULSE_SIZE / 2,
-        }}
+    <View className="flex-1" accessibilityLabel="지도 미리보기">
+      <NaverMapView
+        ref={mapRef}
+        style={{ flex: 1 }}
+        initialCamera={{ latitude: lat, longitude: lng, zoom: INITIAL_ZOOM }}
+        isShowLocationButton={false}
+        isShowZoomControls={false}
+        isShowCompass={false}
+        isShowScaleBar={false}
+        isShowIndoorLevelPicker={false}
       >
-        <View
-          className="absolute rounded-full bg-blue-500/20"
-          style={{ width: MARKER_PULSE_SIZE, height: MARKER_PULSE_SIZE }}
+        <NaverMapMarkerOverlay
+          latitude={lat}
+          longitude={lng}
+          anchor={{ x: 0.5, y: 1 }}
         />
-        <View
-          className="items-center justify-center rounded-full border-2 border-white bg-blue-500"
-          style={{ width: MARKER_DOT_SIZE, height: MARKER_DOT_SIZE }}
-        >
-          <View
-            className="rounded-full bg-white"
-            style={{ width: MARKER_INNER_DOT, height: MARKER_INNER_DOT }}
-          />
-        </View>
-      </View>
+      </NaverMapView>
 
-      <View className="absolute bottom-4 left-0 right-0 items-center">
-        <Text className={`text-[11px] font-medium ${captionText}`}>
-          지도 미리보기 (SDK 연동 전)
-        </Text>
-      </View>
+      {!isGranted && (
+        <View className="absolute bottom-2 left-4 right-4 items-center">
+          <View className={`rounded-full px-3 py-1.5 ${captionBg}`}>
+            <Text className={`text-[11px] font-medium ${captionText}`}>
+              {FALLBACK_NOTE}
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 }

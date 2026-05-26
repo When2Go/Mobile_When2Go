@@ -129,7 +129,7 @@ function useArrivalTime() { ... }
 
 **규칙**
 
-1. 위치: `src/api/{도메인}/index.ts`(함수) + `src/api/{도메인}/types.ts`(요청/응답 타입). 도메인은 `docs/generated/api-schema.md` 기준 (`user` / `trip` / `route` / `reservation` / `parse`).
+1. 위치: `src/api/{도메인}/index.ts`(함수) + `src/api/{도메인}/types.ts`(요청/응답 타입). 도메인은 `docs/references/api-schema.md` 기준 (`user` / `trip` / `route` / `reservation` / `parse`).
 2. 반환 타입은 **항상** `Promise<ApiResult<T>>` (`src/types/api.types.ts`). 화면/훅은 `result.ok` 한 가지만 분기한다.
 3. 호출은 공통 `api` 인스턴스만 사용. 새 axios 인스턴스 생성 금지. `X-Device-Id`·baseURL·타임아웃은 인스턴스가 처리하므로 손대지 않는다.
 4. 성공 시 백엔드 봉투(`{ success, data, message }`)에서 `data`를 꺼내 `{ ok: true, data }`로 감싼다.

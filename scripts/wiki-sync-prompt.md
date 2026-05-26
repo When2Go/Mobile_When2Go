@@ -6,7 +6,7 @@
 
 ## 목표
 
-레포의 하네스 구성요소(`.claude/agents/`, `.claude/skills/`, `.claude/commands/`, `.claude/settings.json`, `CLAUDE.md`)에 직전 commit이 변경을 가했습니다. 이 변경을 GitHub Wiki(`Mobile_When2Go.wiki`)의 해당 페이지에 반영하세요.
+레포의 하네스 구성요소 또는 `docs/` 문서가 직전 commit 에서 변경되었습니다. 이 변경을 GitHub Wiki(`Mobile_When2Go.wiki`)의 해당 페이지에 반영하세요.
 
 ## Wiki 페이지 매핑
 
@@ -18,7 +18,14 @@
 | `.claude/skills/*/skill.md` | `Skills.md` (해당 스킬 섹션) |
 | `.claude/commands/*.md` | `Commands.md` (해당 커맨드 섹션) |
 | `.claude/settings.json` | `Hooks-and-Automation.md` (PostToolUse Hook 섹션) |
-| `CLAUDE.md` | `Home.md`, `Workflow.md` 중 영향받는 섹션 |
+| `CLAUDE.md` | `Home.md`, `Workflow.md` 중 영향받는 섹션. `Architecture.md` 의 `docs/` 트리에 새 파일이 등장하면 그 트리도 갱신 |
+| `docs/FRONTEND.md`, `docs/DESIGN.md`, `docs/frontend-code-quality.md`, `docs/folder-structure.md`, `docs/TESTING.md`, `docs/DEPLOY.md`, `docs/PR-writing-guide.md`, `docs/QUALITY_SCORE.md` | wiki에 직접 미러는 없음. `Architecture.md` 의 `docs/` 트리·관련 섹션에 파일명·한 줄 설명이 반영되어 있는지 확인하고 누락·오기 시 보강 |
+| `docs/wiki-sync.md` | `Hooks-and-Automation.md` (Wiki 자동 동기화 섹션) |
+| `docs/references/README.md` | `References.md` 인덱스 |
+| `docs/references/{파일}.md` (이외) | `Reference-{슬러그}.md` (영문 슬러그). 한글 파일명은 `Reference-PRD-v1.1` 같은 ASCII 슬러그로 변환. 본문은 원본 그대로 복사 (요약 X). 신규 파일이면 `References.md` 표에도 행 추가 |
+| `docs/design-docs/*.md` | wiki 미러 없음. 트리거만 발생할 뿐 별도 페이지를 만들지 말 것. `Home.md` 의 관련 문서 목록만 점검 |
+
+**제외 (트리거되지 않음)**: `docs/exec-plans/`, `docs/generated/` — 임시·자동 산출물이라 sync-wiki.sh 에서 사전 필터링됨.
 
 새 파일이 생기면 해당 페이지에 새 섹션을 추가하고, 파일이 삭제되면 해당 섹션도 제거하세요. 단순 정의 변경은 본문만 갱신합니다.
 
@@ -34,7 +41,7 @@
    git add -A
    # 의미 있는 diff가 있을 때만 commit
    if ! git diff --cached --quiet; then
-     git commit -m "docs: 하네스 변경 자동 동기화 (commit <SHA 앞 7자>)"
+     git commit -m "docs: 레포 변경 자동 동기화 (commit <SHA 앞 7자>)"
      git push origin master
    fi
    ```

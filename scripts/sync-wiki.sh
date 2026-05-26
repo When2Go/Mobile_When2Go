@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 # scripts/sync-wiki.sh
 #
-# 하네스 구조(.claude/agents/, .claude/skills/, .claude/commands/, .claude/settings.json,
-# CLAUDE.md)가 커밋에서 변경되면 Claude headless 모드를 백그라운드로 spawn해
-# GitHub Wiki(Mobile_When2Go.wiki)를 자동 동기화한다.
+# 다음 경로가 커밋에서 변경되면 Claude headless 모드를 백그라운드로 spawn해
+# GitHub Wiki(Mobile_When2Go.wiki)를 자동 동기화한다:
+#   - .claude/agents/, .claude/skills/, .claude/commands/, .claude/settings.json
+#   - CLAUDE.md
+#   - docs/   (단, docs/exec-plans/ 와 docs/generated/ 는 제외 — 자동/임시 산출물)
 #
-# 호출 위치: .git/hooks/post-commit (scripts/install-git-hooks.sh 로 설치)
+# 호출 위치: .husky/post-commit (husky 가 npm install 시 자동 설치)
 # 비활성화:  WIKI_SYNC_DISABLED=1 git commit ...
 
 set -euo pipefail
@@ -21,9 +23,13 @@ if [[ "${WIKI_SYNC_DISABLED:-0}" == "1" ]]; then
 fi
 
 CHANGED="$(git diff-tree --no-commit-id --name-only -r HEAD)"
-TRIGGER_PATTERN='^(\.claude/(agents|skills|commands)/|\.claude/settings\.json$|CLAUDE\.md$)'
+TRIGGER_PATTERN='^(\.claude/(agents|skills|commands)/|\.claude/settings\.json$|CLAUDE\.md$|docs/)'
+EXCLUDE_PATTERN='^docs/(exec-plans|generated)/'
 
-if ! echo "$CHANGED" | grep -qE "$TRIGGER_PATTERN"; then
+# 트리거 매칭 — 제외 패턴은 먼저 거른 뒤 검사
+MATCHED="$(echo "$CHANGED" | grep -vE "$EXCLUDE_PATTERN" | grep -E "$TRIGGER_PATTERN" || true)"
+
+if [[ -z "$MATCHED" ]]; then
   exit 0
 fi
 
@@ -49,7 +55,6 @@ fi
 
 COMMIT_SHA="$(git rev-parse HEAD)"
 COMMIT_LINE="$(git log -1 --oneline HEAD)"
-HARNESS_FILES="$(echo "$CHANGED" | grep -E "$TRIGGER_PATTERN" || true)"
 
 PROMPT_BODY="$(cat "$PROMPT_FILE")
 $(printf '\n')
@@ -58,8 +63,8 @@ $(printf '\n')
 - 레포: $REPO_ROOT
 - Wiki repo (로컬 clone): $WIKI_DIR
 - 직전 commit: $COMMIT_LINE
-- 변경된 하네스 파일:
-$(echo "$HARNESS_FILES" | sed 's/^/  - /')
+- 변경된 트리거 파일:
+$(echo "$MATCHED" | sed 's/^/  - /')
 "
 
 if [[ -t 1 ]]; then
