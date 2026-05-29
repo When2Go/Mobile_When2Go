@@ -1,6 +1,13 @@
 jest.mock('@react-native-firebase/messaging', () => ({
   __esModule: true,
   default: jest.fn(),
+  AuthorizationStatus: {
+    NOT_DETERMINED: -1,
+    DENIED: 0,
+    AUTHORIZED: 1,
+    PROVISIONAL: 2,
+    EPHEMERAL: 3,
+  },
 }));
 
 jest.mock('@/api/notification', () => ({
@@ -9,12 +16,13 @@ jest.mock('@/api/notification', () => ({
 
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
-import messaging from '@react-native-firebase/messaging';
+import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
 
 import { registerFcmToken } from '@/api/notification';
 import { useFcmToken } from '../useFcmToken';
 
 const mockGetToken = jest.fn();
+const mockRequestPermission = jest.fn();
 
 function setPlatform(os: string, version: number) {
   Object.defineProperty(Platform, 'OS', { value: os, configurable: true });
@@ -25,7 +33,11 @@ beforeEach(() => {
   jest.clearAllMocks();
   setPlatform('android', 33);
   mockGetToken.mockResolvedValue('mock-fcm-token');
-  (messaging as jest.Mock).mockReturnValue({ getToken: mockGetToken });
+  mockRequestPermission.mockResolvedValue(AuthorizationStatus.AUTHORIZED);
+  (messaging as jest.Mock).mockReturnValue({
+    getToken: mockGetToken,
+    requestPermission: mockRequestPermission,
+  });
   (registerFcmToken as jest.Mock).mockResolvedValue({});
   jest.spyOn(Alert, 'alert').mockImplementation(() => {});
   jest.spyOn(BackHandler, 'exitApp').mockImplementation(() => true);
@@ -35,14 +47,35 @@ beforeEach(() => {
 });
 
 describe('useFcmToken', () => {
-  describe('requestAndroidPermission', () => {
-    it('iOS에서는 권한 요청 없이 토큰 발급을 진행한다', async () => {
+  describe('requestNotificationPermission', () => {
+    it('iOS에서 권한 허용 시 토큰 발급을 진행한다', async () => {
       setPlatform('ios', 17);
+      mockRequestPermission.mockResolvedValue(AuthorizationStatus.AUTHORIZED);
 
       renderHook(() => useFcmToken());
 
       await waitFor(() => expect(mockGetToken).toHaveBeenCalled());
+      expect(mockRequestPermission).toHaveBeenCalled();
       expect(PermissionsAndroid.request).not.toHaveBeenCalled();
+    });
+
+    it('iOS에서 PROVISIONAL 권한도 허용으로 간주한다', async () => {
+      setPlatform('ios', 17);
+      mockRequestPermission.mockResolvedValue(AuthorizationStatus.PROVISIONAL);
+
+      renderHook(() => useFcmToken());
+
+      await waitFor(() => expect(mockGetToken).toHaveBeenCalled());
+    });
+
+    it('iOS에서 권한 거부 시 토큰 발급을 하지 않는다', async () => {
+      setPlatform('ios', 17);
+      mockRequestPermission.mockResolvedValue(AuthorizationStatus.DENIED);
+
+      renderHook(() => useFcmToken());
+
+      await waitFor(() => expect(mockRequestPermission).toHaveBeenCalled());
+      expect(mockGetToken).not.toHaveBeenCalled();
     });
 
     it('Android API 32 이하에서는 권한 요청 없이 토큰 발급을 진행한다', async () => {
