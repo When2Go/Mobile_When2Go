@@ -13,6 +13,9 @@
       "bundleIdentifier": "kr.co.when2go.app",
       "supportsTablet": false,
       "googleServicesFile": "./GoogleService-Info.plist",
+      "entitlements": {
+        "aps-environment": "development"
+      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": ["remote-notification"],
