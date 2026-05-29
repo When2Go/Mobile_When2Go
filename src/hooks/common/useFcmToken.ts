@@ -3,6 +3,9 @@ import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
 import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
 
 import { registerFcmToken } from '@/api/notification';
+import { getUserStatus, registerUser } from '@/api/user';
+import type { DevicePlatform } from '@/api/user/types';
+import { useDeviceStore } from '@/stores/deviceStore';
 
 const FCM_RETRY_COUNT = 1;
 const ANDROID_MIN_NOTIFICATION_API = 33;
@@ -27,21 +30,31 @@ async function requestNotificationPermission(): Promise<boolean> {
   return result === PermissionsAndroid.RESULTS.GRANTED;
 }
 
-async function sendTokenWithRetry(token: string, retriesLeft: number): Promise<void> {
+function resolvePlatform(): DevicePlatform {
+  return Platform.OS === 'ios' ? 'IOS' : 'ANDROID';
+}
+
+async function withRetry(task: () => Promise<unknown>, retriesLeft: number): Promise<void> {
   try {
-    await registerFcmToken({ fcmToken: token });
+    await task();
   } catch (err) {
-    console.warn('[FCM] registerFcmToken 실패', { retriesLeft, err });
+    console.warn('[FCM] 백엔드 호출 실패', { retriesLeft, err });
     if (retriesLeft > 0) {
-      await sendTokenWithRetry(token, retriesLeft - 1);
+      await withRetry(task, retriesLeft - 1);
     } else {
-      throw new Error('FCM token registration failed after retry');
+      throw new Error('FCM backend call failed after retry');
     }
   }
 }
 
 function exitApp(): void {
   BackHandler.exitApp();
+}
+
+function showFatalAlert(): void {
+  Alert.alert(FCM_ALERT_TITLE, FCM_ALERT_MESSAGE, [
+    { text: FCM_ALERT_BUTTON, onPress: exitApp },
+  ]);
 }
 
 export function useFcmToken(): void {
@@ -51,16 +64,44 @@ export function useFcmToken(): void {
       if (!hasPermission) return;
 
       const token = await messaging().getToken();
-      console.log('[FCM] 토큰 발급 성공', token);
+
+      const { ensureDeviceId, lastFcmToken, setLastFcmToken } =
+        useDeviceStore.getState();
+      const deviceId = await ensureDeviceId();
+
+      let exists: boolean;
+      try {
+        const status = await getUserStatus();
+        exists = status.exists;
+      } catch (err) {
+        console.warn('[FCM] /users/status 호출 실패', err);
+        showFatalAlert();
+        return;
+      }
 
       try {
-        await sendTokenWithRetry(token, FCM_RETRY_COUNT);
-        console.log('[FCM] 백엔드 등록 성공');
+        if (!exists) {
+          await withRetry(
+            () =>
+              registerUser({
+                deviceId,
+                platform: resolvePlatform(),
+                fcmToken: token,
+              }),
+            FCM_RETRY_COUNT,
+          );
+        } else if (lastFcmToken !== token) {
+          await withRetry(
+            () => registerFcmToken({ fcmToken: token }),
+            FCM_RETRY_COUNT,
+          );
+        } else {
+          return;
+        }
+        setLastFcmToken(token);
       } catch (err) {
         console.warn('[FCM] 백엔드 등록 최종 실패', err);
-        Alert.alert(FCM_ALERT_TITLE, FCM_ALERT_MESSAGE, [
-          { text: FCM_ALERT_BUTTON, onPress: exitApp },
-        ]);
+        showFatalAlert();
       }
     };
 

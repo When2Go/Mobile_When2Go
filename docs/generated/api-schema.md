@@ -1,7 +1,7 @@
 # API 스키마
 
 > Spring Boot 백엔드 API. `~/Desktop/api_spec_v2.md` 명세 기준 (2026-05-08 동기화).
-> 일부 항목은 실제 Swagger(`/v3/api-docs`) 기준으로 보정됨 (2026-05-29 — 구현된 4개: `POST /api/users`, `GET /api/users/status`, `PATCH /api/users/me/fcm-token`, `POST /api/routes/search`). 나머지는 명세 그대로 — 백엔드 미구현.
+> 일부 항목은 실제 Swagger(`/v3/api-docs`) 기준으로 보정됨 (2026-05-30 재동기화 — 구현된 4개: `POST /api/users`, `GET /api/users/status`, `PATCH /api/users/me/fcm-token`, `POST /api/routes/search`). 나머지는 명세 그대로 — 백엔드 미구현.
 > 향후 `src/api/` 구현 후에는 `/gc` 커맨드가 코드와 본 문서를 자동 동기화한다.
 
 ---
@@ -104,13 +104,21 @@
 | `widgetEnabled` | boolean | X |  |
 | `createdAt` | string (ISO 8601) | X |  |
 
-**Status**: `201` 신규 / `200` 기존 디바이스 / `400` 필드 오류
+**Status**: `200` (신규 등록 · 기존 디바이스 동일 — upsert 멱등) / `400` 필드 오류(`deviceId` 누락·36자 아님 / `fcmToken` 누락)
 
 ### GET `/api/users/status` — 회원 등록 여부 확인
 
 **Request**: 헤더 `X-Device-Id: {deviceId}` (axios 인터셉터가 자동 주입)
-**Response**: 응답 봉투의 `data`에 등록 여부 (Swagger 스펙상 generic — 백엔드 확인 필요)
-**Status**: `200` / `400`
+
+**Response** (`data`):
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `exists` | boolean | X | 해당 deviceId 회원 등록 여부 |
+
+**Status**: `200` / `400` (`X-Device-Id` 누락 또는 36자 아님)
+
+> 앱 시작 시 호출. `exists=false`이면 `POST /api/users`로 등록 흐름 진입.
 
 ### GET `/api/users/me`
 
@@ -124,9 +132,17 @@
 
 ### PATCH `/api/users/me/fcm-token`
 
-**Request**: `{ "fcmToken": string }` (헤더 `X-Device-Id` 필수)
-**Response**: `data: null`, `message: "FCM 토큰이 갱신되었습니다."`
-**Status**: `200` / `400` (토큰 누락) / `404` (미등록 디바이스)
+**Request**: `{ "fcmToken": string }` (헤더 `X-Device-Id` 필수, `fcmToken` 512자 이하)
+
+**Response** (`data`):
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `userId` | number | X |  |
+| `deviceId` | string | X |  |
+| `fcmToken` | string | X | 갱신된 토큰 |
+
+**Status**: `200` (동일 토큰 재전송도 `200` — 멱등) / `400` (토큰 누락 · 512자 초과 · `X-Device-Id` 누락/형식 오류) / `404` (미등록 디바이스 — `POST /api/users` 선행 필요)
 
 ---
 
