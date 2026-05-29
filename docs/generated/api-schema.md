@@ -1,6 +1,7 @@
 # API 스키마
 
 > Spring Boot 백엔드 API. `~/Desktop/api_spec_v2.md` 명세 기준 (2026-05-08 동기화).
+> 일부 항목은 실제 Swagger(`/v3/api-docs`) 기준으로 보정됨 (2026-05-29 — 구현된 4개: `POST /api/users`, `GET /api/users/status`, `PATCH /api/users/me/fcm-token`, `POST /api/routes/search`). 나머지는 명세 그대로 — 백엔드 미구현.
 > 향후 `src/api/` 구현 후에는 `/gc` 커맨드가 코드와 본 문서를 자동 동기화한다.
 
 ---
@@ -11,7 +12,7 @@
 - **인증 헤더**: `X-Device-Id: {deviceId}` — axios 인터셉터가 모든 요청에 자동 주입
 - **응답 봉투** (성공/실패 공통):
   ```json
-  { "success": boolean, "data": T | null, "message": string | null }
+  { "success": boolean, "code": string, "message": string, "data": T | null }
   ```
 - **에러 처리**: axios 인터셉터에서 전역 처리. 4xx/5xx 또는 `success: false` 발생 시 사용자 토스트 + 로깅
 - **시간 포맷**: 절대 시각은 ISO 8601 (`2026-05-05T14:30:00`), 시각만은 `HH:mm`
@@ -27,15 +28,16 @@
 | GET    | `/api/trips`                      | trip        | 일정 목록 (status/date 필터) |
 | GET    | `/api/trips/{tripId}`             | trip        | 일정 상세 + 경로 단계 |
 | DELETE | `/api/trips/{tripId}`             | trip        | 일정 삭제(취소) |
-| POST   | `/api/users`                      | user        | 디바이스 기반 사용자 등록/조회 |
+| POST   | `/api/users`                      | user        | 디바이스 기반 사용자 등록/조회 (구현됨) |
+| GET    | `/api/users/status`               | user        | 회원 등록 여부 확인 (구현됨) |
 | GET    | `/api/users/me`                   | user        | 현재 사용자 조회 |
 | PATCH  | `/api/users/me`                   | user        | 설정 변경 (버퍼 시간 등) |
-| PUT    | `/api/users/me/fcm-token`         | user        | FCM 토큰 갱신 |
+| PATCH  | `/api/users/me/fcm-token`         | user        | FCM 토큰 갱신 (구현됨) |
 | POST   | `/api/reservations`               | reservation | 예약 생성 (1회/반복) |
 | GET    | `/api/reservations`               | reservation | 예약 목록 |
 | PUT    | `/api/reservations/{reservationId}` | reservation | 예약 수정 |
 | DELETE | `/api/reservations/{reservationId}` | reservation | 예약 삭제 |
-| GET    | `/api/routes/search`              | route       | 대중교통 경로 후보 (ODsay 프록시) |
+| POST   | `/api/routes/search`              | route       | 대중교통 경로 후보 (구현됨 — 응답 schema 전면 변경, ⚠️ 아래 참조) |
 
 ---
 
@@ -88,7 +90,7 @@
 |-----|------|----------|------|
 | `deviceId` | string | X | UUID |
 | `platform` | `Platform` | X | `IOS` / `ANDROID` |
-| `fcmToken` | string | O | 푸시 토큰 (옵션) |
+| `fcmToken` | string | X | 푸시 토큰 (Swagger 기준 required) |
 
 **Response** (`User`):
 
@@ -104,6 +106,12 @@
 
 **Status**: `201` 신규 / `200` 기존 디바이스 / `400` 필드 오류
 
+### GET `/api/users/status` — 회원 등록 여부 확인
+
+**Request**: 헤더 `X-Device-Id: {deviceId}` (axios 인터셉터가 자동 주입)
+**Response**: 응답 봉투의 `data`에 등록 여부 (Swagger 스펙상 generic — 백엔드 확인 필요)
+**Status**: `200` / `400`
+
 ### GET `/api/users/me`
 
 응답: `User` 동일. **Status**: `200` / `401` (X-Device-Id 없음 또는 미등록)
@@ -114,11 +122,11 @@
 **Response**: `{ "userId": number, "bufferMinutes": number }`
 **Status**: `200` / `400` (음수) / `401`
 
-### PUT `/api/users/me/fcm-token`
+### PATCH `/api/users/me/fcm-token`
 
-**Request**: `{ "fcmToken": string }`
+**Request**: `{ "fcmToken": string }` (헤더 `X-Device-Id` 필수)
 **Response**: `data: null`, `message: "FCM 토큰이 갱신되었습니다."`
-**Status**: `200` / `400` (토큰 누락) / `401`
+**Status**: `200` / `400` (토큰 누락) / `404` (미등록 디바이스)
 
 ---
 
@@ -243,30 +251,23 @@
 
 ## 5. route — 경로 탐색
 
-### GET `/api/routes/search`
+### POST `/api/routes/search`
 
-> ⚠️ 명세 미확정 — 응답에 비용(`cost`) 필드 추가 예정
+> ⚠️ Swagger 기준 메서드(GET → **POST**), 입력 위치(Query → **Body**), `arrivalTime` 형식(`HH:mm` → **ISO 8601**), `routeOption` 제거 — 구현이 명세와 다름. 응답 schema도 Google Routes API 형태(`Route`, `Leg`, `MultiModalSegment`, `NavigationInstruction`, `TransitLine`, `Polyline` 등)로 전환된 것으로 보임. 별도 정리 필요.
 
-**Query**
-
-| key | 타입 | Nullable | 설명 |
-|-----|------|----------|------|
-| `originLat` / `originLng` / `destLat` / `destLng` | number | X | 좌표 |
-| `arrivalTime` | string (`HH:mm`) | X |  |
-| `routeOption` | `RouteSearchOption` | X | `DEFAULT` / `SUBWAY_ONLY` / `BUS_ONLY` (※ 위 RouteOption과 다름) |
-
-**Response**
+**Request Body** (`application/json`)
 
 | key | 타입 | Nullable | 설명 |
 |-----|------|----------|------|
-| `cached` | boolean | X | 캐시 히트 여부 |
-| `routes[].routeIndex` | number | X |  |
-| `routes[].totalTimeMinutes` | number | X |  |
-| `routes[].transferCount` | number | X |  |
-| `routes[].firstBoardingLat/Lng/Name` | number/string | X | 첫 탑승 위치 |
-| `routes[].steps` | `RouteStep[]` | X |  |
+| `originLat` / `originLng` / `destLat` / `destLng` | number (double) | X | 좌표 |
+| `arrivalTime` | string (ISO 8601) | X | 도착 목표 시각 |
 
-**Status**: `200` / `400` 필수 누락 또는 좌표 범위 오류 / `401` / `502` (ODsay 호출 실패)
+**Response** (`ApiResponseRouteSearchResponse`)
+
+- `data.routes`: `Route[]` — Google Routes API 형태 (상세 schema 미정리)
+- `data.geocodingResults`: 미정 (Swagger generic)
+
+**Status**: `200` / `400` 필수 누락 또는 좌표 범위 오류
 
 ---
 
@@ -292,7 +293,7 @@
 |------|-----------|
 | `device/` | `user/` (디바이스 기반 사용자로 통합) |
 | `settings/` | `user/`로 흡수 (`PATCH /api/users/me`) |
-| `notification/` | `user/`로 흡수 (`PUT /api/users/me/fcm-token`) |
+| `notification/` | `user/`로 흡수 (`PATCH /api/users/me/fcm-token`) |
 | `trip/` | `trip/` 유지 (단 depart/arrive 제거) |
 | `route/` | `route/` 유지 |
 | — | `parse/` 추가 (`POST /api/parse/schedule`) |
