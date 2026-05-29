@@ -30,7 +30,8 @@ async function requestNotificationPermission(): Promise<boolean> {
 async function sendTokenWithRetry(token: string, retriesLeft: number): Promise<void> {
   try {
     await registerFcmToken({ fcmToken: token });
-  } catch {
+  } catch (err) {
+    console.warn('[FCM] registerFcmToken 실패', { retriesLeft, err });
     if (retriesLeft > 0) {
       await sendTokenWithRetry(token, retriesLeft - 1);
     } else {
@@ -50,10 +51,13 @@ export function useFcmToken(): void {
       if (!hasPermission) return;
 
       const token = await messaging().getToken();
+      console.log('[FCM] 토큰 발급 성공', token);
 
       try {
         await sendTokenWithRetry(token, FCM_RETRY_COUNT);
-      } catch {
+        console.log('[FCM] 백엔드 등록 성공');
+      } catch (err) {
+        console.warn('[FCM] 백엔드 등록 최종 실패', err);
         Alert.alert(FCM_ALERT_TITLE, FCM_ALERT_MESSAGE, [
           { text: FCM_ALERT_BUTTON, onPress: exitApp },
         ]);
