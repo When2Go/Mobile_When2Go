@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { WEEKDAY_LABELS } from '@/constants/schedule';
@@ -45,21 +44,19 @@ export default function DateCalendarPicker({
   onNextMonth,
   minDate,
 }: Props) {
-  const { isDark } = useTheme();
-
   const year = displayMonth.getFullYear();
   const month = displayMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDay = new Date(year, month, 1).getDay();
   const minDay = minDate ? startOfDay(minDate) : null;
 
-  const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const chevronColor = isDark ? PALETTE.blue400 : PALETTE.blue600;
-  const defaultDayText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const disabledDayText = isDark ? 'text-zinc-600' : 'text-zinc-300';
-  const selectedBg = isDark ? 'bg-blue-500/25' : 'bg-blue-100';
-  const selectedText = isDark ? 'text-blue-400' : 'text-blue-600';
+  const labelText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const chevronColor = PALETTE.blue600;
+  const defaultDayText = 'text-zinc-900';
+  const disabledDayText = 'text-zinc-300';
+  const selectedBg = 'bg-blue-100';
+  const selectedText = 'text-blue-600';
 
   const renderDayCell = (day: number) => {
     const dateOfDay = new Date(year, month, day);

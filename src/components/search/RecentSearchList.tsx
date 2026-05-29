@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Clock, X } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -21,15 +20,14 @@ interface Props {
 }
 
 export default function RecentSearchList({ onSelect }: Props) {
-  const { isDark } = useTheme();
   const [items, setItems] = useState<string[]>(MOCK_RECENT);
 
   const handleDelete = (item: string) => setItems((prev) => prev.filter((i) => i !== item));
   const handleClearAll = () => setItems([]);
 
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const label = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const divider = isDark ? 'border-zinc-700' : 'border-zinc-100';
+  const sub = 'text-zinc-500';
+  const label = 'text-zinc-900';
+  const divider = 'border-zinc-100';
 
   if (items.length === 0) {
     return (
@@ -62,7 +60,7 @@ export default function RecentSearchList({ onSelect }: Props) {
           className={`flex-row items-center justify-between border-b py-3 active:opacity-60 ${divider}`}
         >
           <View className="flex-row items-center gap-3">
-            <Clock size={ICON_SIZE.header} color={isDark ? PALETTE.zinc500 : PALETTE.zinc400} />
+            <Clock size={ICON_SIZE.header} color={PALETTE.zinc400} />
             <Text className={`text-[15px] font-medium ${label}`}>{item}</Text>
           </View>
           <Pressable
@@ -71,7 +69,7 @@ export default function RecentSearchList({ onSelect }: Props) {
             accessibilityLabel={`${item} 삭제`}
             hitSlop={8}
           >
-            <X size={ICON_SIZE.card} color={isDark ? PALETTE.zinc500 : PALETTE.zinc300} />
+            <X size={ICON_SIZE.card} color={PALETTE.zinc300} />
           </Pressable>
         </Pressable>
       ))}

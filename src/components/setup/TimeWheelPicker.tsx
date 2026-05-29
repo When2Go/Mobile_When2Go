@@ -9,7 +9,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import {
   HOUR_OPTIONS,
   MINUTE_OPTIONS,
@@ -272,13 +271,11 @@ export default function TimeWheelPicker({
   onHourChange,
   onMinuteChange,
 }: Props) {
-  const { isDark } = useTheme();
-
-  const centerBoxBg = isDark ? 'bg-zinc-700/60' : 'bg-white';
+  const centerBoxBg = 'bg-white';
   // 항목 색은 단일 톤 — 중앙 강조는 거리 기반 opacity/scale 페이드가 담당.
-  const itemText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const noticeBg = isDark ? 'bg-red-900/20' : 'bg-red-50';
-  const noticeText = isDark ? 'text-red-400' : 'text-red-500';
+  const itemText = 'text-zinc-900';
+  const noticeBg = 'bg-red-50';
+  const noticeText = 'text-red-500';
 
   // Android: overflow-hidden + absolute 형제 조합에서 z-order가 역전될 수 있어
   // 중앙 박스(z-0)와 컬럼 컨테이너(z-10)에 z-index를 명시한다.

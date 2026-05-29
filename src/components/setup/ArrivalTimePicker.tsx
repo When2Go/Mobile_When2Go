@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Clock, ShieldCheck } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
@@ -72,16 +71,14 @@ export default function ArrivalTimePicker({
   safetyBufferMin,
   onPressSafetyBuffer,
 }: Props) {
-  const { isDark } = useTheme();
-
-  const labelText = isDark ? 'text-zinc-300' : 'text-zinc-800';
-  const subIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const pickerSurface = isDark ? 'bg-zinc-900/40' : 'bg-zinc-50';
-  const dividerBg = isDark ? 'bg-zinc-700' : 'bg-zinc-200';
-  const bufferBoxBg = isDark ? 'bg-blue-900/30 border border-blue-800/40' : 'bg-blue-50';
-  const bufferText = isDark ? 'text-blue-200' : 'text-blue-900';
-  const bufferActionText = isDark ? 'text-blue-400' : 'text-blue-600';
-  const shieldColor = isDark ? PALETTE.blue400 : PALETTE.blue600;
+  const labelText = 'text-zinc-800';
+  const subIconColor = PALETTE.zinc500;
+  const pickerSurface = 'bg-zinc-50';
+  const dividerBg = 'bg-zinc-200';
+  const bufferBoxBg = 'bg-blue-50';
+  const bufferText = 'text-blue-900';
+  const bufferActionText = 'text-blue-600';
+  const shieldColor = PALETTE.blue600;
 
   return (
     <View className="px-5 py-6">

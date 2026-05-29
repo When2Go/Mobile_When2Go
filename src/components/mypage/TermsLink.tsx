@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { ChevronRight, FileText } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -13,14 +12,9 @@ interface TermsLinkProps {
 }
 
 export default function TermsLink({ noBorder }: TermsLinkProps) {
-  const { isDark } = useTheme();
-
-  const labelText = isDark ? 'text-zinc-200' : 'text-zinc-800';
-  const chevronColor = isDark ? PALETTE.zinc700 : PALETTE.zinc300;
-  const borderClass = (() => {
-    if (noBorder) return '';
-    return isDark ? 'border-b border-zinc-800' : 'border-b border-zinc-100';
-  })();
+  const labelText = 'text-zinc-800';
+  const chevronColor = PALETTE.zinc300;
+  const borderClass = noBorder ? '' : 'border-b border-zinc-100';
 
   // 추후 약관/개인정보 본문 라우팅 연결 예정 (이슈 범위 밖)
   const handlePress = () => {

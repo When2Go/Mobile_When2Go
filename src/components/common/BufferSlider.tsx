@@ -2,7 +2,6 @@ import { Text, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 
 import { PALETTE } from '@/constants/colors';
-import { useTheme } from '@/contexts/ThemeContext';
 import { BUFFER_MAX_MINUTES, BUFFER_MIN_MINUTES } from '@/stores/settingsStore';
 
 const SLIDER_STEP = 5;
@@ -21,15 +20,13 @@ interface BufferSliderProps {
 }
 
 export default function BufferSlider({ value, onChange }: BufferSliderProps) {
-  const { isDark } = useTheme();
-
-  const valueText = isDark ? 'text-blue-400' : 'text-blue-600';
-  const unitText = isDark ? 'text-zinc-300' : 'text-zinc-700';
-  const helperText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const tickText = isDark ? 'text-zinc-500' : 'text-zinc-400';
-  const trackMinColor = isDark ? PALETTE.blue500 : PALETTE.blue600;
-  const trackMaxColor = isDark ? PALETTE.zinc700 : PALETTE.zinc200;
-  const thumbColor = isDark ? PALETTE.blue500 : PALETTE.blue600;
+  const valueText = 'text-blue-600';
+  const unitText = 'text-zinc-700';
+  const helperText = 'text-zinc-500';
+  const tickText = 'text-zinc-400';
+  const trackMinColor = PALETTE.blue600;
+  const trackMaxColor = PALETTE.zinc200;
+  const thumbColor = PALETTE.blue600;
 
   return (
     <View className="gap-6">

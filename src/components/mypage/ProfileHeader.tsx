@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 import { Check, Pencil, X } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 import { NICKNAME_MAX_LENGTH, useSettingsStore } from '@/stores/settingsStore';
@@ -13,23 +12,22 @@ const EDIT_BTN_SIZE_CLASS = 'h-6 w-6';
 const ACTION_BTN_SIZE_CLASS = 'h-7 w-7';
 
 export default function ProfileHeader() {
-  const { isDark } = useTheme();
   const nickname = useSettingsStore((s) => s.nickname);
   const setNickname = useSettingsStore((s) => s.setNickname);
 
   const [isEditing, setIsEditing] = useState(false);
   const [draft, setDraft] = useState(nickname);
 
-  const cardBg = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100';
-  const avatarBg = isDark ? 'bg-blue-900/60' : 'bg-blue-100';
-  const avatarText = isDark ? 'text-blue-400' : 'text-blue-600';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-500' : 'text-zinc-500';
-  const editBtnBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const editIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc400;
-  const inputUnderline = isDark ? 'border-blue-400' : 'border-blue-500';
-  const cancelBtnBg = isDark ? 'bg-zinc-700' : 'bg-zinc-200';
-  const cancelIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
+  const cardBg = 'bg-white border-zinc-100';
+  const avatarBg = 'bg-blue-100';
+  const avatarText = 'text-blue-600';
+  const headingText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const editBtnBg = 'bg-zinc-100';
+  const editIconColor = PALETTE.zinc400;
+  const inputUnderline = 'border-blue-500';
+  const cancelBtnBg = 'bg-zinc-200';
+  const cancelIconColor = PALETTE.zinc500;
 
   const beginEdit = () => {
     setDraft(nickname);
@@ -63,7 +61,7 @@ export default function ProfileHeader() {
                 autoFocus
                 maxLength={NICKNAME_MAX_LENGTH}
                 placeholder="닉네임 입력"
-                placeholderTextColor={isDark ? PALETTE.zinc500 : PALETTE.zinc400}
+                placeholderTextColor={PALETTE.zinc400}
                 className={`flex-1 border-b-2 py-0.5 text-xl font-bold ${inputUnderline} ${headingText}`}
               />
               <Pressable

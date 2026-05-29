@@ -6,20 +6,18 @@ import {
   type NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 
 const INITIAL_ZOOM = 15;
 const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
 
 export default function MapPreview() {
-  const { isDark } = useTheme();
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
   const mapRef = useRef<NaverMapViewRef>(null);
 
-  const baseBg = isDark ? 'bg-zinc-800' : 'bg-zinc-200';
-  const captionText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const captionBg = isDark ? 'bg-zinc-900/70' : 'bg-white/80';
+  const baseBg = 'bg-zinc-200';
+  const captionText = 'text-zinc-500';
+  const captionBg = 'bg-white/80';
 
   useEffect(() => {
     if (isLoading) return;

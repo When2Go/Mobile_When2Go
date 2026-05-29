@@ -3,7 +3,6 @@ import { Pressable, Text, View } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -32,7 +31,6 @@ export default function MonthPickerSheet({
   today,
   onSelect,
 }: MonthPickerSheetProps) {
-  const { isDark } = useTheme();
   const [draftYear, setDraftYear] = useState<number>(currentMonth.getFullYear());
 
   useEffect(() => {
@@ -47,11 +45,11 @@ export default function MonthPickerSheet({
     return null;
   }
 
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const iconColor = isDark ? PALETTE.zinc300 : PALETTE.zinc700;
-  const defaultCellBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const defaultCellText = isDark ? 'text-zinc-200' : 'text-zinc-800';
-  const todayDotBg = isDark ? 'bg-blue-400' : 'bg-blue-500';
+  const headingText = 'text-zinc-900';
+  const iconColor = PALETTE.zinc700;
+  const defaultCellBg = 'bg-zinc-100';
+  const defaultCellText = 'text-zinc-800';
+  const todayDotBg = 'bg-blue-500';
 
   const handleSelectMonth = (month: number) => {
     onSelect(new Date(draftYear, month, 1));

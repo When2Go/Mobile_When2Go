@@ -1,7 +1,6 @@
 import { Pressable } from 'react-native';
 import { Mic } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -10,10 +9,8 @@ interface Props {
 }
 
 export default function VoiceButton({ onPress }: Props) {
-  const { isDark } = useTheme();
-
-  const btnBg = isDark ? 'bg-blue-900/50' : 'bg-blue-50';
-  const iconColor = isDark ? PALETTE.blue400 : PALETTE.blue600;
+  const btnBg = 'bg-blue-50';
+  const iconColor = PALETTE.blue600;
 
   return (
     <Pressable

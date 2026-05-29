@@ -9,7 +9,6 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Clock, MapPin, Trash2 } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { DAYS } from '@/constants/repeat';
@@ -42,11 +41,8 @@ function formatArrival(period: string, hour: number, minute: number): string {
   return `${period} ${hour}:${String(minute).padStart(2, '0')}`;
 }
 
-function Toggle({ enabled, isDark }: { enabled: boolean; isDark: boolean }) {
-  const trackBg = (() => {
-    if (enabled) return 'bg-blue-600';
-    return isDark ? 'bg-zinc-600' : 'bg-zinc-300';
-  })();
+function Toggle({ enabled }: { enabled: boolean }) {
+  const trackBg = enabled ? 'bg-blue-600' : 'bg-zinc-300';
   const thumbPosition = enabled ? 'translate-x-6' : 'translate-x-1';
   return (
     <View className={`relative h-7 w-12 justify-center rounded-full ${trackBg}`}>
@@ -61,16 +57,15 @@ export default function RepeatReservationCard({
   onToggle,
   onDelete,
 }: RepeatReservationCardProps) {
-  const { isDark } = useTheme();
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
 
-  const cardBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
-  const heading = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const arrivalRowBg = isDark ? 'bg-zinc-900/50' : 'bg-zinc-50';
-  const inactiveDot = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const inactiveDotText = isDark ? 'text-zinc-500' : 'text-zinc-400';
+  const cardBg = 'bg-white border-zinc-200';
+  const heading = 'text-zinc-900';
+  const sub = 'text-zinc-500';
+  const arrivalRowBg = 'bg-zinc-50';
+  const inactiveDot = 'bg-zinc-100';
+  const inactiveDotText = 'text-zinc-400';
   const cardOpacity = item.enabled ? '' : 'opacity-50';
 
   const handleDelete = useCallback(() => {
@@ -148,7 +143,7 @@ export default function RepeatReservationCard({
               <View className="mt-0.5 flex-row items-center gap-1.5">
                 <MapPin
                   size={ICON_SIZE.caption + 2}
-                  color={isDark ? PALETTE.zinc400 : PALETTE.zinc500}
+                  color={PALETTE.zinc500}
                 />
                 <Text className={`flex-1 text-sm ${sub}`} numberOfLines={1}>
                   {item.destination}
@@ -175,7 +170,7 @@ export default function RepeatReservationCard({
 
             {/* 도착 시간 박스 */}
             <View className={`flex-row items-center gap-2 rounded-xl px-3 py-2 ${arrivalRowBg}`}>
-              <Clock size={ICON_SIZE.card} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+              <Clock size={ICON_SIZE.card} color={PALETTE.zinc500} />
               <Text className={`text-xs font-semibold ${sub}`}>{ARRIVAL_LABEL}</Text>
               <Text className="ml-auto text-sm font-bold text-blue-500">
                 {formatArrival(item.arrivalPeriod, item.arrivalHour, item.arrivalMinute)}
@@ -194,7 +189,7 @@ export default function RepeatReservationCard({
           hitSlop={8}
           className={`absolute ${TOGGLE_OFFSET_RIGHT_CLASS} ${TOGGLE_OFFSET_TOP_CLASS} active:opacity-70`}
         >
-          <Toggle enabled={item.enabled} isDark={isDark} />
+          <Toggle enabled={item.enabled} />
         </Pressable>
       </Animated.View>
     </View>

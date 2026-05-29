@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { MapPin } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { CHANGE_BUTTON_LABEL, DESTINATION_LABEL } from '@/constants/setup';
@@ -16,14 +15,12 @@ interface Props {
  * - MapPin 아이콘(blue) + "목적지" 캡션 + 굵은 목적지 텍스트 + 우측 `변경` 버튼.
  */
 export default function DestinationHeader({ destination, onChange }: Props) {
-  const { isDark } = useTheme();
-
-  const iconBg = isDark ? 'bg-blue-900/50' : 'bg-blue-100';
-  const iconColor = isDark ? PALETTE.blue400 : PALETTE.blue600;
-  const captionText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const changeBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const changeText = isDark ? 'text-zinc-300' : 'text-zinc-600';
+  const iconBg = 'bg-blue-100';
+  const iconColor = PALETTE.blue600;
+  const captionText = 'text-zinc-500';
+  const headingText = 'text-zinc-900';
+  const changeBg = 'bg-zinc-100';
+  const changeText = 'text-zinc-600';
 
   return (
     <View className="flex-row items-center gap-3 px-5 py-6">

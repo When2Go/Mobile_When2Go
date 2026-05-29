@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { usePathname, useRouter } from 'expo-router';
 import { Bell, ChevronLeft, Home, Map, User } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -34,15 +33,14 @@ interface MobileLayoutProps {
 export default function MobileLayout({ children }: MobileLayoutProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isDark } = useTheme();
 
   const isTabRoot = TAB_ROOT_PATHS.includes(pathname);
   const hideBottomNav = HIDE_BOTTOM_NAV_PATHS.includes(pathname);
 
-  const rootBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const headerBg = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100';
-  const navBg = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
+  const rootBg = 'bg-zinc-50';
+  const headerBg = 'bg-white border-zinc-100';
+  const navBg = 'bg-white border-zinc-100';
+  const headingText = 'text-zinc-900';
 
   const handleBack = () => {
     if (router.canGoBack()) {
@@ -50,7 +48,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
     }
   };
 
-  const inactiveIconColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
+  const inactiveIconColor = PALETTE.zinc400;
   const iconColorFor = (isActive: boolean) => (isActive ? ACTIVE_COLOR : inactiveIconColor);
 
   return (
@@ -67,7 +65,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
           >
             <ChevronLeft
               size={ICON_SIZE.header}
-              color={isDark ? PALETTE.zinc100 : PALETTE.zinc900}
+              color={PALETTE.zinc900}
             />
           </Pressable>
           <Text className={`font-semibold ${headingText}`}>{PAGE_TITLE[pathname] ?? ''}</Text>
@@ -85,28 +83,24 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
             icon={<Home size={ICON_SIZE.tab} color={iconColorFor(pathname === '/')} />}
             label="홈"
             active={pathname === '/'}
-            isDark={isDark}
             onPress={() => router.push('/')}
           />
           <NavItem
             icon={<Bell size={ICON_SIZE.tab} color={iconColorFor(pathname === '/schedule')} />}
             label="일정"
             active={pathname === '/schedule'}
-            isDark={isDark}
             onPress={() => router.push('/schedule')}
           />
           <NavItem
             icon={<Map size={ICON_SIZE.tab} color={iconColorFor(pathname === '/routes')} />}
             label="경로"
             active={pathname === '/routes'}
-            isDark={isDark}
             onPress={() => router.push('/routes')}
           />
           <NavItem
             icon={<User size={ICON_SIZE.tab} color={iconColorFor(pathname === '/mypage')} />}
             label="MY"
             active={pathname === '/mypage'}
-            isDark={isDark}
             onPress={() => router.push('/mypage')}
           />
         </View>
@@ -119,15 +113,11 @@ interface NavItemProps {
   icon: ReactNode;
   label: string;
   active: boolean;
-  isDark: boolean;
   onPress: () => void;
 }
 
-function NavItem({ icon, label, active, isDark, onPress }: NavItemProps) {
-  const labelColor = (() => {
-    if (active) return 'text-blue-500';
-    return isDark ? 'text-zinc-500' : 'text-zinc-400';
-  })();
+function NavItem({ icon, label, active, onPress }: NavItemProps) {
+  const labelColor = active ? 'text-blue-500' : 'text-zinc-400';
 
   return (
     <Pressable

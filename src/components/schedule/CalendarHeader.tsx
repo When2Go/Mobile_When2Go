@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Calendar } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 import { WEEKDAY_LABELS } from '@/constants/schedule';
@@ -41,8 +40,6 @@ export default function CalendarHeader({
   markedDays,
   onPressMonthIcon,
 }: CalendarHeaderProps) {
-  const { isDark } = useTheme();
-
   const year = displayMonth.getFullYear();
   const month = displayMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -50,12 +47,12 @@ export default function CalendarHeader({
   const isCurrentMonthSameAsToday =
     year === today.getFullYear() && month === today.getMonth();
 
-  const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const subIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const defaultDayText = isDark ? 'text-zinc-300' : 'text-zinc-700';
-  const dotBg = isDark ? 'bg-blue-400' : 'bg-blue-500';
-  const selectedRingBorder = isDark ? 'border-blue-400' : 'border-blue-500';
+  const labelText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const subIconColor = PALETTE.zinc500;
+  const defaultDayText = 'text-zinc-700';
+  const dotBg = 'bg-blue-500';
+  const selectedRingBorder = 'border-blue-500';
 
   const renderDayCell = (day: number) => {
     const dateOfDay = new Date(year, month, day);

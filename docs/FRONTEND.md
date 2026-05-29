@@ -82,7 +82,7 @@ const label = (() => {
 | 유형 | 예시 | 방식 |
 |------|------|------|
 | UI 로컬 | 바텀시트 열림, 입력값 | `useState` |
-| 클라이언트 전역 | 디바이스 ID, 다크모드, 버퍼 시간 | Zustand |
+| 클라이언트 전역 | 디바이스 ID, 버퍼 시간 | Zustand |
 | 서버 상태 (기본) | Trip CRUD, 경로 결과 | `useState + useEffect` |
 | 서버 상태 (폴링/캐싱) | 대중교통 도착 예정, 경로 기록 목록, 즐겨찾기 | TanStack Query |
 | 네비게이션 | 목적지, 도착 시간 파라미터 | Expo Router params |

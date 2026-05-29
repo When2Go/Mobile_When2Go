@@ -3,7 +3,6 @@ import { useRouter } from 'expo-router';
 import { Briefcase, GraduationCap, Heart, Home as HomeIcon, MapPin } from 'lucide-react-native';
 import type { ComponentType } from 'react';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -36,16 +35,15 @@ const CARD_GAP = 12;
 
 export default function FavoriteRoutes() {
   const router = useRouter();
-  const { isDark } = useTheme();
 
-  const sectionTitle = isDark ? 'text-zinc-200' : 'text-zinc-800';
-  const card = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-200';
-  const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const destText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const metaText = isDark ? 'text-blue-400' : 'text-blue-500';
-  const iconBg = isDark ? 'bg-blue-900/40' : 'bg-blue-50';
-  const iconColor = isDark ? PALETTE.blue400 : PALETTE.blue500;
-  const pinColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
+  const sectionTitle = 'text-zinc-800';
+  const card = 'bg-zinc-50 border-zinc-200';
+  const labelText = 'text-zinc-900';
+  const destText = 'text-zinc-500';
+  const metaText = 'text-blue-500';
+  const iconBg = 'bg-blue-50';
+  const iconColor = PALETTE.blue500;
+  const pinColor = PALETTE.zinc400;
 
   return (
     <View>

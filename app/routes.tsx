@@ -8,7 +8,6 @@ import AdSlot from '@/components/common/AdSlot';
 import RouteListItem from '@/components/routes/RouteListItem';
 import EmptyState from '@/components/routes/EmptyState';
 import RouteEditModal from '@/components/routes/RouteEditModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
@@ -28,8 +27,6 @@ let nextId = MOCK_ROUTES.length + 1;
 
 export default function RoutesScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
-
   const [routes, setRoutes] = useState<RouteItem[]>(MOCK_ROUTES);
   const [editTarget, setEditTarget] = useState<RouteItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
@@ -52,12 +49,12 @@ export default function RoutesScreen() {
     }, []),
   );
 
-  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const headerBg = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const addBtnBg = isDark ? 'bg-blue-900/50' : 'bg-blue-50';
-  const addBtnText = isDark ? 'text-blue-400' : 'text-blue-600';
-  const listHeading = isDark ? 'text-zinc-100' : 'text-zinc-900';
+  const pageBg = 'bg-zinc-50';
+  const headerBg = 'bg-white border-zinc-100';
+  const headingText = 'text-zinc-900';
+  const addBtnBg = 'bg-blue-50';
+  const addBtnText = 'text-blue-600';
+  const listHeading = 'text-zinc-900';
 
   const handleAdd = () => {
     setEditTarget(undefined);
@@ -113,7 +110,7 @@ export default function RoutesScreen() {
           accessibilityRole="button"
           className={`flex-row items-center gap-1.5 rounded-lg px-3 py-2 active:opacity-70 ${addBtnBg}`}
         >
-          <Plus size={ICON_SIZE.card} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
+          <Plus size={ICON_SIZE.card} color={PALETTE.blue600} />
           <Text className={`text-sm font-semibold ${addBtnText}`}>추가</Text>
         </Pressable>
       </View>

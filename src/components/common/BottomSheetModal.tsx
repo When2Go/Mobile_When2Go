@@ -9,7 +9,6 @@ import {
 } from '@gorhom/bottom-sheet';
 import { X } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -38,7 +37,6 @@ export default function BottomSheetModal({
   children,
 }: BottomSheetModalProps) {
   const ref = useRef<RNBottomSheetModal>(null);
-  const { isDark } = useTheme();
 
   useEffect(() => {
     if (isOpen) {
@@ -62,14 +60,14 @@ export default function BottomSheetModal({
   );
 
   const renderHandle = useCallback(() => {
-    const barBg = isDark ? 'bg-zinc-700' : 'bg-zinc-200';
+    const barBg = 'bg-zinc-200';
     return <View className={`${HANDLE_BAR_CLASS} ${barBg}`} />;
-  }, [isDark]);
+  }, []);
 
-  const sheetBgColor = isDark ? PALETTE.zinc900 : PALETTE.white;
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const dividerBorder = isDark ? 'border-zinc-700' : 'border-zinc-100';
-  const closeIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
+  const sheetBgColor = PALETTE.white;
+  const headingText = 'text-zinc-900';
+  const dividerBorder = 'border-zinc-100';
+  const closeIconColor = PALETTE.zinc500;
 
   const backgroundStyle = useMemo(() => ({ backgroundColor: sheetBgColor }), [sheetBgColor]);
 

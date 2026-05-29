@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
@@ -26,7 +25,6 @@ const SCHEDULE_PATH = '/schedule';
 
 export default function ResultScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
   const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
   const rawParams = useLocalSearchParams<{ bufferMin?: string }>();
   const bufferMinParam = rawParams[BUFFER_MIN_PARAM];
@@ -45,12 +43,12 @@ export default function ResultScreen() {
     };
   }, []);
 
-  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const cardBg = isDark ? 'bg-zinc-900' : 'bg-white';
-  const dividerBorder = isDark ? 'border-zinc-800' : 'border-zinc-100';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const backBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const backIconColor = isDark ? PALETTE.zinc300 : PALETTE.zinc500;
+  const pageBg = 'bg-zinc-50';
+  const cardBg = 'bg-white';
+  const dividerBorder = 'border-zinc-100';
+  const headingText = 'text-zinc-900';
+  const backBg = 'bg-zinc-100';
+  const backIconColor = PALETTE.zinc500;
 
   const handleSelectRoute = (route: MockRoute) => {
     setSelectedRoute(route);
