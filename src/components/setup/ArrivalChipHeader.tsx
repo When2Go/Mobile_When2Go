@@ -1,6 +1,5 @@
 import { Pressable, Text, View } from 'react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ARRIVAL_LABEL } from '@/constants/setup';
 
 export type PickerMode = 'date' | 'time';
@@ -22,14 +21,12 @@ export default function ArrivalChipHeader({
   dateLabel,
   timeLabel,
 }: Props) {
-  const { isDark } = useTheme();
-
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
+  const headingText = 'text-zinc-900';
   // 활성/비활성 배경 분리 — 시각 구분 강화 (#33 WARNING 1)
-  const activeChipBg = isDark ? 'bg-zinc-600' : 'bg-white';
-  const inactiveChipBg = isDark ? 'bg-zinc-700/80' : 'bg-zinc-200/80';
-  const activeText = isDark ? 'text-blue-400' : 'text-blue-600';
-  const inactiveText = isDark ? 'text-zinc-100' : 'text-zinc-900';
+  const activeChipBg = 'bg-white';
+  const inactiveChipBg = 'bg-zinc-200/80';
+  const activeText = 'text-blue-600';
+  const inactiveText = 'text-zinc-900';
 
   const renderChip = (target: PickerMode, label: string) => {
     const isActive = mode === target;

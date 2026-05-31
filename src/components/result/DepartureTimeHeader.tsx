@@ -1,6 +1,5 @@
 import { Text, View } from 'react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { SAFETY_BUFFER_NOTICE_FORMAT } from '@/constants/result';
 
 interface DepartureTimeHeaderProps {
@@ -14,11 +13,9 @@ export default function DepartureTimeHeader({
   heading,
   safetyBufferMin,
 }: DepartureTimeHeaderProps) {
-  const { isDark } = useTheme();
-
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const bufferText = isDark ? 'text-blue-400' : 'text-blue-600';
+  const headingText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const bufferText = 'text-blue-600';
 
   return (
     <View className="px-5 pb-4 pt-5">

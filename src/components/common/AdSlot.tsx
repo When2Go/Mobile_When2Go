@@ -1,7 +1,5 @@
 import { Text, View } from 'react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
-
 export type AdSlotType = 'banner' | 'splash' | 'interstitial';
 
 interface AdSlotProps {
@@ -27,12 +25,10 @@ const TYPE_LABEL: Record<AdSlotType, string> = {
  * 앱 심사 통과 후 별도 이슈에서 SDK 연동 예정.
  */
 export default function AdSlot({ type, height, className = '' }: AdSlotProps) {
-  const { isDark } = useTheme();
-
   const resolvedHeight = height ?? DEFAULT_HEIGHT[type];
-  const containerBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const labelText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const captionText = isDark ? 'text-zinc-500' : 'text-zinc-400';
+  const containerBg = 'bg-zinc-100';
+  const labelText = 'text-zinc-500';
+  const captionText = 'text-zinc-400';
 
   return (
     <View

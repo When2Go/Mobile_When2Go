@@ -2,7 +2,6 @@ import { Pressable, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Clock, MapPin } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -23,16 +22,15 @@ const RECENT_DESTINATIONS: RecentDestination[] = [
 
 export default function RecentDestinations() {
   const router = useRouter();
-  const { isDark } = useTheme();
 
-  const sectionTitle = isDark ? 'text-zinc-200' : 'text-zinc-800';
-  const rowBorder = isDark ? 'border-zinc-800' : 'border-zinc-100';
-  const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-500' : 'text-zinc-500';
-  const timeText = isDark ? 'text-zinc-500' : 'text-zinc-400';
-  const iconBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const pinColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const clockColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
+  const sectionTitle = 'text-zinc-800';
+  const rowBorder = 'border-zinc-100';
+  const labelText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const timeText = 'text-zinc-400';
+  const iconBg = 'bg-zinc-100';
+  const pinColor = PALETTE.zinc500;
+  const clockColor = PALETTE.zinc400;
 
   return (
     <View>

@@ -8,7 +8,6 @@ import MapPreview from '@/components/home/MapPreview';
 import SearchEntryBar from '@/components/home/SearchEntryBar';
 import FavoriteRoutes from '@/components/home/FavoriteRoutes';
 import RecentDestinations from '@/components/home/RecentDestinations';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 
 const SHEET_SNAP_POINTS = ['25%', '62%'];
@@ -18,11 +17,10 @@ const PANEL_BOTTOM_PADDING = 24;
 const SECTION_GAP = 20;
 
 export default function Home() {
-  const { isDark } = useTheme();
   const sheetRef = useRef<BottomSheet>(null);
 
-  const sheetBgColor = isDark ? PALETTE.zinc900 : PALETTE.white;
-  const handleColor = isDark ? PALETTE.zinc500 : PALETTE.zinc300;
+  const sheetBgColor = PALETTE.white;
+  const handleColor = PALETTE.zinc300;
 
   const backgroundStyle = useMemo(
     () => ({

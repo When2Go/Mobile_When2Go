@@ -1,7 +1,6 @@
 import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { MapPin } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 import { usePlaceSearch } from '@/hooks/search/usePlaceSearch';
@@ -13,18 +12,17 @@ interface Props {
 }
 
 export default function SearchResultList({ query, onSelect }: Props) {
-  const { isDark } = useTheme();
   const { places, isLoading, error } = usePlaceSearch(query);
 
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const label = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const divider = isDark ? 'border-zinc-700' : 'border-zinc-100';
+  const sub = 'text-zinc-500';
+  const label = 'text-zinc-900';
+  const divider = 'border-zinc-100';
 
   function renderContent() {
     if (isLoading) {
       return (
         <View className="items-center py-12">
-          <ActivityIndicator size="small" color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+          <ActivityIndicator size="small" color={PALETTE.zinc500} />
         </View>
       );
     }
@@ -50,7 +48,7 @@ export default function SearchResultList({ query, onSelect }: Props) {
         accessibilityLabel={item.name}
         className={`flex-row items-center gap-4 border-b py-3 active:opacity-60 ${divider}`}
       >
-        <MapPin size={ICON_SIZE.header} color={isDark ? PALETTE.zinc500 : PALETTE.zinc400} />
+        <MapPin size={ICON_SIZE.header} color={PALETTE.zinc400} />
         <View className="flex-1">
           <Text className={`text-[15px] font-medium ${label}`}>{item.name}</Text>
           <Text className={`text-xs ${sub}`}>{item.address}</Text>

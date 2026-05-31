@@ -2,7 +2,6 @@ import { Fragment } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Bus, ChevronRight, MapPin, TrainFront } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import {
   ARRIVAL_SUFFIX_FORMAT,
@@ -43,19 +42,18 @@ function resolveStepKind(index: number, total: number): 'start' | 'end' | 'middl
 }
 
 function StepIcon({ index, total, icon }: StepIconProps) {
-  const { isDark } = useTheme();
   const kind = resolveStepKind(index, total);
 
   const dotBg = (() => {
-    if (kind === 'start') return isDark ? 'bg-blue-900/60' : 'bg-blue-100';
-    if (kind === 'end') return isDark ? 'bg-rose-900/60' : 'bg-rose-100';
-    return isDark ? 'bg-emerald-900/40' : 'bg-emerald-100';
+    if (kind === 'start') return 'bg-blue-100';
+    if (kind === 'end') return 'bg-rose-100';
+    return 'bg-emerald-100';
   })();
 
   const iconColor = (() => {
-    if (kind === 'start') return isDark ? PALETTE.blue400 : PALETTE.blue600;
-    if (kind === 'end') return isDark ? PALETTE.rose400 : PALETTE.rose600;
-    return isDark ? PALETTE.emerald400 : PALETTE.emerald600;
+    if (kind === 'start') return PALETTE.blue600;
+    if (kind === 'end') return PALETTE.rose600;
+    return PALETTE.emerald600;
   })();
 
   const renderInner = () => {
@@ -78,15 +76,11 @@ function StepIcon({ index, total, icon }: StepIconProps) {
 }
 
 export default function RouteCard({ route, onPress }: RouteCardProps) {
-  const { isDark } = useTheme();
-
-  const cardClass = isDark
-    ? 'bg-zinc-800 border-zinc-700'
-    : 'bg-white border-zinc-200';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const stepText = isDark ? 'text-zinc-300' : 'text-zinc-700';
-  const departureText = isDark ? 'text-blue-400' : 'text-blue-500';
-  const chevronColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
+  const cardClass = 'bg-white border-zinc-200';
+  const subText = 'text-zinc-500';
+  const stepText = 'text-zinc-700';
+  const departureText = 'text-blue-500';
+  const chevronColor = PALETTE.zinc500;
 
   const badgeBg = BADGE_BG_CLASS[route.badge];
   const badgeLabel = BADGE_LABEL[route.badge];

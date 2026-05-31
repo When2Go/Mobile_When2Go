@@ -2,7 +2,6 @@ import { Pressable, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
@@ -41,13 +40,9 @@ export default function ReservationCompleteModal({
   onClose,
   onConfirm,
 }: ReservationCompleteModalProps) {
-  const { isDark } = useTheme();
-
-  const summaryCard = isDark
-    ? 'bg-zinc-800 border-zinc-700'
-    : 'bg-zinc-50 border-zinc-100';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const departureText = isDark ? 'text-blue-400' : 'text-blue-500';
+  const summaryCard = 'bg-zinc-50 border-zinc-100';
+  const subText = 'text-zinc-500';
+  const departureText = 'text-blue-500';
 
   const confirmBg = confirmed ? 'bg-emerald-500' : 'bg-blue-600';
 

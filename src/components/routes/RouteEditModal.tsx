@@ -3,7 +3,6 @@ import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 import { ChevronRight, MapPin } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import type { RouteFormData } from '@/types/routes.types';
@@ -33,8 +32,6 @@ export default function RouteEditModal({
   onFormChange,
   onSelectLocation,
 }: RouteEditModalProps) {
-  const { isDark } = useTheme();
-
   const isValid =
     form.name.trim().length > 0 &&
     form.from.trim().length > 0 &&
@@ -42,16 +39,14 @@ export default function RouteEditModal({
 
   const title = isEditMode ? '경로 수정' : '새 경로 추가';
 
-  const inputBg = isDark
-    ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
-    : 'bg-white border-zinc-200 text-zinc-900';
-  const placeholderColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
-  const labelText = isDark ? 'text-zinc-200' : 'text-zinc-800';
-  const rowBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
-  const chevronColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
+  const inputBg = 'bg-white border-zinc-200 text-zinc-900';
+  const placeholderColor = PALETTE.zinc400;
+  const labelText = 'text-zinc-800';
+  const rowBg = 'bg-white border-zinc-200';
+  const chevronColor = PALETTE.zinc400;
 
-  const locationValueText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const locationPlaceholderText = isDark ? 'text-zinc-500' : 'text-zinc-400';
+  const locationValueText = 'text-zinc-900';
+  const locationPlaceholderText = 'text-zinc-400';
   const locationFieldText = (value: string) => (value ? locationValueText : locationPlaceholderText);
 
   return (
@@ -78,7 +73,7 @@ export default function RouteEditModal({
             accessibilityLabel="출발지 검색"
             className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${rowBg}`}
           >
-            <MapPin size={ICON_SIZE.formInline} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
+            <MapPin size={ICON_SIZE.formInline} color={PALETTE.blue600} />
             <Text className={`flex-1 text-base ${locationFieldText(form.from)}`} numberOfLines={1}>
               {form.from || FIELD_PLACEHOLDER_FROM}
             </Text>
@@ -95,7 +90,7 @@ export default function RouteEditModal({
             accessibilityLabel="목적지 검색"
             className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${rowBg}`}
           >
-            <MapPin size={ICON_SIZE.formInline} color={isDark ? PALETTE.emerald400 : PALETTE.emerald600} />
+            <MapPin size={ICON_SIZE.formInline} color={PALETTE.emerald600} />
             <Text className={`flex-1 text-base ${locationFieldText(form.to)}`} numberOfLines={1}>
               {form.to || FIELD_PLACEHOLDER_TO}
             </Text>

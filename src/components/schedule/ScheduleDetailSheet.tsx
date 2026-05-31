@@ -2,7 +2,6 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { Clock, MapPin, TrainFront } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 import type { ScheduleItem } from '@/types/schedule.types';
@@ -32,19 +31,17 @@ export default function ScheduleDetailSheet({
   onClose,
   onDelete,
 }: ScheduleDetailSheetProps) {
-  const { isDark } = useTheme();
-
   // 닫힘 상태에서는 sheet 자체를 렌더하지 않는다.
   // mypage 패턴과 동일하게 부모가 isOpen=false면 unmount.
   if (!schedule) {
     return null;
   }
 
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const subIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const infoBoxClass = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-100';
-  const departureValueText = isDark ? 'text-blue-400' : 'text-blue-500';
+  const headingText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const subIconColor = PALETTE.zinc500;
+  const infoBoxClass = 'bg-zinc-50 border-zinc-100';
+  const departureValueText = 'text-blue-500';
 
   const handlePressDelete = () => {
     const title = `${DELETE_ALERT_TITLE_PREFIX}${schedule.title}${DELETE_ALERT_TITLE_SUFFIX}`;

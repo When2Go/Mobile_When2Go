@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Plus, Repeat2 } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { EMPTY_CTA_LABEL, EMPTY_DESCRIPTION, EMPTY_TITLE } from '@/constants/repeat';
@@ -14,11 +13,9 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({ onAddPress }: EmptyStateProps) {
-  const { isDark } = useTheme();
-
-  const iconCircleBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const heading = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
+  const iconCircleBg = 'bg-zinc-100';
+  const heading = 'text-zinc-900';
+  const sub = 'text-zinc-500';
 
   return (
     <View className="flex-1 items-center justify-center gap-4 px-8 pb-20">
@@ -26,7 +23,7 @@ export default function EmptyState({ onAddPress }: EmptyStateProps) {
         className={`items-center justify-center rounded-full ${iconCircleBg}`}
         style={{ width: ICON_CIRCLE_SIZE, height: ICON_CIRCLE_SIZE }}
       >
-        <Repeat2 size={REPEAT_ICON_SIZE} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+        <Repeat2 size={REPEAT_ICON_SIZE} color={PALETTE.zinc500} />
       </View>
       <View>
         <Text className={`mb-1 text-center text-lg font-bold ${heading}`}>{EMPTY_TITLE}</Text>

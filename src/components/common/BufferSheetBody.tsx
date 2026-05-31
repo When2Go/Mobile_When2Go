@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import BufferSlider from '@/components/common/BufferSlider';
-import { useTheme } from '@/contexts/ThemeContext';
 
 interface BufferSheetBodyProps {
   value: number;
@@ -11,15 +10,14 @@ interface BufferSheetBodyProps {
 }
 
 export default function BufferSheetBody({ value, onSave, onCancel }: BufferSheetBodyProps) {
-  const { isDark } = useTheme();
   const [local, setLocal] = useState(value);
 
   useEffect(() => {
     setLocal(value);
   }, [value]);
 
-  const cancelBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const cancelText = isDark ? 'text-zinc-300' : 'text-zinc-600';
+  const cancelBg = 'bg-zinc-100';
+  const cancelText = 'text-zinc-600';
 
   return (
     <View className="gap-6 pb-2">

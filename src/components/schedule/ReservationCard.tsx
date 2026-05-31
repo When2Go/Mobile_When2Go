@@ -9,7 +9,6 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Bell, ChevronRight, Clock, MapPin, TrainFront, Trash2 } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 import {
@@ -38,7 +37,6 @@ interface ReservationCardProps {
  * - 시안의 wasDragging 패턴은 `Gesture.Race(pan, tap)`로 대체.
  */
 export default function ReservationCard({ schedule, onDelete, onTap }: ReservationCardProps) {
-  const { isDark } = useTheme();
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
 
@@ -91,40 +89,38 @@ export default function ReservationCard({ schedule, onDelete, onTap }: Reservati
     transform: [{ translateX: translateX.value }],
   }));
 
-  const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const subIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-  const updatedText = isDark ? 'text-zinc-500' : 'text-zinc-400';
+  const labelText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
+  const subIconColor = PALETTE.zinc500;
+  const updatedText = 'text-zinc-400';
 
   const cardSurfaceClass = (() => {
     if (schedule.isActive) {
-      return isDark
-        ? 'bg-blue-950 border-blue-700'
-        : 'bg-blue-50 border-blue-200';
+      return 'bg-blue-50 border-blue-200';
     }
-    return isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
+    return 'bg-white border-zinc-200';
   })();
 
   const statusBadgeClass = (() => {
     if (schedule.status === '진행중') {
-      return isDark ? 'bg-blue-500' : 'bg-blue-600';
+      return 'bg-blue-600';
     }
     if (schedule.status === '완료') {
-      return isDark ? 'bg-emerald-700' : 'bg-emerald-100';
+      return 'bg-emerald-100';
     }
-    return isDark ? 'bg-zinc-700' : 'bg-zinc-100';
+    return 'bg-zinc-100';
   })();
 
   const statusBadgeText = (() => {
     if (schedule.status === '진행중') return 'text-white';
     if (schedule.status === '완료') {
-      return isDark ? 'text-emerald-100' : 'text-emerald-700';
+      return 'text-emerald-700';
     }
-    return isDark ? 'text-zinc-300' : 'text-zinc-500';
+    return 'text-zinc-500';
   })();
 
-  const timeBoxBg = isDark ? 'bg-zinc-900/60' : 'bg-zinc-50';
-  const departureValueText = isDark ? 'text-blue-400' : 'text-blue-500';
+  const timeBoxBg = 'bg-zinc-50';
+  const departureValueText = 'text-blue-500';
 
   return (
     <View className="relative overflow-hidden rounded-2xl">

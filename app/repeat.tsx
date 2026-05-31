@@ -7,7 +7,6 @@ import { ArrowLeft, Plus } from 'lucide-react-native';
 import EmptyState from '@/components/repeat/EmptyState';
 import RepeatEditModal from '@/components/repeat/RepeatEditModal';
 import RepeatReservationCard from '@/components/repeat/RepeatReservationCard';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, MOCK_REPEATS, SCREEN_TITLE } from '@/constants/repeat';
@@ -18,21 +17,19 @@ const INITIAL_NEXT_ID = MOCK_REPEATS.length + 1;
 
 export default function RepeatScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
-
   const nextIdRef = useRef(INITIAL_NEXT_ID);
   const [repeats, setRepeats] = useState<RepeatItem[]>(MOCK_REPEATS);
   const [editTarget, setEditTarget] = useState<RepeatItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
   const [draftForm, setDraftForm] = useState<RepeatFormData>(EMPTY_REPEAT_FORM);
 
-  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const headerBg = isDark ? 'bg-zinc-900 border-zinc-800' : 'bg-white border-zinc-100';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const backBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const backIconColor = isDark ? PALETTE.zinc300 : PALETTE.zinc500;
-  const addBtnBg = isDark ? 'bg-blue-900/50' : 'bg-blue-50';
-  const addBtnText = isDark ? 'text-blue-400' : 'text-blue-600';
+  const pageBg = 'bg-zinc-50';
+  const headerBg = 'bg-white border-zinc-100';
+  const headingText = 'text-zinc-900';
+  const backBg = 'bg-zinc-100';
+  const backIconColor = PALETTE.zinc500;
+  const addBtnBg = 'bg-blue-50';
+  const addBtnText = 'text-blue-600';
 
   const handleAdd = () => {
     setEditTarget(undefined);
@@ -112,7 +109,7 @@ export default function RepeatScreen() {
           accessibilityLabel="반복 예약 추가"
           className={`flex-row items-center gap-1.5 rounded-lg px-3 py-2 active:opacity-70 ${addBtnBg}`}
         >
-          <Plus size={ICON_SIZE.card} color={isDark ? PALETTE.blue400 : PALETTE.blue600} />
+          <Plus size={ICON_SIZE.card} color={PALETTE.blue600} />
           <Text className={`text-sm font-semibold ${addBtnText}`}>{ADD_CTA_LABEL}</Text>
         </Pressable>
       </View>

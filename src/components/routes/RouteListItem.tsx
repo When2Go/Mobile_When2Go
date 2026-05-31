@@ -9,7 +9,6 @@ import Animated, {
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { MapPin, Pencil, Trash2 } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import type { RouteItem } from '@/types/routes.types';
@@ -32,15 +31,14 @@ interface RouteListItemProps {
 }
 
 export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDelete }: RouteListItemProps) {
-  const { isDark } = useTheme();
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
 
-  const cardBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
-  const divider = isDark ? 'border-zinc-700' : 'border-zinc-100';
-  const heading = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const originDotColor = isDark ? 'bg-blue-400' : 'bg-blue-600';
+  const cardBg = 'bg-white border-zinc-200';
+  const divider = 'border-zinc-100';
+  const heading = 'text-zinc-900';
+  const sub = 'text-zinc-500';
+  const originDotColor = 'bg-blue-600';
 
   const handleDelete = useCallback(() => {
     onDelete(route.id);
@@ -112,7 +110,7 @@ export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDele
                 hitSlop={8}
                 className="rounded-lg p-1.5 active:opacity-60"
               >
-                <Pencil size={ICON_SIZE.card} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+                <Pencil size={ICON_SIZE.card} color={PALETTE.zinc500} />
               </Pressable>
             </View>
 
@@ -128,7 +126,7 @@ export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDele
               <View className="flex-row items-center gap-2">
                 <MapPin
                   size={ICON_SIZE.caption + 2}
-                  color={isDark ? PALETTE.emerald100 : PALETTE.emerald700}
+                  color={PALETTE.emerald700}
                 />
                 <Text className={`text-sm ${sub}`}>{route.to}</Text>
               </View>
