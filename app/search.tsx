@@ -12,11 +12,15 @@ import VoiceModal from '@/components/search/VoiceModal';
 import RecentSearchList from '@/components/search/RecentSearchList';
 import SearchResultList from '@/components/search/SearchResultList';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { useRecentSearches } from '@/hooks/search/useRecentSearches';
+import type { Place } from '@/api/kakao/types';
 
 export default function SearchScreen() {
   const router = useRouter();
   const { mode, field } = useLocalSearchParams<{ mode?: string; field?: string }>();
   const setPendingLocation = useRouteDraftStore((s) => s.setPendingLocation);
+  const setCoords = useRouteDraftStore((s) => s.setCoords);
+  const { addRecentPlace } = useRecentSearches();
 
   const [query, setQuery] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -24,13 +28,16 @@ export default function SearchScreen() {
   const startVoice = () => setVoiceOpen(true);
   const cancelVoice = () => setVoiceOpen(false);
 
-  const handleSelect = (destination: string) => {
+  const handleSelect = (place: Place) => {
+    const f = (field ?? 'from') as 'from' | 'to';
+    setCoords(f, { lat: place.lat, lng: place.lng });
+    addRecentPlace(place);
     if (mode === 'select-location') {
-      setPendingLocation(destination, (field ?? 'from') as 'from' | 'to');
+      setPendingLocation(place.name, f);
       router.back();
       return;
     }
-    router.push({ pathname: '/setup', params: { destination } });
+    router.push({ pathname: '/setup', params: { destination: place.name } });
   };
 
   const pageBg = 'bg-zinc-50';
@@ -58,7 +65,6 @@ export default function SearchScreen() {
           value={query}
           onChangeText={setQuery}
           onClear={() => setQuery('')}
-          onSubmit={() => { if (query.trim()) handleSelect(query.trim()); }}
         />
         <VoiceButton onPress={startVoice} />
       </View>
