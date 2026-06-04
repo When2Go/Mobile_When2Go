@@ -28,7 +28,6 @@ export const BADGE_LABEL: Record<RouteBadgeId, string> = {
 
 /** 라벨 토큰. */
 export const SCREEN_TITLE = '경로 선택';
-export const ARRIVAL_TARGET_PREFIX = '오후 2:30 도착을 위한';
 export const SELECT_ROUTE_HEADING = '경로를 선택해 주세요';
 export const RESERVATION_TITLE = '예약 확인';
 export const NOTIFICATION_NOTICE = '출발 10분 전과 출발 시점에 알림을 드릴게요';

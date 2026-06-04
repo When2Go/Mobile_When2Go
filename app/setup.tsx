@@ -88,7 +88,7 @@ export default function SetupScreen() {
   };
 
   const handleChangeDestination = () => {
-    router.push(SEARCH_PATH);
+    router.push({ pathname: SEARCH_PATH, params: { field: 'to' } });
   };
 
   const handleDepart = () => {
