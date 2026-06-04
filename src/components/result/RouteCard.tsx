@@ -9,7 +9,7 @@ import {
   DEPART_SUFFIX,
   FARE_LABEL_FORMAT,
   TRANSFER_META_FORMAT,
-  type MockRoute,
+  type RouteDisplayItem,
   type RouteBadgeId,
   type TransitIcon,
 } from '@/constants/result';
@@ -25,7 +25,7 @@ const BADGE_BG_CLASS: Record<RouteBadgeId, string> = {
 };
 
 interface RouteCardProps {
-  route: MockRoute;
+  route: RouteDisplayItem;
   onPress: () => void;
 }
 

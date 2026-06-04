@@ -17,8 +17,11 @@ import {
   type Period,
   type RouteOptionId,
 } from '@/constants/setup';
-import { BUFFER_MIN_PARAM } from '@/constants/result';
+import { ARRIVAL_TIME_PARAM, BUFFER_MIN_PARAM } from '@/constants/result';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
+import { toHHmm } from '@/utils/timeFormat';
 import DestinationHeader from '@/components/setup/DestinationHeader';
 import ArrivalTimePicker from '@/components/setup/ArrivalTimePicker';
 import RouteOptionList from '@/components/setup/RouteOptionList';
@@ -62,6 +65,9 @@ export default function SetupScreen() {
   const safetyBufferMin = routeBufferOverride ?? defaultBufferMin;
   const [isBufferSheetOpen, setBufferSheetOpen] = useState(false);
 
+  const setCoords = useRouteDraftStore((s) => s.setCoords);
+  const { lat: currentLat, lng: currentLng } = useCurrentLocation();
+
   const handleSaveBuffer = (next: number) => {
     setRouteBufferOverride(next);
     setBufferSheetOpen(false);
@@ -86,7 +92,14 @@ export default function SetupScreen() {
   };
 
   const handleDepart = () => {
-    router.push({ pathname: RESULT_PATH, params: { [BUFFER_MIN_PARAM]: String(safetyBufferMin) } });
+    setCoords('from', { lat: currentLat, lng: currentLng });
+    router.push({
+      pathname: RESULT_PATH,
+      params: {
+        [BUFFER_MIN_PARAM]: String(safetyBufferMin),
+        [ARRIVAL_TIME_PARAM]: toHHmm(period, hour, minute),
+      },
+    });
   };
 
   // mock 단계에서는 destination이 비어있을 때만 비활성. 시간 기본값이 항상 세팅돼 있어 추가 검증은 X.

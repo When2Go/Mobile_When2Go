@@ -11,7 +11,7 @@ import {
   DEPART_SUFFIX,
   NOTIFICATION_NOTICE,
   RESERVATION_TITLE,
-  type MockRoute,
+  type RouteDisplayItem,
   type RouteBadgeId,
 } from '@/constants/result';
 
@@ -27,7 +27,7 @@ const STEPS_JOINER = ' → ';
 
 interface ReservationCompleteModalProps {
   isOpen: boolean;
-  route: MockRoute | null;
+  route: RouteDisplayItem | null;
   confirmed: boolean;
   onClose: () => void;
   onConfirm: () => void;

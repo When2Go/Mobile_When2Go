@@ -8,7 +8,7 @@ export type RouteBadgeId = 'optimal' | 'min_transfer' | 'min_fare';
 
 export type TransitIcon = 'train' | 'bus';
 
-export interface MockRoute {
+export interface RouteDisplayItem {
   id: string;
   badge: RouteBadgeId;
   departureTime: string;
@@ -26,42 +26,6 @@ export const BADGE_LABEL: Record<RouteBadgeId, string> = {
   min_fare: '최소요금',
 };
 
-export const MOCK_ROUTES: readonly MockRoute[] = [
-  {
-    id: 'optimal',
-    badge: 'optimal',
-    departureTime: '오후 1:15',
-    arrivalTime: '오후 2:30',
-    durationLabel: '1시간 15분',
-    steps: ['인하대역', '오이도역', '강남역'],
-    transferCount: 1,
-    fareLabel: '1,850원',
-    icon: 'train',
-  },
-  {
-    id: 'min_transfer',
-    badge: 'min_transfer',
-    departureTime: '오후 1:10',
-    arrivalTime: '오후 2:30',
-    durationLabel: '1시간 20분',
-    steps: ['인하대역', '신도림역', '강남역'],
-    transferCount: 1,
-    fareLabel: '1,950원',
-    icon: 'train',
-  },
-  {
-    id: 'min_fare',
-    badge: 'min_fare',
-    departureTime: '오후 1:00',
-    arrivalTime: '오후 2:30',
-    durationLabel: '1시간 30분',
-    steps: ['현위치', '직행버스', '강남역'],
-    transferCount: 0,
-    fareLabel: '1,450원',
-    icon: 'bus',
-  },
-] as const;
-
 /** 라벨 토큰. */
 export const SCREEN_TITLE = '경로 선택';
 export const ARRIVAL_TARGET_PREFIX = '오후 2:30 도착을 위한';
@@ -78,8 +42,9 @@ export const FARE_LABEL_FORMAT = (fareLabel: string): string => `요금 ${fareLa
 export const SAFETY_BUFFER_NOTICE_FORMAT = (minutes: number): string =>
   `+${minutes}분 안전 버퍼 적용`;
 
-/** setup → result 화면으로 넘기는 안전 버퍼 라우트 파라미터 키. */
+/** setup → result 화면으로 넘기는 라우트 파라미터 키. */
 export const BUFFER_MIN_PARAM = 'bufferMin';
+export const ARRIVAL_TIME_PARAM = 'arrivalTime';
 
 /** 예약 완료 후 schedule 화면으로 리다이렉트되기 전 머무는 시간(ms). */
 export const CONFIRM_REDIRECT_DELAY_MS = 800;
