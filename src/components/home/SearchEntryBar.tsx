@@ -19,7 +19,7 @@ export default function SearchEntryBar() {
 
   return (
     <Pressable
-      onPress={() => router.push('/search')}
+      onPress={() => router.push({ pathname: '/search', params: { field: 'to' } })}
       accessibilityRole="button"
       accessibilityLabel="목적지 검색"
       className={`h-14 w-full flex-row items-center gap-3 rounded-2xl border px-4 active:opacity-80 ${barBg}`}
