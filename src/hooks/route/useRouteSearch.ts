@@ -18,7 +18,10 @@ const INITIAL_STATE: RouteSearchState = {
   error: null,
 };
 
-export function useRouteSearch(req: RouteSearchRequest | null): RouteSearchState {
+export function useRouteSearch(
+  req: RouteSearchRequest | null,
+  bufferMin: number,
+): RouteSearchState {
   const [state, setState] = useState<RouteSearchState>(INITIAL_STATE);
 
   useEffect(() => {
@@ -31,7 +34,7 @@ export function useRouteSearch(req: RouteSearchRequest | null): RouteSearchState
       .then((candidates) => {
         if (cancelled) return;
         setState({
-          routes: normalizeCandidates(candidates),
+          routes: normalizeCandidates(candidates, req.arrivalTime, bufferMin),
           isLoading: false,
           error: null,
         });
@@ -44,7 +47,7 @@ export function useRouteSearch(req: RouteSearchRequest | null): RouteSearchState
     return () => {
       cancelled = true;
     };
-  }, [req]);
+  }, [req, bufferMin]);
 
   return state;
 }

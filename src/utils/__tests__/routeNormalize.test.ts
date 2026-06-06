@@ -29,60 +29,67 @@ const TRANSIT_STEP = {
 function makeRoute(overrides: Partial<RouteCandidate> = {}): RouteCandidate {
   return {
     distanceMeters: 5209,
-    duration: '1438s',
-    staticDuration: '1438s',
+    duration: '1800s',
+    staticDuration: '1800s',
     legs: [{ steps: [WALK_STEP, TRANSIT_STEP, WALK_STEP] }],
     routeLabels: ['DEFAULT_ROUTE'],
-    localizedValues: { duration: { text: '24분' } },
+    localizedValues: { duration: { text: '30분' } },
     ...overrides,
   };
 }
 
+const ARRIVAL_TIME = '2026-05-22 14:30';
+const BUFFER_MIN = 0;
+
 describe('normalizeRoute', () => {
   // 정상
   it('durationLabel은 localizedValues.duration.text에서 추출', () => {
-    const item = normalizeRoute(makeRoute(), 0, 'optimal');
-    expect(item.durationLabel).toBe('24분');
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
+    expect(item.durationLabel).toBe('30분');
   });
 
   it('TRANSIT step에서 승/하차 역명 추출', () => {
-    const item = normalizeRoute(makeRoute(), 0, 'optimal');
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
     expect(item.steps).toEqual(['주안역환승정류장', '인하대역']);
   });
 
   it('BUS vehicle → icon: bus', () => {
-    const item = normalizeRoute(makeRoute(), 0, 'optimal');
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
     expect(item.icon).toBe('bus');
   });
 
-  it('departureTime / arrivalTime은 KST 포맷으로 변환', () => {
-    const item = normalizeRoute(makeRoute(), 0, 'optimal');
-    expect(item.departureTime).toBe('오후 1:13');
-    expect(item.arrivalTime).toBe('오후 1:28');
+  // 출발·도착 시각 계산
+  it('departureTime은 arrivalTime - duration - bufferMin', () => {
+    // 14:30 - 1800s(30분) - 0 = 14:00
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
+    expect(item.departureTime).toBe('오후 2:00');
+  });
+
+  it('arrivalTime은 arrivalTime - bufferMin', () => {
+    // 14:30 - 0 = 14:30
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
+    expect(item.arrivalTime).toBe('오후 2:30');
+  });
+
+  it('버퍼가 있으면 출발·도착 모두 앞당겨진다', () => {
+    // 14:30 - 1800s(30분) - 10분 = 13:50 출발, 14:30 - 10분 = 14:20 도착
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, 10);
+    expect(item.departureTime).toBe('오후 1:50');
+    expect(item.arrivalTime).toBe('오후 2:20');
   });
 
   it('badge 파라미터를 그대로 반환한다', () => {
-    expect(normalizeRoute(makeRoute(), 0, 'optimal').badge).toBe('optimal');
-    expect(normalizeRoute(makeRoute(), 1, 'min_transfer').badge).toBe('min_transfer');
-    expect(normalizeRoute(makeRoute(), 2, null).badge).toBeNull();
+    expect(normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN).badge).toBe('optimal');
+    expect(normalizeRoute(makeRoute(), 1, 'min_transfer', ARRIVAL_TIME, BUFFER_MIN).badge).toBe('min_transfer');
+    expect(normalizeRoute(makeRoute(), 2, null, ARRIVAL_TIME, BUFFER_MIN).badge).toBeNull();
   });
 
   // 경계: TRANSIT step 없음
   it('TRANSIT step이 없으면 steps 빈 배열, transferCount 0', () => {
     const walkOnly = makeRoute({ legs: [{ steps: [WALK_STEP] }] });
-    const item = normalizeRoute(walkOnly, 0, 'optimal');
+    const item = normalizeRoute(walkOnly, 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
     expect(item.steps).toEqual([]);
     expect(item.transferCount).toBe(0);
-  });
-
-  // 에러: transitDetails 없는 TRANSIT step
-  it('transitDetails 없으면 departureTime/arrivalTime "--:--"', () => {
-    const noDetails = makeRoute({
-      legs: [{ steps: [{ travelMode: 'TRANSIT' as const, distanceMeters: 100, staticDuration: '60s' }] }],
-    });
-    const item = normalizeRoute(noDetails, 0, 'optimal');
-    expect(item.departureTime).toBe('--:--');
-    expect(item.arrivalTime).toBe('--:--');
   });
 
   it('SUBWAY vehicle → icon: train', () => {
@@ -90,7 +97,7 @@ describe('normalizeRoute', () => {
       ...TRANSIT_STEP,
       transitDetails: { ...TRANSIT_STEP.transitDetails, transitLine: { vehicle: { type: 'SUBWAY' } } },
     };
-    const item = normalizeRoute(makeRoute({ legs: [{ steps: [subwayStep] }] }), 0, 'optimal');
+    const item = normalizeRoute(makeRoute({ legs: [{ steps: [subwayStep] }] }), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
     expect(item.icon).toBe('train');
   });
 
@@ -98,7 +105,7 @@ describe('normalizeRoute', () => {
     const route = makeRoute({
       legs: [{ steps: [WALK_STEP, TRANSIT_STEP, WALK_STEP, TRANSIT_STEP, WALK_STEP] }],
     });
-    const item = normalizeRoute(route, 0, 'optimal');
+    const item = normalizeRoute(route, 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
     expect(item.transferCount).toBe(1);
   });
 });
@@ -108,9 +115,9 @@ describe('normalizeCandidates', () => {
   it('duration이 가장 짧은 경로가 optimal 배지를 받는다', () => {
     const short = makeRoute({ duration: '600s', routeLabels: [] });
     const long = makeRoute({ duration: '1200s', routeLabels: [] });
-    const result = normalizeCandidates([long, short]);
-    const optimal = result.find((r) => r.badge === 'optimal');
-    expect(optimal?.durationLabel).toBe('24분'); // short route의 localizedValues
+    const result = normalizeCandidates([long, short], ARRIVAL_TIME, BUFFER_MIN);
+    const optimalIdx = result.findIndex((r) => r.badge === 'optimal');
+    expect(result[optimalIdx].durationLabel).toBe('30분'); // short route
   });
 
   // 정상: 환승 최솟값(optimal 제외) → min_transfer
@@ -121,36 +128,36 @@ describe('normalizeCandidates', () => {
       legs: [{ steps: [TRANSIT_STEP] }],
     });
     const twoTransit = makeRoute({
-      duration: '1000s', // optimal
+      duration: '1000s',
       routeLabels: [],
       legs: [{ steps: [TRANSIT_STEP, TRANSIT_STEP] }],
     });
-    const result = normalizeCandidates([twoTransit, oneTransit]);
-    expect(result.find((r) => r.badge === 'optimal')?.transferCount).toBe(1); // twoTransit
-    expect(result.find((r) => r.badge === 'min_transfer')?.transferCount).toBe(0); // oneTransit
+    const result = normalizeCandidates([twoTransit, oneTransit], ARRIVAL_TIME, BUFFER_MIN);
+    expect(result.find((r) => r.badge === 'optimal')?.transferCount).toBe(1);
+    expect(result.find((r) => r.badge === 'min_transfer')?.transferCount).toBe(0);
   });
 
-  // 경계: 경로 1개 → optimal만, min_transfer 없음
+  // 경계: 경로 1개 → optimal만
   it('경로가 1개면 optimal만 반환한다', () => {
-    const result = normalizeCandidates([makeRoute()]);
+    const result = normalizeCandidates([makeRoute()], ARRIVAL_TIME, BUFFER_MIN);
     expect(result).toHaveLength(1);
     expect(result[0].badge).toBe('optimal');
   });
 
-  // null 필터: 배지 없는 경로는 결과에서 제외
+  // null 필터
   it('badge가 null인 경로(3번째 이상)는 결과에서 제외된다', () => {
     const routes = [
       makeRoute({ duration: '1000s', routeLabels: [] }),
       makeRoute({ duration: '2000s', routeLabels: [] }),
       makeRoute({ duration: '3000s', routeLabels: [] }),
     ];
-    const result = normalizeCandidates(routes);
+    const result = normalizeCandidates(routes, ARRIVAL_TIME, BUFFER_MIN);
     expect(result).toHaveLength(2);
     expect(result.map((r) => r.badge)).toEqual(['optimal', 'min_transfer']);
   });
 
   // 경계: 빈 배열
   it('빈 배열을 넘기면 빈 배열을 반환한다', () => {
-    expect(normalizeCandidates([])).toEqual([]);
+    expect(normalizeCandidates([], ARRIVAL_TIME, BUFFER_MIN)).toEqual([]);
   });
 });

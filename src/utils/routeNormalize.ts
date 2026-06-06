@@ -1,6 +1,6 @@
 import type { RouteCandidate, RouteLeg } from '@/api/route/types';
 import type { RouteBadgeId, RouteDisplayItem, TransitIcon } from '@/constants/result';
-import { formatUTCToKoreanTime } from './timeFormat';
+import { calcArrivalDisplay, calcDepartureTime } from './timeFormat';
 
 const FALLBACK_TIME = '--:--';
 
@@ -59,35 +59,36 @@ export function normalizeRoute(
   route: RouteCandidate,
   index: number,
   badge: RouteBadgeId | null,
+  arrivalTime: string,
+  bufferMin: number,
 ): RouteDisplayItem {
-  const { legs } = route;
-  const allSteps = legs.flatMap((l) => l.steps);
-
-  const firstTransit = allSteps.find((s) => s.travelMode === 'TRANSIT');
-  const lastTransit = [...allSteps].reverse().find((s) => s.travelMode === 'TRANSIT');
-
-  const deptTime = firstTransit?.transitDetails?.stopDetails?.departureTime;
-  const arrTime = lastTransit?.transitDetails?.stopDetails?.arrivalTime;
+  const durationSecs = parseInt(route.duration);
 
   return {
     id: String(index),
     badge,
-    departureTime: deptTime ? formatUTCToKoreanTime(deptTime) : FALLBACK_TIME,
-    arrivalTime: arrTime ? formatUTCToKoreanTime(arrTime) : FALLBACK_TIME,
+    departureTime: isNaN(durationSecs)
+      ? FALLBACK_TIME
+      : calcDepartureTime(arrivalTime, durationSecs, bufferMin),
+    arrivalTime: calcArrivalDisplay(arrivalTime, bufferMin),
     durationLabel:
       route.localizedValues?.duration?.text ??
       route.localizedValues?.staticDuration?.text ??
       FALLBACK_TIME,
-    steps: extractTransitStops(legs),
-    transferCount: countTransfers(legs),
+    steps: extractTransitStops(route.legs),
+    transferCount: countTransfers(route.legs),
     fareLabel: '-',
-    icon: resolveIcon(legs),
+    icon: resolveIcon(route.legs),
   };
 }
 
-export function normalizeCandidates(candidates: RouteCandidate[]): RouteDisplayItem[] {
+export function normalizeCandidates(
+  candidates: RouteCandidate[],
+  arrivalTime: string,
+  bufferMin: number,
+): RouteDisplayItem[] {
   const badges = assignBadges(candidates);
   return candidates
-    .map((c, i) => normalizeRoute(c, i, badges[i]))
+    .map((c, i) => normalizeRoute(c, i, badges[i], arrivalTime, bufferMin))
     .filter((item) => item.badge !== null);
 }

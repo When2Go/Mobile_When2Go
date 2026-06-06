@@ -45,7 +45,7 @@ const VALID_REQ: RouteSearchRequest = {
   originLng: 126.679,
   destLat: 37.448,
   destLng: 126.649,
-  arrivalTime: '14:30',
+  arrivalTime: '2026-05-22 14:30',
 };
 
 beforeEach(() => {
@@ -57,7 +57,7 @@ describe('useRouteSearch', () => {
   it('유효한 req 제공 시 API를 호출하고 routes를 반환한다', async () => {
     searchRoutes.mockResolvedValue([MOCK_ROUTE]);
 
-    const { result } = renderHook(() => useRouteSearch(VALID_REQ));
+    const { result } = renderHook(() => useRouteSearch(VALID_REQ, 0));
 
     expect(result.current.isLoading).toBe(true);
 
@@ -75,7 +75,7 @@ describe('useRouteSearch', () => {
   it('API가 빈 배열을 반환하면 routes가 빈 배열이다', async () => {
     searchRoutes.mockResolvedValue([]);
 
-    const { result } = renderHook(() => useRouteSearch(VALID_REQ));
+    const { result } = renderHook(() => useRouteSearch(VALID_REQ, 0));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -86,7 +86,7 @@ describe('useRouteSearch', () => {
 
   // 분기: req가 null이면 API 미호출
   it('req가 null이면 API를 호출하지 않고 isLoading false를 유지한다', () => {
-    const { result } = renderHook(() => useRouteSearch(null));
+    const { result } = renderHook(() => useRouteSearch(null, 0));
 
     expect(searchRoutes).not.toHaveBeenCalled();
     expect(result.current.isLoading).toBe(false);
@@ -98,7 +98,7 @@ describe('useRouteSearch', () => {
     const failure: ApiFailure = { ok: false, reason: 'SERVER', status: 500 };
     searchRoutes.mockRejectedValue(failure);
 
-    const { result } = renderHook(() => useRouteSearch(VALID_REQ));
+    const { result } = renderHook(() => useRouteSearch(VALID_REQ, 0));
 
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
@@ -113,7 +113,7 @@ describe('useRouteSearch', () => {
     searchRoutes.mockResolvedValue([MOCK_ROUTE]);
 
     const { result, rerender } = renderHook(
-      ({ req }: { req: RouteSearchRequest | null }) => useRouteSearch(req),
+      ({ req }: { req: RouteSearchRequest | null }) => useRouteSearch(req, 0),
       { initialProps: { req: VALID_REQ } },
     );
 

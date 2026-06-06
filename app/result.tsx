@@ -98,7 +98,7 @@ export default function ResultScreen() {
     [fromCoords, toCoords, arrivalTime],
   );
 
-  const { routes, isLoading, error } = useRouteSearch(routeReq);
+  const { routes, isLoading, error } = useRouteSearch(routeReq, safetyBufferMin);
 
   const [selectedRoute, setSelectedRoute] = useState<RouteDisplayItem | null>(null);
   const [confirmed, setConfirmed] = useState(false);

@@ -1,6 +1,8 @@
 import type { Period } from '@/constants/setup';
 
 const KST_OFFSET_HOURS = 9;
+const MS_PER_SEC = 1000;
+const MS_PER_MIN = 60 * MS_PER_SEC;
 
 /**
  * setup 화면의 오전/오후 + 12h 시각을 API 요청용 HH:mm(24h) 문자열로 변환한다.
@@ -19,6 +21,35 @@ export function toDateTimeString(date: Date, period: Period, hour: number, minut
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd} ${toHHmm(period, hour, minute)}`;
+}
+
+function parseKSTDateTime(dateTimeStr: string): Date {
+  const [datePart, timePart] = dateTimeStr.split(' ');
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute] = timePart.split(':').map(Number);
+  return new Date(year, month - 1, day, hour, minute, 0);
+}
+
+function formatLocalKoreanTime(date: Date): string {
+  const h = date.getHours();
+  const m = date.getMinutes();
+  const period = h < 12 ? '오전' : '오후';
+  const displayHour = h % 12 || 12;
+  return `${period} ${displayHour}:${String(m).padStart(2, '0')}`;
+}
+
+/** 도착 목표 시각에서 소요 시간·안전 버퍼를 역산해 출발 시각을 반환한다. */
+export function calcDepartureTime(arrivalTimeStr: string, durationSecs: number, bufferMin: number): string {
+  const arrival = parseKSTDateTime(arrivalTimeStr);
+  const departure = new Date(arrival.getTime() - durationSecs * MS_PER_SEC - bufferMin * MS_PER_MIN);
+  return formatLocalKoreanTime(departure);
+}
+
+/** 도착 목표 시각에서 안전 버퍼를 뺀 실제 도착 시각을 반환한다. */
+export function calcArrivalDisplay(arrivalTimeStr: string, bufferMin: number): string {
+  const arrival = parseKSTDateTime(arrivalTimeStr);
+  const actual = new Date(arrival.getTime() - bufferMin * MS_PER_MIN);
+  return formatLocalKoreanTime(actual);
 }
 
 /**
