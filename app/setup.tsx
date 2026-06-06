@@ -21,7 +21,7 @@ import { ARRIVAL_TIME_PARAM, BUFFER_MIN_PARAM } from '@/constants/result';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
-import { toHHmm } from '@/utils/timeFormat';
+import { toDateTimeString } from '@/utils/timeFormat';
 import DestinationHeader from '@/components/setup/DestinationHeader';
 import ArrivalTimePicker from '@/components/setup/ArrivalTimePicker';
 import RouteOptionList from '@/components/setup/RouteOptionList';
@@ -97,7 +97,7 @@ export default function SetupScreen() {
       pathname: RESULT_PATH,
       params: {
         [BUFFER_MIN_PARAM]: String(safetyBufferMin),
-        [ARRIVAL_TIME_PARAM]: toHHmm(period, hour, minute),
+        [ARRIVAL_TIME_PARAM]: toDateTimeString(selectedDate, period, hour, minute),
       },
     });
   };

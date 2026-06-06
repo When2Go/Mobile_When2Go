@@ -1,4 +1,4 @@
-import { formatUTCToKoreanTime, toHHmm } from '../timeFormat';
+import { formatUTCToKoreanTime, toDateTimeString, toHHmm } from '../timeFormat';
 
 describe('toHHmm', () => {
   // 정상
@@ -26,6 +26,20 @@ describe('toHHmm', () => {
   // 분 0패딩
   it('오전 9:05 → "09:05"', () => {
     expect(toHHmm('오전', 9, 5)).toBe('09:05');
+  });
+});
+
+describe('toDateTimeString', () => {
+  it('날짜 + 오후 1:30 → "2026-05-22 13:30"', () => {
+    expect(toDateTimeString(new Date(2026, 4, 22), '오후', 1, 30)).toBe('2026-05-22 13:30');
+  });
+
+  it('날짜 + 오전 9:05 → "2026-05-22 09:05"', () => {
+    expect(toDateTimeString(new Date(2026, 4, 22), '오전', 9, 5)).toBe('2026-05-22 09:05');
+  });
+
+  it('월·일 0패딩 → "2026-01-03 08:00"', () => {
+    expect(toDateTimeString(new Date(2026, 0, 3), '오전', 8, 0)).toBe('2026-01-03 08:00');
   });
 });
 

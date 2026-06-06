@@ -21,7 +21,6 @@ const CHEVRON_SIZE = 12;
 const BADGE_BG_CLASS: Record<RouteBadgeId, string> = {
   optimal: 'bg-blue-600',
   min_transfer: 'bg-emerald-600',
-  min_fare: 'bg-amber-500',
 };
 
 interface RouteCardProps {
@@ -82,21 +81,25 @@ export default function RouteCard({ route, onPress }: RouteCardProps) {
   const departureText = 'text-blue-500';
   const chevronColor = PALETTE.zinc500;
 
-  const badgeBg = BADGE_BG_CLASS[route.badge];
-  const badgeLabel = BADGE_LABEL[route.badge];
+  const badgeBg = route.badge ? BADGE_BG_CLASS[route.badge] : null;
+  const badgeLabel = route.badge ? BADGE_LABEL[route.badge] : null;
 
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${badgeLabel} 경로 선택`}
+      accessibilityLabel={badgeLabel ? `${badgeLabel} 경로 선택` : '경로 선택'}
       className={`rounded-2xl border p-4 active:opacity-70 ${cardClass}`}
     >
       {/* 상단: 배지 + 소요/환승 메타 */}
       <View className="mb-3 flex-row items-center justify-between">
-        <View className={`rounded-full px-2.5 py-1 ${badgeBg}`}>
-          <Text className="text-[11px] font-bold text-white">{badgeLabel}</Text>
-        </View>
+        {badgeBg && badgeLabel ? (
+          <View className={`rounded-full px-2.5 py-1 ${badgeBg}`}>
+            <Text className="text-[11px] font-bold text-white">{badgeLabel}</Text>
+          </View>
+        ) : (
+          <View />
+        )}
         <Text className={`text-xs font-medium ${subText}`}>
           {TRANSFER_META_FORMAT(route.durationLabel, route.transferCount)}
         </Text>

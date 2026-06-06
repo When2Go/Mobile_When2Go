@@ -13,6 +13,14 @@ export function toHHmm(period: Period, hour: number, minute: number): string {
   return `${String(h).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
+/** setup 화면의 날짜·오전오후·시·분을 API 요청용 "YYYY-MM-DD HH:mm" 문자열로 변환한다. */
+export function toDateTimeString(date: Date, period: Period, hour: number, minute: number): string {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd} ${toHHmm(period, hour, minute)}`;
+}
+
 /**
  * Google Maps API가 반환하는 ISO-8601 UTC 시각을 한국 시간(KST, UTC+9) 표시 문자열로 변환한다.
  * 예: "2026-05-22T04:13:11Z" → "오후 1:13"

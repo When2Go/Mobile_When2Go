@@ -20,7 +20,6 @@ const SHEET_SNAP_POINTS = ['52%'];
 const BADGE_BG_CLASS: Record<RouteBadgeId, string> = {
   optimal: 'bg-blue-600',
   min_transfer: 'bg-emerald-600',
-  min_fare: 'bg-amber-500',
 };
 
 const STEPS_JOINER = ' → ';
@@ -58,12 +57,14 @@ export default function ReservationCompleteModal({
           {/* 선택 경로 요약 */}
           <View className={`mb-5 rounded-2xl border p-4 ${summaryCard}`}>
             <View className="mb-2 flex-row items-center">
-              <View className={`rounded-full px-2 py-0.5 ${BADGE_BG_CLASS[route.badge]}`}>
-                <Text className="text-[11px] font-bold text-white">
-                  {BADGE_LABEL[route.badge]}
-                </Text>
-              </View>
-              <Text className={`ml-2 text-xs ${subText}`}>{route.durationLabel}</Text>
+              {route.badge ? (
+                <View className={`rounded-full px-2 py-0.5 ${BADGE_BG_CLASS[route.badge]}`}>
+                  <Text className="text-[11px] font-bold text-white">
+                    {BADGE_LABEL[route.badge]}
+                  </Text>
+                </View>
+              ) : null}
+              <Text className={`${route.badge ? 'ml-2' : ''} text-xs ${subText}`}>{route.durationLabel}</Text>
             </View>
             <View className="flex-row items-baseline">
               <Text className={`text-2xl font-black ${departureText}`}>{route.departureTime}</Text>

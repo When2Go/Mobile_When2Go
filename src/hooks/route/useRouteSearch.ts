@@ -4,7 +4,7 @@ import { searchRoutes } from '@/api/route';
 import type { RouteSearchRequest } from '@/api/route/types';
 import type { RouteDisplayItem } from '@/constants/result';
 import type { ApiFailure } from '@/types/api.types';
-import { normalizeRoute } from '@/utils/routeNormalize';
+import { normalizeCandidates } from '@/utils/routeNormalize';
 
 interface RouteSearchState {
   routes: RouteDisplayItem[];
@@ -31,7 +31,7 @@ export function useRouteSearch(req: RouteSearchRequest | null): RouteSearchState
       .then((candidates) => {
         if (cancelled) return;
         setState({
-          routes: candidates.map((c, i) => normalizeRoute(c, i)),
+          routes: normalizeCandidates(candidates),
           isLoading: false,
           error: null,
         });

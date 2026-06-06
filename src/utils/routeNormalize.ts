@@ -4,11 +4,27 @@ import { formatUTCToKoreanTime } from './timeFormat';
 
 const FALLBACK_TIME = '--:--';
 
-function resolveBadge(index: number, routeLabels?: string[]): RouteBadgeId {
-  if (routeLabels?.includes('DEFAULT_ROUTE')) return 'optimal';
-  if (index === 0) return 'optimal';
-  if (index === 1) return 'min_transfer';
-  return 'min_fare';
+function assignBadges(candidates: RouteCandidate[]): (RouteBadgeId | null)[] {
+  const badges: (RouteBadgeId | null)[] = new Array(candidates.length).fill(null);
+  if (candidates.length === 0) return badges;
+
+  const durations = candidates.map((c) => parseInt(c.duration));
+  const minDurationIdx = durations.indexOf(Math.min(...durations));
+  badges[minDurationIdx] = 'optimal';
+
+  const transfers = candidates.map((c) => countTransfers(c.legs));
+  let minTransferIdx = -1;
+  let minTransferCount = Infinity;
+  for (let i = 0; i < candidates.length; i++) {
+    if (i === minDurationIdx) continue;
+    if (transfers[i] < minTransferCount) {
+      minTransferCount = transfers[i];
+      minTransferIdx = i;
+    }
+  }
+  if (minTransferIdx !== -1) badges[minTransferIdx] = 'min_transfer';
+
+  return badges;
 }
 
 function extractTransitStops(legs: RouteLeg[]): string[] {
@@ -39,7 +55,11 @@ function resolveIcon(legs: RouteLeg[]): TransitIcon {
   return firstTransit?.transitDetails?.transitLine?.vehicle?.type === 'SUBWAY' ? 'train' : 'bus';
 }
 
-export function normalizeRoute(route: RouteCandidate, index: number): RouteDisplayItem {
+export function normalizeRoute(
+  route: RouteCandidate,
+  index: number,
+  badge: RouteBadgeId | null,
+): RouteDisplayItem {
   const { legs } = route;
   const allSteps = legs.flatMap((l) => l.steps);
 
@@ -51,7 +71,7 @@ export function normalizeRoute(route: RouteCandidate, index: number): RouteDispl
 
   return {
     id: String(index),
-    badge: resolveBadge(index, route.routeLabels),
+    badge,
     departureTime: deptTime ? formatUTCToKoreanTime(deptTime) : FALLBACK_TIME,
     arrivalTime: arrTime ? formatUTCToKoreanTime(arrTime) : FALLBACK_TIME,
     durationLabel:
@@ -63,4 +83,11 @@ export function normalizeRoute(route: RouteCandidate, index: number): RouteDispl
     fareLabel: '-',
     icon: resolveIcon(legs),
   };
+}
+
+export function normalizeCandidates(candidates: RouteCandidate[]): RouteDisplayItem[] {
+  const badges = assignBadges(candidates);
+  return candidates
+    .map((c, i) => normalizeRoute(c, i, badges[i]))
+    .filter((item) => item.badge !== null);
 }

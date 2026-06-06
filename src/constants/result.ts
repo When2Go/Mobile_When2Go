@@ -4,13 +4,13 @@
  * - 컴포넌트에 매직 넘버·문자열을 박지 않기 위함 (CLAUDE.md §컨벤션 3).
  */
 
-export type RouteBadgeId = 'optimal' | 'min_transfer' | 'min_fare';
+export type RouteBadgeId = 'optimal' | 'min_transfer';
 
 export type TransitIcon = 'train' | 'bus';
 
 export interface RouteDisplayItem {
   id: string;
-  badge: RouteBadgeId;
+  badge: RouteBadgeId | null;
   departureTime: string;
   arrivalTime: string;
   durationLabel: string;
@@ -23,7 +23,6 @@ export interface RouteDisplayItem {
 export const BADGE_LABEL: Record<RouteBadgeId, string> = {
   optimal: '최적경로',
   min_transfer: '최소환승',
-  min_fare: '최소요금',
 };
 
 /** 라벨 토큰. */
