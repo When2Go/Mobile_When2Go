@@ -97,18 +97,35 @@
 | `widgetEnabled` | boolean | X |  |
 | `createdAt` | string (ISO 8601) | X |  |
 
-**Status**: `200` 성공(신규/기존) / `400` 필드 오류
+**Status**: `200` (신규 등록 · 동일 디바이스 재요청 — upsert 멱등) / `400` 필드 오류(`deviceId` 누락·36자 아님 / `fcmToken` 누락)
 
 ### GET `/api/users/status` — 등록 여부 확인
 
-**Response**: `data`에 `exists`(boolean) 필드로 디바이스 등록 여부 판별
-**Status**: `200` / `400` (X-Device-Id 누락 또는 형식 오류)
+**Request**: 헤더 `X-Device-Id: {deviceId}` (axios 인터셉터가 자동 주입)
+
+**Response** (`data`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `exists` | boolean | X | 해당 deviceId 회원 등록 여부 |
+
+**Status**: `200` / `400` (`X-Device-Id` 누락 또는 36자 아님)
+
+> 앱 시작 시 호출. `exists=false`이면 `POST /api/users`로 등록 흐름 진입.
 
 ### PATCH `/api/users/me/fcm-token`
 
-**Request** (`FcmTokenUpdateRequest`): `{ "fcmToken": string }` (required)
-**Response**: `data: null`
-**Status**: `200` / `400` (토큰 누락) / `404` (미등록 디바이스)
+**Request** (`FcmTokenUpdateRequest`): `{ "fcmToken": string }` (헤더 `X-Device-Id` 필수, `fcmToken` 512자 이하)
+
+**Response** (`data`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `userId` | number | X |  |
+| `deviceId` | string | X |  |
+| `fcmToken` | string | X | 갱신된 토큰 |
+
+**Status**: `200` (동일 토큰 재전송도 `200` — 멱등) / `400` (토큰 누락 · 512자 초과 · `X-Device-Id` 누락/형식 오류) / `404` (미등록 디바이스 — `POST /api/users` 선행 필요)
 
 ---
 

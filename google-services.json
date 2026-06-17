@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "344357000234",
+    "project_id": "when2go-35b35",
+    "storage_bucket": "when2go-35b35.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:344357000234:android:672326d8cb5bcf169b1f53",
+        "android_client_info": {
+          "package_name": "kr.co.when2go.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC0un8QMc3IO1gvE5b3zsiWZ09Bxu2ukWI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

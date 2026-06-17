@@ -15,12 +15,19 @@ const config: ExpoConfig = {
   ios: {
     bundleIdentifier: 'kr.co.when2go.app',
     supportsTablet: false,
+    googleServicesFile: './GoogleService-Info.plist',
+    entitlements: {
+      'aps-environment': 'development',
+    },
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
+      UIBackgroundModes: ['remote-notification'],
+      NSPushNotificationUsageDescription: '출발 알림을 받으려면 알림 권한이 필요합니다.',
     },
   },
   android: {
     package: 'kr.co.when2go.app',
+    googleServicesFile: './google-services.json',
     adaptiveIcon: {
       backgroundColor: '#E6F4FE',
       foregroundImage: './assets/images/android-icon-foreground.png',
@@ -35,6 +42,8 @@ const config: ExpoConfig = {
     favicon: './assets/images/favicon.png',
   },
   plugins: [
+    'expo-dev-client',
+    '@react-native-firebase/app',
     'expo-router',
     [
       'expo-splash-screen',
@@ -64,11 +73,15 @@ const config: ExpoConfig = {
     [
       'expo-build-properties',
       {
+        ios: {
+          useFrameworks: 'static',
+        },
         android: {
           extraMavenRepos: ['https://repository.map.naver.com/archive/maven'],
         },
       },
     ],
+    './plugins/withFirebaseFix',
   ],
   experiments: {
     typedRoutes: true,
