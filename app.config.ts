@@ -74,7 +74,6 @@ const config: ExpoConfig = {
       'expo-build-properties',
       {
         ios: {
-          newArchEnabled: false,
           useFrameworks: 'static',
         },
         android: {
