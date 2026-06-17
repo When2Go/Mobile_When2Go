@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { ArrowRight } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { DEPART_BUTTON_LABEL } from '@/constants/setup';
@@ -17,10 +16,8 @@ interface Props {
  * - disabled 시 opacity 50.
  */
 export default function DepartButton({ disabled, onPress }: Props) {
-  const { isDark } = useTheme();
-
-  const baseBg = isDark ? 'bg-blue-500' : 'bg-blue-600';
-  const activeBg = isDark ? 'active:bg-blue-600' : 'active:bg-blue-700';
+  const baseBg = 'bg-blue-600';
+  const activeBg = 'active:bg-blue-700';
   const opacityClass = disabled ? 'opacity-50' : '';
 
   return (

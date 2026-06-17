@@ -13,7 +13,7 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
 ## 핵심 컨벤션
 
 1. **스타일**: NativeWind 시맨틱 토큰만 사용. 하드코딩 색상값(`#2563eb`, `style={{color:...}}`) 금지.
-2. **다크모드**: 모든 화면에 `isDark` 조건부 클래스 필수. 누락 시 QA 반려.
+2. **다크모드**: 현재 라이트모드로 일괄 통일된 상태(#58). 신규 컴포넌트에 `isDark` 분기 추가 금지. `ThemeContext`/`useTheme()` 골격은 재도입 대비로 보존만. 재도입 시점에 별도 이슈로 다크 톤 재디자인 예정.
 3. **상수**: 숫자 리터럴 직접 사용 금지. `constants/` 또는 파일 상단에 상수명 선언.
 4. **훅**: 도메인별 분리 (`hooks/trip/`, `hooks/route/`). 로직 종류 기준 혼합 금지.
 5. **ODsay**: 프론트 직접 호출 금지. Spring Boot 프록시를 통해서만.
@@ -39,6 +39,7 @@ React Native + Expo (TypeScript) / Expo Router / NativeWind / Zustand / lucide-r
   github-issue-work   — "issue #숫자" 트리거
   github-issue-create — "이슈 만들어줘" 트리거
   harness-feedback    — 반복 위반 패턴 감지 시 자동 제안
+  pr-review           — "PR 리뷰해줘" 트리거 (GitHub PR 라인별 코멘트 게시)
 
 .claude/commands/
   /review   — QA 리뷰 (별도 세션)
@@ -111,6 +112,8 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/generated/component-inventory.md` — 컴포넌트 목록 (자동 생성)
 - `docs/exec-plans/` — 이슈별 작업 계획 (자동 생성, PR Approve 후 삭제)
 - `docs/references/PRD-지금나가-v1.1.md` — 상위 폴더 PRD 사본 (변경 시 양쪽 동기화)
+- `docs/references/api-schema.md` — Spring Boot 백엔드 API 스키마. **API 함수 작성 1차 자료**
+- `docs/references/naver-maps-api-schema.md` — `@mj-studio/react-native-naver-map` 사용 범위 + 비용 정책. **지도 관련 작업 1차 자료**
 - `docs/TESTING.md` — 단위 테스트 가이드 (대상·예시·우선순위)
 - `docs/DEPLOY.md` — EAS Build / TestFlight / Play 배포 가이드
 - `docs/frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준

@@ -2,7 +2,6 @@ import { Fragment } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { Bus, ChevronRight, MapPin, TrainFront } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import {
   ARRIVAL_SUFFIX_FORMAT,
@@ -10,7 +9,7 @@ import {
   DEPART_SUFFIX,
   FARE_LABEL_FORMAT,
   TRANSFER_META_FORMAT,
-  type MockRoute,
+  type RouteDisplayItem,
   type RouteBadgeId,
   type TransitIcon,
 } from '@/constants/result';
@@ -22,11 +21,10 @@ const CHEVRON_SIZE = 12;
 const BADGE_BG_CLASS: Record<RouteBadgeId, string> = {
   optimal: 'bg-blue-600',
   min_transfer: 'bg-emerald-600',
-  min_fare: 'bg-amber-500',
 };
 
 interface RouteCardProps {
-  route: MockRoute;
+  route: RouteDisplayItem;
   onPress: () => void;
 }
 
@@ -43,19 +41,18 @@ function resolveStepKind(index: number, total: number): 'start' | 'end' | 'middl
 }
 
 function StepIcon({ index, total, icon }: StepIconProps) {
-  const { isDark } = useTheme();
   const kind = resolveStepKind(index, total);
 
   const dotBg = (() => {
-    if (kind === 'start') return isDark ? 'bg-blue-900/60' : 'bg-blue-100';
-    if (kind === 'end') return isDark ? 'bg-rose-900/60' : 'bg-rose-100';
-    return isDark ? 'bg-emerald-900/40' : 'bg-emerald-100';
+    if (kind === 'start') return 'bg-blue-100';
+    if (kind === 'end') return 'bg-rose-100';
+    return 'bg-emerald-100';
   })();
 
   const iconColor = (() => {
-    if (kind === 'start') return isDark ? PALETTE.blue400 : PALETTE.blue600;
-    if (kind === 'end') return isDark ? PALETTE.rose400 : PALETTE.rose600;
-    return isDark ? PALETTE.emerald400 : PALETTE.emerald600;
+    if (kind === 'start') return PALETTE.blue600;
+    if (kind === 'end') return PALETTE.rose600;
+    return PALETTE.emerald600;
   })();
 
   const renderInner = () => {
@@ -78,31 +75,31 @@ function StepIcon({ index, total, icon }: StepIconProps) {
 }
 
 export default function RouteCard({ route, onPress }: RouteCardProps) {
-  const { isDark } = useTheme();
+  const cardClass = 'bg-white border-zinc-200';
+  const subText = 'text-zinc-500';
+  const stepText = 'text-zinc-700';
+  const departureText = 'text-blue-500';
+  const chevronColor = PALETTE.zinc500;
 
-  const cardClass = isDark
-    ? 'bg-zinc-800 border-zinc-700'
-    : 'bg-white border-zinc-200';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const stepText = isDark ? 'text-zinc-300' : 'text-zinc-700';
-  const departureText = isDark ? 'text-blue-400' : 'text-blue-500';
-  const chevronColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
-
-  const badgeBg = BADGE_BG_CLASS[route.badge];
-  const badgeLabel = BADGE_LABEL[route.badge];
+  const badgeBg = route.badge ? BADGE_BG_CLASS[route.badge] : null;
+  const badgeLabel = route.badge ? BADGE_LABEL[route.badge] : null;
 
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${badgeLabel} 경로 선택`}
+      accessibilityLabel={badgeLabel ? `${badgeLabel} 경로 선택` : '경로 선택'}
       className={`rounded-2xl border p-4 active:opacity-70 ${cardClass}`}
     >
       {/* 상단: 배지 + 소요/환승 메타 */}
       <View className="mb-3 flex-row items-center justify-between">
-        <View className={`rounded-full px-2.5 py-1 ${badgeBg}`}>
-          <Text className="text-[11px] font-bold text-white">{badgeLabel}</Text>
-        </View>
+        {badgeBg && badgeLabel ? (
+          <View className={`rounded-full px-2.5 py-1 ${badgeBg}`}>
+            <Text className="text-[11px] font-bold text-white">{badgeLabel}</Text>
+          </View>
+        ) : (
+          <View />
+        )}
         <Text className={`text-xs font-medium ${subText}`}>
           {TRANSFER_META_FORMAT(route.durationLabel, route.transferCount)}
         </Text>

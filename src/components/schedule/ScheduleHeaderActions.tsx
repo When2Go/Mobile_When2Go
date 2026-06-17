@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Plus } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -17,11 +16,9 @@ interface ScheduleHeaderActionsProps {
  *   여기서는 "+ 새 일정" 버튼만 우측에 둔다.
  */
 export default function ScheduleHeaderActions({ onPressNew }: ScheduleHeaderActionsProps) {
-  const { isDark } = useTheme();
-
-  const buttonBg = isDark ? 'bg-blue-900/40' : 'bg-blue-50';
-  const buttonText = isDark ? 'text-blue-300' : 'text-blue-600';
-  const buttonIconColor = isDark ? PALETTE.blue400 : PALETTE.blue600;
+  const buttonBg = 'bg-blue-50';
+  const buttonText = 'text-blue-600';
+  const buttonIconColor = PALETTE.blue600;
 
   return (
     <View className={`${ROW_PADDING_CLASS} flex-row justify-end`}>

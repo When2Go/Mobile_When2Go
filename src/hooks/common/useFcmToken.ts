@@ -23,7 +23,7 @@ async function requestNotificationPermission(): Promise<boolean> {
     );
   }
 
-  if (Platform.Version < ANDROID_MIN_NOTIFICATION_API) return true;
+  if (Number(Platform.Version) < ANDROID_MIN_NOTIFICATION_API) return true;
   const result = await PermissionsAndroid.request(
     PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
   );

@@ -82,7 +82,7 @@ const label = (() => {
 | 유형 | 예시 | 방식 |
 |------|------|------|
 | UI 로컬 | 바텀시트 열림, 입력값 | `useState` |
-| 클라이언트 전역 | 디바이스 ID, 다크모드, 버퍼 시간 | Zustand |
+| 클라이언트 전역 | 디바이스 ID, 버퍼 시간 | Zustand |
 | 서버 상태 (기본) | Trip CRUD, 경로 결과 | `useState + useEffect` |
 | 서버 상태 (폴링/캐싱) | 대중교통 도착 예정, 경로 기록 목록, 즐겨찾기 | TanStack Query |
 | 네비게이션 | 목적지, 도착 시간 파라미터 | Expo Router params |
@@ -129,7 +129,7 @@ function useArrivalTime() { ... }
 
 **규칙**
 
-1. 위치: `src/api/{도메인}/index.ts`(함수) + `src/api/{도메인}/types.ts`(요청/응답 타입). 도메인은 `docs/generated/api-schema.md` 기준 (`user` / `trip` / `route` / `reservation` / `parse`).
+1. 위치: `src/api/{도메인}/index.ts`(함수) + `src/api/{도메인}/types.ts`(요청/응답 타입). 도메인은 `docs/references/api-schema.md` 기준 (`user` / `trip` / `route` / `reservation` / `parse`).
 2. 반환 타입은 **항상** `Promise<ApiResult<T>>` (`src/types/api.types.ts`). 화면/훅은 `result.ok` 한 가지만 분기한다.
 3. 호출은 공통 `api` 인스턴스만 사용. 새 axios 인스턴스 생성 금지. `X-Device-Id`·baseURL·타임아웃은 인스턴스가 처리하므로 손대지 않는다.
 4. 성공 시 백엔드 봉투(`{ success, data, message }`)에서 `data`를 꺼내 `{ ok: true, data }`로 감싼다.

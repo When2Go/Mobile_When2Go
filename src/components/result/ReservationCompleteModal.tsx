@@ -2,7 +2,6 @@ import { Pressable, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
@@ -12,7 +11,7 @@ import {
   DEPART_SUFFIX,
   NOTIFICATION_NOTICE,
   RESERVATION_TITLE,
-  type MockRoute,
+  type RouteDisplayItem,
   type RouteBadgeId,
 } from '@/constants/result';
 
@@ -21,14 +20,13 @@ const SHEET_SNAP_POINTS = ['52%'];
 const BADGE_BG_CLASS: Record<RouteBadgeId, string> = {
   optimal: 'bg-blue-600',
   min_transfer: 'bg-emerald-600',
-  min_fare: 'bg-amber-500',
 };
 
 const STEPS_JOINER = ' → ';
 
 interface ReservationCompleteModalProps {
   isOpen: boolean;
-  route: MockRoute | null;
+  route: RouteDisplayItem | null;
   confirmed: boolean;
   onClose: () => void;
   onConfirm: () => void;
@@ -41,13 +39,9 @@ export default function ReservationCompleteModal({
   onClose,
   onConfirm,
 }: ReservationCompleteModalProps) {
-  const { isDark } = useTheme();
-
-  const summaryCard = isDark
-    ? 'bg-zinc-800 border-zinc-700'
-    : 'bg-zinc-50 border-zinc-100';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const departureText = isDark ? 'text-blue-400' : 'text-blue-500';
+  const summaryCard = 'bg-zinc-50 border-zinc-100';
+  const subText = 'text-zinc-500';
+  const departureText = 'text-blue-500';
 
   const confirmBg = confirmed ? 'bg-emerald-500' : 'bg-blue-600';
 
@@ -63,12 +57,14 @@ export default function ReservationCompleteModal({
           {/* 선택 경로 요약 */}
           <View className={`mb-5 rounded-2xl border p-4 ${summaryCard}`}>
             <View className="mb-2 flex-row items-center">
-              <View className={`rounded-full px-2 py-0.5 ${BADGE_BG_CLASS[route.badge]}`}>
-                <Text className="text-[11px] font-bold text-white">
-                  {BADGE_LABEL[route.badge]}
-                </Text>
-              </View>
-              <Text className={`ml-2 text-xs ${subText}`}>{route.durationLabel}</Text>
+              {route.badge ? (
+                <View className={`rounded-full px-2 py-0.5 ${BADGE_BG_CLASS[route.badge]}`}>
+                  <Text className="text-[11px] font-bold text-white">
+                    {BADGE_LABEL[route.badge]}
+                  </Text>
+                </View>
+              ) : null}
+              <Text className={`${route.badge ? 'ml-2' : ''} text-xs ${subText}`}>{route.durationLabel}</Text>
             </View>
             <View className="flex-row items-baseline">
               <Text className={`text-2xl font-black ${departureText}`}>{route.departureTime}</Text>

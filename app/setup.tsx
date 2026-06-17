@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
@@ -18,8 +17,11 @@ import {
   type Period,
   type RouteOptionId,
 } from '@/constants/setup';
-import { BUFFER_MIN_PARAM } from '@/constants/result';
+import { ARRIVAL_TIME_PARAM, BUFFER_MIN_PARAM } from '@/constants/result';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
+import { toDateTimeString } from '@/utils/timeFormat';
 import DestinationHeader from '@/components/setup/DestinationHeader';
 import ArrivalTimePicker from '@/components/setup/ArrivalTimePicker';
 import RouteOptionList from '@/components/setup/RouteOptionList';
@@ -41,8 +43,6 @@ function formatTimeChip(period: Period, hour: number, minute: number): string {
 
 export default function SetupScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
-
   const { destination: destinationParam } = useLocalSearchParams<{ destination?: string }>();
   const destination = destinationParam?.trim() ? destinationParam.trim() : DEFAULT_DESTINATION;
 
@@ -65,17 +65,20 @@ export default function SetupScreen() {
   const safetyBufferMin = routeBufferOverride ?? defaultBufferMin;
   const [isBufferSheetOpen, setBufferSheetOpen] = useState(false);
 
+  const setCoords = useRouteDraftStore((s) => s.setCoords);
+  const { lat: currentLat, lng: currentLng } = useCurrentLocation();
+
   const handleSaveBuffer = (next: number) => {
     setRouteBufferOverride(next);
     setBufferSheetOpen(false);
   };
 
-  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const cardBg = isDark ? 'bg-zinc-900' : 'bg-white';
-  const dividerBorder = isDark ? 'border-zinc-800' : 'border-zinc-100';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const backBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const backIconColor = isDark ? PALETTE.zinc300 : PALETTE.zinc500;
+  const pageBg = 'bg-zinc-50';
+  const cardBg = 'bg-white';
+  const dividerBorder = 'border-zinc-100';
+  const headingText = 'text-zinc-900';
+  const backBg = 'bg-zinc-100';
+  const backIconColor = PALETTE.zinc500;
 
   const handlePrevMonth = () => {
     setDisplayMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
@@ -85,11 +88,18 @@ export default function SetupScreen() {
   };
 
   const handleChangeDestination = () => {
-    router.push(SEARCH_PATH);
+    router.push({ pathname: SEARCH_PATH, params: { field: 'to' } });
   };
 
   const handleDepart = () => {
-    router.push({ pathname: RESULT_PATH, params: { [BUFFER_MIN_PARAM]: String(safetyBufferMin) } });
+    setCoords('from', { lat: currentLat, lng: currentLng });
+    router.push({
+      pathname: RESULT_PATH,
+      params: {
+        [BUFFER_MIN_PARAM]: String(safetyBufferMin),
+        [ARRIVAL_TIME_PARAM]: toDateTimeString(selectedDate, period, hour, minute),
+      },
+    });
   };
 
   // mock 단계에서는 destination이 비어있을 때만 비활성. 시간 기본값이 항상 세팅돼 있어 추가 검증은 X.

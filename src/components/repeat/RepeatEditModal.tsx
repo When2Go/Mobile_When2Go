@@ -6,7 +6,6 @@ import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Shield, Trash2 } 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
 import BufferSlider from '@/components/common/BufferSlider';
 import TimeWheelPicker from '@/components/setup/TimeWheelPicker';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { ROUTE_OPTIONS } from '@/constants/setup';
@@ -61,7 +60,6 @@ export default function RepeatEditModal({
   onFormChange,
   onSelectLocation,
 }: RepeatEditModalProps) {
-  const { isDark } = useTheme();
   const [isTimeExpanded, setTimeExpanded] = useState(false);
   const [isBufferExpanded, setBufferExpanded] = useState(false);
   const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
@@ -71,28 +69,20 @@ export default function RepeatEditModal({
   const isValid = form.name.trim().length > 0 && form.days.length > 0;
 
   // 색상 토큰
-  const inputBg = isDark
-    ? 'bg-zinc-800 border-zinc-700 text-zinc-100'
-    : 'bg-white border-zinc-200 text-zinc-900';
-  const placeholderColor = isDark ? PALETTE.zinc500 : PALETTE.zinc400;
-  const labelText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const fieldRowBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-zinc-50 border-zinc-200';
-  const dividerLine = isDark ? 'bg-zinc-700' : 'bg-zinc-300';
-  const arrivalBoxBg = isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-white border-zinc-200';
+  const inputBg = 'bg-white border-zinc-200 text-zinc-900';
+  const placeholderColor = PALETTE.zinc400;
+  const labelText = 'text-zinc-900';
+  const sub = 'text-zinc-500';
+  const fieldRowBg = 'bg-zinc-50 border-zinc-200';
+  const dividerLine = 'bg-zinc-300';
+  const arrivalBoxBg = 'bg-white border-zinc-200';
   const dayBtnActive = 'bg-blue-600 border-blue-600';
-  const dayBtnInactive = isDark
-    ? 'bg-zinc-800 border-zinc-700'
-    : 'bg-white border-zinc-200';
-  const routeActiveBg = isDark
-    ? 'border-blue-500 bg-blue-900/30'
-    : 'border-blue-600 bg-blue-50';
-  const routeInactiveBg = isDark
-    ? 'border-zinc-700 bg-zinc-800'
-    : 'border-zinc-200 bg-white';
+  const dayBtnInactive = 'bg-white border-zinc-200';
+  const routeActiveBg = 'border-blue-600 bg-blue-50';
+  const routeInactiveBg = 'border-zinc-200 bg-white';
 
-  const locationPlaceholderText = isDark ? 'text-zinc-500' : 'text-zinc-400';
-  const locationValueText = isDark ? 'text-zinc-100' : 'text-zinc-900';
+  const locationPlaceholderText = 'text-zinc-400';
+  const locationValueText = 'text-zinc-900';
   const locationFieldText = (value: string) =>
     value ? locationValueText : locationPlaceholderText;
 
@@ -144,7 +134,7 @@ export default function RepeatEditModal({
               >
                 <Navigation
                   size={ICON_SIZE.formInline}
-                  color={isDark ? PALETTE.blue400 : PALETTE.blue500}
+                  color={PALETTE.blue500}
                 />
                 <Text
                   className={`flex-1 text-sm ${locationFieldText(form.origin)}`}
@@ -165,7 +155,7 @@ export default function RepeatEditModal({
               >
                 <MapPin
                   size={ICON_SIZE.formInline}
-                  color={isDark ? PALETTE.rose400 : PALETTE.red500}
+                  color={PALETTE.red500}
                 />
                 <Text
                   className={`flex-1 text-sm ${locationFieldText(form.destination)}`}
@@ -185,10 +175,7 @@ export default function RepeatEditModal({
               {DAYS.map((d, i) => {
                 const isSelected = form.days.includes(i);
                 const btnBg = isSelected ? dayBtnActive : dayBtnInactive;
-                const btnText = (() => {
-                  if (isSelected) return 'text-white';
-                  return isDark ? 'text-zinc-400' : 'text-zinc-500';
-                })();
+                const btnText = isSelected ? 'text-white' : 'text-zinc-500';
                 return (
                   <Pressable
                     key={d}
@@ -213,7 +200,7 @@ export default function RepeatEditModal({
               accessibilityLabel={`${LABEL_ARRIVAL} ${isTimeExpanded ? '접기' : '펼치기'}`}
               className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${arrivalBoxBg}`}
             >
-              <Clock size={ICON_SIZE.header} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+              <Clock size={ICON_SIZE.header} color={PALETTE.zinc500} />
               <Text className={`text-base font-semibold ${labelText}`}>
                 {formatArrival(form.arrivalPeriod, form.arrivalHour, form.arrivalMinute)}
               </Text>
@@ -243,10 +230,7 @@ export default function RepeatEditModal({
               {ROUTE_OPTIONS.map((opt) => {
                 const isActive = form.routeOption === opt.id;
                 const btnBg = isActive ? routeActiveBg : routeInactiveBg;
-                const btnText = (() => {
-                  if (isActive) return isDark ? 'text-blue-300' : 'text-blue-700';
-                  return isDark ? 'text-zinc-400' : 'text-zinc-600';
-                })();
+                const btnText = isActive ? 'text-blue-700' : 'text-zinc-600';
                 return (
                   <Pressable
                     key={opt.id}
@@ -273,7 +257,7 @@ export default function RepeatEditModal({
               accessibilityLabel={`${LABEL_BUFFER} ${isBufferExpanded ? '접기' : '펼치기'}`}
               className={`flex-row items-center gap-3 rounded-xl border px-4 py-3 active:opacity-70 ${arrivalBoxBg}`}
             >
-              <Shield size={ICON_SIZE.header} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+              <Shield size={ICON_SIZE.header} color={PALETTE.zinc500} />
               <Text className={`text-base font-semibold ${labelText}`}>{`${effectiveBufferMin}분`}</Text>
               <View className="ml-auto">
                 <ChevronDown size={ICON_SIZE.card} color={placeholderColor} />
@@ -294,12 +278,10 @@ export default function RepeatEditModal({
             onPress={onDelete}
             accessibilityRole="button"
             accessibilityLabel="삭제"
-            className={`flex-row items-center justify-center gap-2 rounded-2xl px-5 py-3.5 active:opacity-70 ${
-              isDark ? 'bg-red-900/40' : 'bg-red-50'
-            }`}
+            className="flex-row items-center justify-center gap-2 rounded-2xl px-5 py-3.5 bg-red-50 active:opacity-70"
           >
-            <Trash2 size={ICON_SIZE.card} color={isDark ? PALETTE.rose400 : PALETTE.rose600} />
-            <Text className={`text-sm font-bold ${isDark ? 'text-red-400' : 'text-red-600'}`}>
+            <Trash2 size={ICON_SIZE.card} color={PALETTE.rose600} />
+            <Text className="text-sm font-bold text-red-600">
               {DELETE_LABEL}
             </Text>
           </Pressable>

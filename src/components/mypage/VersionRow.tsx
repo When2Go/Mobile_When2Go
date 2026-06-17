@@ -2,7 +2,6 @@ import { Text, View } from 'react-native';
 import Constants from 'expo-constants';
 import { Info } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -15,14 +14,9 @@ interface VersionRowProps {
 }
 
 export default function VersionRow({ noBorder }: VersionRowProps) {
-  const { isDark } = useTheme();
-
-  const labelText = isDark ? 'text-zinc-200' : 'text-zinc-800';
+  const labelText = 'text-zinc-800';
   const valueText = 'text-zinc-500';
-  const borderClass = (() => {
-    if (noBorder) return '';
-    return isDark ? 'border-b border-zinc-800' : 'border-b border-zinc-100';
-  })();
+  const borderClass = noBorder ? '' : 'border-b border-zinc-100';
 
   const version = Constants.expoConfig?.version ?? FALLBACK_VERSION;
 

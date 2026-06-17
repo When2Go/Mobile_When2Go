@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Settings2 } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { ROUTE_OPTIONS, ROUTE_SECTION_TITLE, type RouteOptionId } from '@/constants/setup';
@@ -17,18 +16,16 @@ interface Props {
  * - 활성 카드는 blue ring + blue 배경 톤.
  */
 export default function RouteOptionList({ value, onChange }: Props) {
-  const { isDark } = useTheme();
+  const labelText = 'text-zinc-800';
+  const subIconColor = PALETTE.zinc500;
 
-  const labelText = isDark ? 'text-zinc-300' : 'text-zinc-800';
-  const subIconColor = isDark ? PALETTE.zinc400 : PALETTE.zinc500;
+  const activeBorder = 'border-blue-600';
+  const activeBg = 'bg-blue-50/60';
+  const activeText = 'text-blue-700';
 
-  const activeBorder = isDark ? 'border-blue-500' : 'border-blue-600';
-  const activeBg = isDark ? 'bg-blue-900/30' : 'bg-blue-50/60';
-  const activeText = isDark ? 'text-blue-300' : 'text-blue-700';
-
-  const inactiveBorder = isDark ? 'border-zinc-700' : 'border-zinc-200';
-  const inactiveBg = isDark ? 'bg-zinc-800' : 'bg-white';
-  const inactiveText = isDark ? 'text-zinc-400' : 'text-zinc-600';
+  const inactiveBorder = 'border-zinc-200';
+  const inactiveBg = 'bg-white';
+  const inactiveText = 'text-zinc-600';
 
   return (
     <View className="px-5 py-6">

@@ -10,7 +10,7 @@
 git commit
    │
    ▼
-.git/hooks/post-commit
+.husky/post-commit   ← husky 가 core.hooksPath 로 라우팅
    │
    ▼
 scripts/sync-wiki.sh
@@ -26,16 +26,28 @@ scripts/sync-wiki.sh
 
 `claude --print` 는 무인 headless 모드. `--permission-mode acceptEdits` 로 권한 프롬프트 없이 진행한다.
 
-## 설치
+## 설치 — 팀원 머신 자동 적용
 
-레포 clone 직후 한 번:
+레포 clone 후 한 번:
 
 ```bash
-./scripts/install-git-hooks.sh
+npm install
 ```
 
-- `.git/hooks/post-commit` 가 설치된다 (git hooks 는 레포에 커밋되지 않으므로 각 개발자가 직접 설치)
-- 기존 post-commit 이 있으면 백업 후 교체
+`package.json` 의 `scripts.prepare = "husky"` 가 자동 실행되어 `.husky/_` wrapper 가 만들어지고, `core.hooksPath` 가 `.husky/_` 로 설정된다. 별도 설치 스크립트 호출 불필요.
+
+확인:
+
+```bash
+git config --get core.hooksPath   # .husky/_ 가 나오면 OK
+ls .husky/post-commit             # 존재해야 함
+```
+
+이전에 쓰이던 `scripts/install-git-hooks.sh` 는 husky 도입 시 제거됨. 그 시점 전에 설치된 `.git/hooks/post-commit` 이 남아 있더라도 `core.hooksPath` 가 우선이라 husky 경로가 사용된다. 깔끔히 정리하려면:
+
+```bash
+rm -f .git/hooks/post-commit
+```
 
 ## 트리거 조건
 
@@ -48,8 +60,18 @@ scripts/sync-wiki.sh
 | `.claude/commands/*.md` | `Commands` |
 | `.claude/settings.json` | `Hooks-and-Automation` |
 | `CLAUDE.md` | `Home`, `Workflow` (영향받는 섹션) |
+| `docs/FRONTEND.md`, `docs/DESIGN.md`, `docs/folder-structure.md`, `docs/TESTING.md` 등 | `Architecture` 의 `docs/` 트리·관련 섹션 갱신 |
+| `docs/wiki-sync.md` | `Hooks-and-Automation` (Wiki 자동 동기화 섹션) |
+| `docs/references/README.md` | `References` 인덱스 |
+| `docs/references/{파일}.md` | `Reference-{슬러그}` 페이지 (영문 슬러그). 본문 그대로 미러 |
 
-그 외 파일만 변경된 commit 은 트리거되지 않는다.
+**트리거되지 않는 경로** (sync-wiki.sh 에서 사전 제외):
+
+- `docs/exec-plans/` — 이슈 작업 임시 plan
+- `docs/generated/` — 자동 생성 산출물 (component-inventory · api-schema 등)
+- `docs/design-docs/` 내 파일은 트리거되지만 wiki 미러 페이지가 없어 본문 갱신 작업은 발생하지 않는다 (필요 시 `Home` 의 관련 문서 목록만 점검)
+
+그 외 경로(`src/`, `app/`, `.github/`, `scripts/` 등) 변경만 있는 commit 은 트리거되지 않는다.
 
 ## 환경 변수
 
@@ -74,15 +96,17 @@ tail -f .wiki-sync.log
 ./scripts/sync-wiki.sh
 ```
 
-## 비활성화 (영구)
+## 비활성화
 
-```bash
-rm .git/hooks/post-commit
-```
-
-또는 hook 파일에서 `sync-wiki.sh` 호출 줄만 주석 처리.
+- **일회성**: `WIKI_SYNC_DISABLED=1 git commit ...`
+- **영구 (이 머신만)**: `chmod -x .husky/post-commit` 또는 hook 파일에서 `sync-wiki.sh` 호출 줄 주석 처리. 절대 `.husky/post-commit` 파일 자체를 삭제·미커밋하지 말 것 (다른 팀원 영향).
+- **레포 차원 비활성화**: `package.json` 의 `prepare` 스크립트 제거 + `.husky/` 디렉토리 제거 + husky devDependency 제거.
 
 ## 트러블슈팅
+
+자세한 트러블슈팅과 점검 절차는 데스크탑 `Desktop/wiki-sync-troubleshooting.md` 참조 (개발자 메모, 레포 외부).
+
+대표 증상 요약:
 
 | 증상 | 원인 / 해결 |
 |---|---|
@@ -90,6 +114,7 @@ rm .git/hooks/post-commit
 | `wiki clone 실패` | wiki에 첫 페이지가 있는지 확인 (`https://github.com/When2Go/Mobile_When2Go/wiki`) |
 | wiki 가 안 갱신됨 | `.wiki-sync.log` 확인. claude 가 백그라운드에서 작업 중일 수 있음 (수십 초 ~ 1분) |
 | push 권한 오류 | 로컬 git credential 이 When2Go org 에 push 권한 있는지 확인 |
+| 새 clone 후 hook 안 깔림 | `npm install` 실행 안 함 → 실행 후 `git config --get core.hooksPath` 확인 |
 
 ## 보안 고려
 

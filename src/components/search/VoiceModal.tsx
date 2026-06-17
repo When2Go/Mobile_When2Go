@@ -3,7 +3,6 @@ import { Animated, Pressable, Text, View } from 'react-native';
 import { Mic } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 
 type VoiceStage = 'listening' | 'processing';
@@ -28,7 +27,6 @@ interface VoiceModalProps {
 }
 
 export default function VoiceModal({ isOpen, onClose, onComplete }: VoiceModalProps) {
-  const { isDark } = useTheme();
   const [voiceStage, setVoiceStage] = useState<VoiceStage>('listening');
 
   const pulse1 = useRef(new Animated.Value(0)).current;
@@ -89,10 +87,10 @@ export default function VoiceModal({ isOpen, onClose, onComplete }: VoiceModalPr
   const pulse2Opacity = pulse2.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.2, 0.1, 0] });
   const spin = spinAnim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
 
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
-  const cancelBtnBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const cancelBtnText = isDark ? 'text-zinc-300' : 'text-zinc-600';
+  const headingText = 'text-zinc-900';
+  const sub = 'text-zinc-500';
+  const cancelBtnBg = 'bg-zinc-100';
+  const cancelBtnText = 'text-zinc-600';
 
   return (
     <BottomSheetModal isOpen={isOpen} onClose={onClose} snapPoints={VOICE_SNAP_POINTS}>

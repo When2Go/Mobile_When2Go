@@ -71,7 +71,7 @@ beforeEach(() => {
   setPlatform('android', 33);
   mockGetToken.mockResolvedValue('mock-fcm-token');
   mockRequestPermission.mockResolvedValue(AuthorizationStatus.AUTHORIZED);
-  (messaging as jest.Mock).mockReturnValue({
+  (messaging as unknown as jest.Mock).mockReturnValue({
     getToken: mockGetToken,
     requestPermission: mockRequestPermission,
   });

@@ -31,72 +31,57 @@ theme: {
 
 ### 브랜드 컬러
 
-| 역할 | Light | Dark |
-|------|-------|------|
-| Primary (버튼, 활성 탭) | `bg-blue-600` / `bg-primary` | `bg-blue-500` |
-| Primary Soft (배지 bg) | `bg-blue-50` | `bg-blue-900/50` |
-| Primary Text (출발시간 강조) | `text-blue-500` | `text-blue-400` |
+| 역할 | 클래스 |
+|------|--------|
+| Primary (버튼, 활성 탭) | `bg-blue-600` / `bg-primary` |
+| Primary Soft (배지 bg) | `bg-blue-50` |
+| Primary Text (출발시간 강조) | `text-blue-500` |
 
 ### 배경 계층
 
-| 레이어 | Light | Dark |
-|--------|-------|------|
-| 페이지 배경 | `bg-zinc-50` | `bg-zinc-950` |
-| 카드 / 시트 | `bg-white` | `bg-zinc-900` |
-| 서브 카드 / 입력 bg | `bg-zinc-50` | `bg-zinc-800` |
-| 입력 필드 bg | `bg-zinc-100` | `bg-zinc-800` |
-| 구분선 | `border-zinc-100` | `border-zinc-700` |
+| 레이어 | 클래스 |
+|--------|--------|
+| 페이지 배경 | `bg-zinc-50` |
+| 카드 / 시트 | `bg-white` |
+| 서브 카드 / 입력 bg | `bg-zinc-50` |
+| 입력 필드 bg | `bg-zinc-100` |
+| 구분선 | `border-zinc-100` |
 
 ### 텍스트 계층
 
-| 역할 | Light | Dark |
-|------|-------|------|
-| Heading | `text-zinc-900` | `text-zinc-100` |
-| Label | `text-zinc-800` | `text-zinc-200` |
-| Sub | `text-zinc-500` | `text-zinc-400` |
-| Muted | `text-zinc-400` | `text-zinc-500` |
+| 역할 | 클래스 |
+|------|--------|
+| Heading | `text-zinc-900` |
+| Label | `text-zinc-800` |
+| Sub | `text-zinc-500` |
+| Muted | `text-zinc-400` |
 
 ### 상태 컬러
 
 | 상태 | 클래스 |
 |------|--------|
-| 진행중 | `bg-blue-600 text-white` (dark: `bg-blue-500`) |
-| 완료 | `bg-emerald-100 text-emerald-700` (dark: `bg-emerald-700 text-emerald-100`) |
-| 예정 | `bg-zinc-100 text-zinc-500` (dark: `bg-zinc-700 text-zinc-300`) |
+| 진행중 | `bg-blue-600 text-white` |
+| 완료 | `bg-emerald-100 text-emerald-700` |
+| 예정 | `bg-zinc-100 text-zinc-500` |
 | 위험/삭제 | `bg-red-500 text-white` |
 
 ---
 
-## 3. 다크모드 구현 패턴
+## 3. 다크모드 정책
 
-### ThemeContext
+현재 다크모드는 **일괄 제거 상태**입니다 (#58). 라이트 톤만 유지하고, 컴포넌트 레벨의 `isDark ? darkClass : lightClass` 분기는 모두 라이트 값으로 정리됐습니다.
 
-- `isDark` boolean + 시스템 자동 감지 + 수동 오버라이드
-- `toggle()` 함수로 MyPage 토글 스위치와 연결
+### 보존된 골격 (재도입 대비)
 
-### 필수 패턴 (모든 화면/컴포넌트)
+- `src/contexts/ThemeContext.tsx` — `ThemeProvider`, `useTheme()` 시그니처 유지 (`isDark`는 상수 `false`)
+- `tailwind.config.js` — `darkMode: 'class'` 설정 유지
+- 재도입 시 본 컨텍스트 내부만 복원하면 각 화면에 다크 톤을 다시 디자인해 넣을 수 있습니다.
 
-```tsx
-const { isDark } = useTheme();
+### 신규 작업 규칙
 
-// 페이지 시작부에 로컬 토큰 선언
-const pageBg  = isDark ? "bg-zinc-950" : "bg-zinc-50";
-const card    = isDark ? "bg-zinc-800 border-zinc-700" : "bg-white border-zinc-200";
-const label   = isDark ? "text-zinc-100" : "text-zinc-900";
-const sub     = isDark ? "text-zinc-400" : "text-zinc-500";
-const divider = isDark ? "border-zinc-700" : "border-zinc-100";
-```
-
-### QA 체크리스트
-
-```
-[ ] 배경색 (pageBg, card 토큰 사용)
-[ ] 텍스트색 (label, sub 토큰 사용)
-[ ] 테두리색 (divider 토큰 사용)
-[ ] 아이콘 색
-[ ] 입력창 배경
-[ ] 지도 이미지 (dark: opacity-30 grayscale brightness-50)
-```
+- **신규 컴포넌트에 `isDark` 분기 추가 금지.**
+- 색상은 위 팔레트의 라이트 값만 사용합니다.
+- 다크 톤 재도입은 별도 이슈로 진행하며, 디자인 톤 재정의가 먼저입니다.
 
 ---
 
@@ -175,7 +160,7 @@ BottomSheetModal 래퍼 사용 (src/components/common/BottomSheetModal.tsx)
 ### 위치 마커 (홈 화면)
 
 ```tsx
-// 내 위치: h-8 w-8 rounded-full bg-blue-500 border-2 border-white + ping 애니메이션
+// 내 위치: h-4 w-4 rounded-full bg-blue-500 border-2 border-white + ping 애니메이션
 // 목적지: rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white
 ```
 

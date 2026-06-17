@@ -4,7 +4,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, Mic } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import SearchInput from '@/components/search/SearchInput';
@@ -13,12 +12,15 @@ import VoiceModal from '@/components/search/VoiceModal';
 import RecentSearchList from '@/components/search/RecentSearchList';
 import SearchResultList from '@/components/search/SearchResultList';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { useRecentSearches } from '@/hooks/search/useRecentSearches';
+import type { Place } from '@/api/kakao/types';
 
 export default function SearchScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
   const { mode, field } = useLocalSearchParams<{ mode?: string; field?: string }>();
   const setPendingLocation = useRouteDraftStore((s) => s.setPendingLocation);
+  const setCoords = useRouteDraftStore((s) => s.setCoords);
+  const { addRecentPlace } = useRecentSearches();
 
   const [query, setQuery] = useState('');
   const [voiceOpen, setVoiceOpen] = useState(false);
@@ -26,22 +28,25 @@ export default function SearchScreen() {
   const startVoice = () => setVoiceOpen(true);
   const cancelVoice = () => setVoiceOpen(false);
 
-  const handleSelect = (destination: string) => {
+  const handleSelect = (place: Place) => {
+    const f = (field ?? 'from') as 'from' | 'to';
+    setCoords(f, { lat: place.lat, lng: place.lng });
+    addRecentPlace(place);
     if (mode === 'select-location') {
-      setPendingLocation(destination, (field ?? 'from') as 'from' | 'to');
+      setPendingLocation(place.name, f);
       router.back();
       return;
     }
-    router.push({ pathname: '/setup', params: { destination } });
+    router.push({ pathname: '/setup', params: { destination: place.name } });
   };
 
-  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const borderColor = isDark ? 'border-zinc-700' : 'border-zinc-100';
-  const backBg = isDark ? 'bg-zinc-700' : 'bg-zinc-100';
-  const backIconColor = isDark ? PALETTE.zinc300 : PALETTE.zinc500;
-  const voiceCardBg = isDark ? 'border border-blue-800/40 bg-blue-900/40' : 'bg-blue-50';
-  const voiceHeading = isDark ? 'text-blue-200' : 'text-blue-900';
-  const voiceDesc = isDark ? 'text-blue-300/80' : 'text-blue-700/80';
+  const pageBg = 'bg-zinc-50';
+  const borderColor = 'border-zinc-100';
+  const backBg = 'bg-zinc-100';
+  const backIconColor = PALETTE.zinc500;
+  const voiceCardBg = 'bg-blue-50';
+  const voiceHeading = 'text-blue-900';
+  const voiceDesc = 'text-blue-700/80';
 
   return (
     <SafeAreaView className={`flex-1 ${pageBg}`} edges={['top', 'left', 'right', 'bottom']}>
@@ -60,7 +65,6 @@ export default function SearchScreen() {
           value={query}
           onChangeText={setQuery}
           onClear={() => setQuery('')}
-          onSubmit={() => { if (query.trim()) handleSelect(query.trim()); }}
         />
         <VoiceButton onPress={startVoice} />
       </View>

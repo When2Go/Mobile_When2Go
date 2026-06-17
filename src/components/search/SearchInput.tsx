@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
@@ -13,11 +12,10 @@ interface Props {
   value: string;
   onChangeText: (text: string) => void;
   onClear: () => void;
-  onSubmit: () => void;
+  onSubmit?: () => void;
 }
 
 export default function SearchInput({ value, onChangeText, onClear, onSubmit }: Props) {
-  const { isDark } = useTheme();
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
@@ -25,9 +23,9 @@ export default function SearchInput({ value, onChangeText, onClear, onSubmit }: 
     return () => clearTimeout(timer);
   }, []);
 
-  const inputBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const textColor = isDark ? PALETTE.zinc100 : PALETTE.zinc900;
-  const clearBg = isDark ? 'bg-zinc-600' : 'bg-zinc-300';
+  const inputBg = 'bg-zinc-100';
+  const textColor = PALETTE.zinc900;
+  const clearBg = 'bg-zinc-300';
 
   return (
     <View className={`flex-1 flex-row items-center gap-2 rounded-xl px-3 py-2.5 ${inputBg}`}>
@@ -51,7 +49,7 @@ export default function SearchInput({ value, onChangeText, onClear, onSubmit }: 
           hitSlop={8}
         >
           <View className={`rounded-full p-0.5 ${clearBg}`}>
-            <X size={ICON_SIZE.card} color={isDark ? PALETTE.zinc300 : PALETTE.white} />
+            <X size={ICON_SIZE.card} color={PALETTE.white} />
           </View>
         </Pressable>
       )}

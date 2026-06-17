@@ -1,7 +1,6 @@
 import { Pressable, Text, View } from 'react-native';
 import { Navigation, Plus } from 'lucide-react-native';
 
-import { useTheme } from '@/contexts/ThemeContext';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 
@@ -13,11 +12,9 @@ interface EmptyStateProps {
 }
 
 export default function EmptyState({ onAddPress }: EmptyStateProps) {
-  const { isDark } = useTheme();
-
-  const iconCircleBg = isDark ? 'bg-zinc-800' : 'bg-zinc-100';
-  const heading = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const sub = isDark ? 'text-zinc-400' : 'text-zinc-500';
+  const iconCircleBg = 'bg-zinc-100';
+  const heading = 'text-zinc-900';
+  const sub = 'text-zinc-500';
 
   return (
     <View className="flex-1 items-center justify-center px-8 pb-20">
@@ -25,7 +22,7 @@ export default function EmptyState({ onAddPress }: EmptyStateProps) {
         className={`mb-6 items-center justify-center rounded-full ${iconCircleBg}`}
         style={{ width: ICON_CIRCLE_SIZE, height: ICON_CIRCLE_SIZE }}
       >
-        <Navigation size={NAV_ICON_SIZE} color={isDark ? PALETTE.zinc400 : PALETTE.zinc500} />
+        <Navigation size={NAV_ICON_SIZE} color={PALETTE.zinc500} />
       </View>
       <Text className={`mb-2 text-center text-xl font-bold ${heading}`}>
         등록된 경로가 없어요

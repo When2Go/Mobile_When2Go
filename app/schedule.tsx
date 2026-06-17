@@ -9,7 +9,6 @@ import ReservationCard from '@/components/schedule/ReservationCard';
 import EmptyState from '@/components/schedule/EmptyState';
 import ScheduleDetailSheet from '@/components/schedule/ScheduleDetailSheet';
 import MonthPickerSheet from '@/components/schedule/MonthPickerSheet';
-import { useTheme } from '@/contexts/ThemeContext';
 import {
   INITIAL_SCHEDULES,
   MOCK_MARKED_OFFSETS_FROM_TODAY,
@@ -45,7 +44,6 @@ function buildMarkedDays(today: Date): number[] {
 
 export default function ScheduleScreen() {
   const router = useRouter();
-  const { isDark } = useTheme();
   const today = useMemo(() => new Date(), []);
 
   const [displayMonth, setDisplayMonth] = useState<Date>(today);
@@ -54,11 +52,11 @@ export default function ScheduleScreen() {
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(null);
   const [isMonthPickerOpen, setMonthPickerOpen] = useState(false);
 
-  const pageBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
-  const cardBg = isDark ? 'bg-zinc-900' : 'bg-white';
-  const dividerBorder = isDark ? 'border-zinc-800' : 'border-zinc-100';
-  const headingText = isDark ? 'text-zinc-100' : 'text-zinc-900';
-  const subText = isDark ? 'text-zinc-400' : 'text-zinc-500';
+  const pageBg = 'bg-zinc-50';
+  const cardBg = 'bg-white';
+  const dividerBorder = 'border-zinc-100';
+  const headingText = 'text-zinc-900';
+  const subText = 'text-zinc-500';
 
   // mock 단순화: 일정 데이터는 "오늘"에만 존재. 다른 날·다른 월은 빈 상태.
   const visibleScheduleList = isSameDay(selectedDate, today) ? scheduleList : [];

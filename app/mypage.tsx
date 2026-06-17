@@ -9,10 +9,8 @@ import SafetyBufferRow from '@/components/mypage/SafetyBufferRow';
 import BufferSheetBody from '@/components/common/BufferSheetBody';
 import NotificationSettingsRow from '@/components/mypage/NotificationSettingsRow';
 import RepeatReservationLink from '@/components/mypage/RepeatReservationLink';
-import DarkModeRow from '@/components/mypage/DarkModeRow';
 import TermsLink from '@/components/mypage/TermsLink';
 import VersionRow from '@/components/mypage/VersionRow';
-import { useTheme } from '@/contexts/ThemeContext';
 import { useSettingsStore } from '@/stores/settingsStore';
 
 const SECTION_GAP_CLASS = 'gap-2';
@@ -25,15 +23,14 @@ const NOTI_ALERT_CONFIRM = '설정 열기';
 const NOTI_ALERT_CANCEL = '취소';
 
 export default function MyPageScreen() {
-  const { isDark } = useTheme();
   const bufferMinutes = useSettingsStore((s) => s.bufferMinutes);
   const setBufferMinutes = useSettingsStore((s) => s.setBufferMinutes);
 
   const [isBufferSheetOpen, setBufferSheetOpen] = useState(false);
 
-  const sectionCard = isDark ? 'bg-zinc-900' : 'bg-white';
+  const sectionCard = 'bg-white';
   const sectionTitle = 'text-zinc-500';
-  const scrollBg = isDark ? 'bg-zinc-950' : 'bg-zinc-50';
+  const scrollBg = 'bg-zinc-50';
 
   const handleSaveBuffer = (next: number) => {
     setBufferMinutes(next);
@@ -65,8 +62,7 @@ export default function MyPageScreen() {
             </Text>
             <SafetyBufferRow value={bufferMinutes} onPress={() => setBufferSheetOpen(true)} />
             <NotificationSettingsRow onPress={handleOpenSystemNotificationSettings} />
-            <RepeatReservationLink />
-            <DarkModeRow noBorder />
+            <RepeatReservationLink noBorder />
           </View>
 
           {/* 앱 정보 */}
