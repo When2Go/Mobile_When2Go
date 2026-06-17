@@ -16,8 +16,8 @@ const baseListItem: TripListItem = {
 };
 
 describe('tripStatusToKorean', () => {
-  it('SCHEDULED → "진행중" (출발 시각 확정·알림 스케줄링 중)', () => {
-    expect(tripStatusToKorean('SCHEDULED')).toBe('진행중');
+  it('SCHEDULED → "확정" (출발 시각이 확정된 상태)', () => {
+    expect(tripStatusToKorean('SCHEDULED')).toBe('확정');
   });
 
   it('PENDING → "예정"', () => {
@@ -39,9 +39,9 @@ describe('tripListItemToSchedule', () => {
       destination: '강남역',
       arrivalTime: '오전 9:00',
       departureTime: '오전 7:45',
-      status: '진행중',
+      status: '확정',
       route: '현재 위치 → 강남역',
-      isActive: true,
+      isActive: false,
       updatedAt: null,
       from: '현재 위치',
       to: '강남역',

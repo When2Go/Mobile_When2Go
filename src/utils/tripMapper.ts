@@ -13,11 +13,11 @@ const NO_DEPARTURE_LABEL = '-';
 
 /**
  * 백엔드 TripStatus → 화면 표시 상태.
- * SCHEDULED(출발 시각 확정·알림 스케줄링 중)가 화면상 "진행중"에 해당한다.
+ * SCHEDULED는 출발 시각이 확정된 상태("확정")를 뜻한다(현재 진행 중이 아님).
  */
 const STATUS_LABEL: Record<TripStatus, ScheduleStatus> = {
   PENDING: '예정',
-  SCHEDULED: '진행중',
+  SCHEDULED: '확정',
   COMPLETED: '완료',
 };
 
@@ -39,7 +39,7 @@ export function tripListItemToSchedule(item: TripListItem): ScheduleItem {
     departureTime: departureLabel(item.finalDepartureTime),
     status: tripStatusToKorean(item.status),
     route: `${item.originName}${ROUTE_JOINER}${item.destName}`,
-    isActive: item.status === 'SCHEDULED',
+    isActive: false,
     updatedAt: null,
     from: item.originName,
     to: item.destName,
@@ -69,7 +69,7 @@ export function tripDetailToSchedule(detail: TripDetail): ScheduleItem {
     departureTime: departureLabel(detail.finalDepartureTime),
     status: tripStatusToKorean(detail.status),
     route: `${detail.originName}${ROUTE_JOINER}${detail.destName}`,
-    isActive: detail.status === 'SCHEDULED',
+    isActive: false,
     updatedAt: isoToHHmmKST(detail.updatedAt),
     from: detail.originName,
     to: detail.destName,

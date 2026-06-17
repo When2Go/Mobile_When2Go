@@ -3,7 +3,7 @@
  * mock 단계에서는 화면 전용으로만 쓰이며, 실제 Trip API 연동 시 재배치/확장 예정.
  */
 
-export type ScheduleStatus = '예정' | '진행중' | '완료';
+export type ScheduleStatus = '예정' | '확정' | '완료';
 
 export interface ScheduleItem {
   id: number;

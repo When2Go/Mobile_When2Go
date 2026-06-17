@@ -102,7 +102,7 @@ export default function ReservationCard({ schedule, onDelete, onTap }: Reservati
   })();
 
   const statusBadgeClass = (() => {
-    if (schedule.status === '진행중') {
+    if (schedule.status === '확정') {
       return 'bg-blue-600';
     }
     if (schedule.status === '완료') {
@@ -112,7 +112,7 @@ export default function ReservationCard({ schedule, onDelete, onTap }: Reservati
   })();
 
   const statusBadgeText = (() => {
-    if (schedule.status === '진행중') return 'text-white';
+    if (schedule.status === '확정') return 'text-white';
     if (schedule.status === '완료') {
       return 'text-emerald-700';
     }
