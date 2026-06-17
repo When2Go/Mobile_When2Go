@@ -29,4 +29,6 @@ export interface ScheduleItem {
   from: string;
   /** 도착지 표시명 (상세 시트에서 사용) */
   to: string;
+  /** 일정 날짜 키 ("YYYY-MM-DD", KST 기준). 달력 필터·마커 기준. */
+  date: string;
 }

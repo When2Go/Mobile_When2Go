@@ -66,6 +66,7 @@ export default function SetupScreen() {
   const [isBufferSheetOpen, setBufferSheetOpen] = useState(false);
 
   const setCoords = useRouteDraftStore((s) => s.setCoords);
+  const setToName = useRouteDraftStore((s) => s.setToName);
   const { lat: currentLat, lng: currentLng } = useCurrentLocation();
 
   const handleSaveBuffer = (next: number) => {
@@ -93,6 +94,7 @@ export default function SetupScreen() {
 
   const handleDepart = () => {
     setCoords('from', { lat: currentLat, lng: currentLng });
+    setToName(destination);
     router.push({
       pathname: RESULT_PATH,
       params: {

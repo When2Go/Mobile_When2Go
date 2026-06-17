@@ -75,6 +75,7 @@ export function normalizeRoute(
       route.localizedValues?.duration?.text ??
       route.localizedValues?.staticDuration?.text ??
       FALLBACK_TIME,
+    durationSeconds: isNaN(durationSecs) ? 0 : durationSecs,
     steps: extractTransitStops(route.legs),
     transferCount: countTransfers(route.legs),
     fareLabel: '-',

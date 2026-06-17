@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import MobileLayout from '@/components/common/MobileLayout';
@@ -9,37 +9,20 @@ import ReservationCard from '@/components/schedule/ReservationCard';
 import EmptyState from '@/components/schedule/EmptyState';
 import ScheduleDetailSheet from '@/components/schedule/ScheduleDetailSheet';
 import MonthPickerSheet from '@/components/schedule/MonthPickerSheet';
-import {
-  INITIAL_SCHEDULES,
-  MOCK_MARKED_OFFSETS_FROM_TODAY,
-  WEEKDAY_LABELS,
-} from '@/constants/schedule';
+import { PALETTE } from '@/constants/colors';
+import { WEEKDAY_LABELS } from '@/constants/schedule';
+import { useTrips } from '@/hooks/trip/useTrips';
+import { useTripDetail } from '@/hooks/trip/useTripDetail';
+import { useDeleteTrip } from '@/hooks/trip/useDeleteTrip';
 import type { ScheduleItem } from '@/types/schedule.types';
 
 const SECTION_PADDING_CLASS = 'px-5';
 const LIST_SPACING_CLASS = 'gap-3';
 const SUMMARY_VERTICAL_CLASS = 'py-3';
-
-function isSameDay(a: Date, b: Date) {
-  return (
-    a.getFullYear() === b.getFullYear() &&
-    a.getMonth() === b.getMonth() &&
-    a.getDate() === b.getDate()
-  );
-}
+const LOAD_ERROR_MESSAGE = '일정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
 
 function isSameMonth(a: Date, b: Date) {
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth();
-}
-
-function buildMarkedDays(today: Date): number[] {
-  return MOCK_MARKED_OFFSETS_FROM_TODAY.map((offset) => {
-    const date = new Date(today.getFullYear(), today.getMonth(), today.getDate() + offset);
-    if (date.getMonth() !== today.getMonth()) {
-      return null;
-    }
-    return date.getDate();
-  }).filter((value): value is number => value !== null);
 }
 
 export default function ScheduleScreen() {
@@ -48,9 +31,12 @@ export default function ScheduleScreen() {
 
   const [displayMonth, setDisplayMonth] = useState<Date>(today);
   const [selectedDate, setSelectedDate] = useState<Date>(today);
-  const [scheduleList, setScheduleList] = useState<ScheduleItem[]>(INITIAL_SCHEDULES);
   const [selectedSchedule, setSelectedSchedule] = useState<ScheduleItem | null>(null);
   const [isMonthPickerOpen, setMonthPickerOpen] = useState(false);
+
+  const { trips, isLoading, error, refetch } = useTrips(selectedDate);
+  const { detail } = useTripDetail(selectedSchedule?.id ?? null);
+  const { remove } = useDeleteTrip();
 
   const pageBg = 'bg-zinc-50';
   const cardBg = 'bg-white';
@@ -58,14 +44,14 @@ export default function ScheduleScreen() {
   const headingText = 'text-zinc-900';
   const subText = 'text-zinc-500';
 
-  // mock 단순화: 일정 데이터는 "오늘"에만 존재. 다른 날·다른 월은 빈 상태.
-  const visibleScheduleList = isSameDay(selectedDate, today) ? scheduleList : [];
+  // API가 선택 날짜로 이미 필터링한 결과를 그대로 노출.
+  const visibleScheduleList = trips;
 
-  // dot도 현재 표시 중인 달이 today의 월과 같을 때만 (실데이터 연동 시 markedDays는 그 달의 일정 day로 대체).
+  // MVP: 월 전체 마커는 후속 이슈로 분리. 현재 로드된 선택일에 일정이 있으면 그 날만 점 표시.
   const markedDays = useMemo(() => {
-    if (!isSameMonth(displayMonth, today)) return [];
-    return buildMarkedDays(today);
-  }, [displayMonth, today]);
+    if (!isSameMonth(selectedDate, displayMonth) || trips.length === 0) return [];
+    return [selectedDate.getDate()];
+  }, [selectedDate, displayMonth, trips.length]);
 
   const summaryDateText = `${selectedDate.getFullYear()}년 ${selectedDate.getMonth() + 1}월 ${selectedDate.getDate()}일 (${WEEKDAY_LABELS[selectedDate.getDay()]})`;
   const summaryCountText =
@@ -77,8 +63,12 @@ export default function ScheduleScreen() {
     router.push('/search');
   };
 
-  const handleDelete = (id: number) => {
-    setScheduleList((prev) => prev.filter((s) => s.id !== id));
+  const handleDelete = async (id: number) => {
+    const ok = await remove(id);
+    if (ok) {
+      setSelectedSchedule(null);
+      refetch();
+    }
   };
 
   const handleOpenDetail = (item: ScheduleItem) => {
@@ -97,6 +87,34 @@ export default function ScheduleScreen() {
     } else {
       setSelectedDate(new Date(date.getFullYear(), date.getMonth(), 1));
     }
+  };
+
+  const renderListBody = () => {
+    if (isLoading) {
+      return (
+        <View className="items-center py-12">
+          <ActivityIndicator size="large" color={PALETTE.blue600} />
+        </View>
+      );
+    }
+    if (error) {
+      return (
+        <View className="items-center py-12">
+          <Text className={`text-sm ${subText}`}>{LOAD_ERROR_MESSAGE}</Text>
+        </View>
+      );
+    }
+    if (visibleScheduleList.length === 0) {
+      return <EmptyState onPressNew={handleNavigateToNew} />;
+    }
+    return visibleScheduleList.map((schedule) => (
+      <ReservationCard
+        key={schedule.id}
+        schedule={schedule}
+        onDelete={() => handleDelete(schedule.id)}
+        onTap={() => handleOpenDetail(schedule)}
+      />
+    ));
   };
 
   return (
@@ -122,23 +140,12 @@ export default function ScheduleScreen() {
         </View>
 
         <View className={`${SECTION_PADDING_CLASS} pt-4 ${LIST_SPACING_CLASS}`}>
-          {visibleScheduleList.length === 0 ? (
-            <EmptyState onPressNew={handleNavigateToNew} />
-          ) : (
-            visibleScheduleList.map((schedule) => (
-              <ReservationCard
-                key={schedule.id}
-                schedule={schedule}
-                onDelete={() => handleDelete(schedule.id)}
-                onTap={() => handleOpenDetail(schedule)}
-              />
-            ))
-          )}
+          {renderListBody()}
         </View>
       </ScrollView>
 
       <ScheduleDetailSheet
-        schedule={selectedSchedule}
+        schedule={detail ?? selectedSchedule}
         isOpen={selectedSchedule !== null}
         onClose={handleCloseDetail}
         onDelete={handleDelete}

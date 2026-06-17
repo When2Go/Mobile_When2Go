@@ -1,4 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { Check } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
@@ -28,6 +28,8 @@ interface ReservationCompleteModalProps {
   isOpen: boolean;
   route: RouteDisplayItem | null;
   confirmed: boolean;
+  /** 생성 API 호출 진행 중 — 버튼 비활성·스피너 표시. */
+  isCreating?: boolean;
   onClose: () => void;
   onConfirm: () => void;
 }
@@ -36,6 +38,7 @@ export default function ReservationCompleteModal({
   isOpen,
   route,
   confirmed,
+  isCreating = false,
   onClose,
   onConfirm,
 }: ReservationCompleteModalProps) {
@@ -44,6 +47,21 @@ export default function ReservationCompleteModal({
   const departureText = 'text-blue-500';
 
   const confirmBg = confirmed ? 'bg-emerald-500' : 'bg-blue-600';
+
+  const buttonContent = (() => {
+    if (confirmed) {
+      return (
+        <>
+          <Check size={ICON_SIZE.header} color={PALETTE.white} />
+          <Text className="ml-2 text-base font-bold text-white">{CONFIRMED_LABEL}</Text>
+        </>
+      );
+    }
+    if (isCreating) {
+      return <ActivityIndicator color={PALETTE.white} />;
+    }
+    return <Text className="text-base font-bold text-white">{CONFIRM_LABEL}</Text>;
+  })();
 
   return (
     <BottomSheetModal
@@ -77,19 +95,12 @@ export default function ReservationCompleteModal({
 
           <Pressable
             onPress={onConfirm}
-            disabled={confirmed}
+            disabled={confirmed || isCreating}
             accessibilityRole="button"
             accessibilityLabel={confirmed ? CONFIRMED_LABEL : CONFIRM_LABEL}
-            className={`flex-row items-center justify-center rounded-2xl py-4 active:opacity-80 ${confirmBg}`}
+            className={`flex-row items-center justify-center rounded-2xl py-4 active:opacity-80 ${confirmBg} ${isCreating && !confirmed ? 'opacity-70' : ''}`}
           >
-            {confirmed ? (
-              <>
-                <Check size={ICON_SIZE.header} color={PALETTE.white} />
-                <Text className="ml-2 text-base font-bold text-white">{CONFIRMED_LABEL}</Text>
-              </>
-            ) : (
-              <Text className="text-base font-bold text-white">{CONFIRM_LABEL}</Text>
-            )}
+            {buttonContent}
           </Pressable>
         </View>
       ) : null}

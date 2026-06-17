@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
@@ -14,10 +14,14 @@ import {
   SELECT_ROUTE_HEADING,
   type RouteDisplayItem,
 } from '@/constants/result';
+import { ORIGIN_CURRENT_LOCATION } from '@/constants/trip';
 import { useSettingsStore } from '@/stores/settingsStore';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import { useRouteSearch } from '@/hooks/route/useRouteSearch';
+import { useCreateTrip } from '@/hooks/trip/useCreateTrip';
+import { toISO8601KST } from '@/utils/tripDateTime';
 import type { RouteSearchRequest } from '@/api/route/types';
+import type { TripCreateRequest } from '@/api/trip/types';
 import AdSlot from '@/components/common/AdSlot';
 import DepartureTimeHeader from '@/components/result/DepartureTimeHeader';
 import RouteCard from '@/components/result/RouteCard';
@@ -27,6 +31,8 @@ const SCHEDULE_PATH = '/schedule';
 const ERROR_MESSAGE = '경로를 불러오지 못했습니다. 다시 시도해 주세요.';
 const EMPTY_MESSAGE = '조건에 맞는 경로가 없습니다.';
 const ARRIVAL_TARGET_SUFFIX = '도착을 위한';
+const SAVE_ERROR_TITLE = '예약 실패';
+const SAVE_ERROR_MESSAGE = '일정을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.';
 
 function RouteListContent({
   isLoading,
@@ -83,6 +89,8 @@ export default function ResultScreen() {
 
   const fromCoords = useRouteDraftStore((s) => s.fromCoords);
   const toCoords = useRouteDraftStore((s) => s.toCoords);
+  const toName = useRouteDraftStore((s) => s.toName);
+  const { create, isCreating } = useCreateTrip();
 
   const routeReq = useMemo<RouteSearchRequest | null>(
     () =>
@@ -130,8 +138,28 @@ export default function ResultScreen() {
     setSelectedRoute(null);
   };
 
-  const handleConfirm = () => {
-    if (confirmed) return;
+  const handleConfirm = async () => {
+    if (confirmed || isCreating) return;
+    if (!selectedRoute || !fromCoords || !toCoords || !arrivalTime) return;
+
+    const payload: TripCreateRequest = {
+      originName: ORIGIN_CURRENT_LOCATION,
+      originLat: fromCoords.lat,
+      originLng: fromCoords.lng,
+      destName: toName ?? selectedRoute.steps[selectedRoute.steps.length - 1] ?? ORIGIN_CURRENT_LOCATION,
+      destLat: toCoords.lat,
+      destLng: toCoords.lng,
+      arrivalTime: toISO8601KST(arrivalTime),
+      bufferMinutes: safetyBufferMin,
+      durationSeconds: selectedRoute.durationSeconds,
+    };
+
+    const ok = await create(payload);
+    if (!ok) {
+      Alert.alert(SAVE_ERROR_TITLE, SAVE_ERROR_MESSAGE);
+      return;
+    }
+
     setConfirmed(true);
     redirectTimerRef.current = setTimeout(() => {
       setSelectedRoute(null);
@@ -194,6 +222,7 @@ export default function ResultScreen() {
           isOpen={selectedRoute !== null}
           route={selectedRoute}
           confirmed={confirmed}
+          isCreating={isCreating}
           onClose={handleCloseModal}
           onConfirm={handleConfirm}
         />
