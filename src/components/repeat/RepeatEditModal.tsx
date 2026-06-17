@@ -107,6 +107,7 @@ export default function RepeatEditModal({
       title={title}
       snapPoints={EDIT_SHEET_SNAP_POINTS}
       scrollable
+      keyboardBehavior="interactive"
     >
       <View className="gap-5 pb-2">
           {/* 예약 이름 */}

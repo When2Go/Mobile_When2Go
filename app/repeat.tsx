@@ -286,6 +286,8 @@ export default function RepeatScreen() {
           destLng: toCoords?.lng,
         }));
       }
+      // 검색 후 복귀 시 모달을 다시 열어 선택 결과를 표시한다
+      setEditOpen(true);
     }, []),
   );
 
