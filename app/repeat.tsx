@@ -312,6 +312,7 @@ export default function RepeatScreen() {
 
   const handleSelectLocation = (field: 'origin' | 'destination') => {
     locationSelectingRef.current = true;
+    setEditOpen(false);
     router.push({
       pathname: '/search',
       params: { mode: 'select-location', field: field === 'origin' ? 'from' : 'to' },
