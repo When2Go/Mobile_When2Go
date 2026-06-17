@@ -65,7 +65,11 @@ export default function RepeatEditModal({
   const effectiveBufferMin = resolveRepeatBufferMinutes(form, globalBufferMin);
 
   const title = mode === 'edit' ? EDIT_MODAL_TITLE : ADD_MODAL_TITLE;
-  const isValid = form.name.trim().length > 0 && form.days.length > 0;
+  const isValid =
+    form.name.trim().length > 0 &&
+    form.days.length > 0 &&
+    form.origin.trim().length > 0 &&
+    form.destination.trim().length > 0;
 
   // 색상 토큰
   const inputBg = 'bg-white border-zinc-200 text-zinc-900';

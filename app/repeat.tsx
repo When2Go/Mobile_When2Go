@@ -104,6 +104,7 @@ function hasAllCoords(
 export default function RepeatScreen() {
   const router = useRouter();
   const nextIdRef = useRef(INITIAL_NEXT_ID);
+  const locationSelectingRef = useRef(false);
   const [repeats, setRepeats] = useState<RepeatItem[]>([]);
   const [editTarget, setEditTarget] = useState<RepeatItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
@@ -227,6 +228,14 @@ export default function RepeatScreen() {
       enabled: true,
     };
 
+    console.log('[repeat] coords:', {
+      originLat: draftForm.originLat,
+      originLng: draftForm.originLng,
+      destLat: draftForm.destLat,
+      destLng: draftForm.destLng,
+      hasCoords: hasAllCoords(draftForm),
+    });
+
     if (hasAllCoords(draftForm)) {
       try {
         const res = await createReservation({
@@ -246,9 +255,11 @@ export default function RepeatScreen() {
           repeatDays: daysToRepeatDays(draftForm.days),
         });
         newItem.reservationId = res.reservationId;
-      } catch {
-        // API 실패 시 로컬 전용으로 저장 진행
+      } catch (e) {
+        console.log('[repeat] POST error:', e);
       }
+    } else {
+      console.log('[repeat] POST skipped — coords missing, saved locally only');
     }
 
     setRepeats((prev) => {
@@ -267,31 +278,40 @@ export default function RepeatScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      if (!locationSelectingRef.current) return;
+      locationSelectingRef.current = false;
+
       const { consumePendingLocation, fromCoords, toCoords } = useRouteDraftStore.getState();
       const pending = consumePendingLocation();
-      if (!pending) return;
 
-      if (pending.field === 'from') {
-        setDraftForm((prev) => ({
-          ...prev,
-          origin: pending.location,
-          originLat: fromCoords?.lat,
-          originLng: fromCoords?.lng,
-        }));
-      } else {
-        setDraftForm((prev) => ({
-          ...prev,
-          destination: pending.location,
-          destLat: toCoords?.lat,
-          destLng: toCoords?.lng,
-        }));
+      console.log('[repeat] returned from search, pending:', pending);
+
+      if (pending) {
+        if (pending.field === 'from') {
+          setDraftForm((prev) => ({
+            ...prev,
+            origin: pending.location,
+            originLat: fromCoords?.lat,
+            originLng: fromCoords?.lng,
+          }));
+          console.log('[repeat] origin set:', pending.location, fromCoords);
+        } else {
+          setDraftForm((prev) => ({
+            ...prev,
+            destination: pending.location,
+            destLat: toCoords?.lat,
+            destLng: toCoords?.lng,
+          }));
+          console.log('[repeat] destination set:', pending.location, toCoords);
+        }
       }
-      // 검색 후 복귀 시 모달을 다시 열어 선택 결과를 표시한다
+      // 선택했든 취소했든 모달을 다시 열어준다
       setEditOpen(true);
     }, []),
   );
 
   const handleSelectLocation = (field: 'origin' | 'destination') => {
+    locationSelectingRef.current = true;
     router.push({
       pathname: '/search',
       params: { mode: 'select-location', field: field === 'origin' ? 'from' : 'to' },
