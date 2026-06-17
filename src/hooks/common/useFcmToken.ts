@@ -64,7 +64,6 @@ export function useFcmToken(): void {
       if (!hasPermission) return;
 
       const token = await messaging().getToken();
-      console.log('[FCM] 발급 토큰', token);
 
       const { ensureDeviceId, lastFcmToken, setLastFcmToken } =
         useDeviceStore.getState();
@@ -73,7 +72,6 @@ export function useFcmToken(): void {
       let exists: boolean;
       try {
         const status = await getUserStatus();
-        console.log('[FCM] GET /api/users/status 응답', status);
         exists = status.exists;
       } catch (err) {
         console.warn('[FCM] /users/status 호출 실패', err);
@@ -83,19 +81,20 @@ export function useFcmToken(): void {
 
       try {
         if (!exists) {
-          await withRetry(async () => {
-            const response = await registerUser({
-              deviceId,
-              platform: resolvePlatform(),
-              fcmToken: token,
-            });
-            console.log('[FCM] POST /api/users 응답', response);
-          }, FCM_RETRY_COUNT);
+          await withRetry(
+            () =>
+              registerUser({
+                deviceId,
+                platform: resolvePlatform(),
+                fcmToken: token,
+              }),
+            FCM_RETRY_COUNT,
+          );
         } else if (lastFcmToken !== token) {
-          await withRetry(async () => {
-            const response = await registerFcmToken({ fcmToken: token });
-            console.log('[FCM] PATCH /api/users/me/fcm-token 응답', response.data);
-          }, FCM_RETRY_COUNT);
+          await withRetry(
+            () => registerFcmToken({ fcmToken: token }),
+            FCM_RETRY_COUNT,
+          );
         } else {
           return;
         }
