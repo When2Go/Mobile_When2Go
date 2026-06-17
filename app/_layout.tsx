@@ -8,8 +8,11 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useDeviceStore } from '@/stores/deviceStore';
+import { useFcmToken } from '@/hooks/common/useFcmToken';
 
 export default function RootLayout() {
+  useFcmToken();
+
   useEffect(() => {
     void useDeviceStore.getState().ensureDeviceId();
   }, []);
