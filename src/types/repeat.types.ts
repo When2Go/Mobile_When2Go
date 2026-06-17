@@ -13,6 +13,10 @@ export interface RepeatItem {
   name: string;
   origin: string;
   destination: string;
+  originLat?: number;
+  originLng?: number;
+  destLat?: number;
+  destLng?: number;
   days: number[];
   arrivalPeriod: Period;
   arrivalHour: number;
@@ -20,6 +24,7 @@ export interface RepeatItem {
   routeOption: RouteOptionId;
   enabled: boolean;
   safetyBufferMin?: number;
+  reservationId?: number;
 }
 
 /** 폼은 id/enabled를 제외한 나머지. */
