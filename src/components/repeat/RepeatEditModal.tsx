@@ -118,7 +118,7 @@ export default function RepeatEditModal({
           <View>
             <Text className={`mb-2 text-sm font-semibold ${labelText}`}>{LABEL_NAME}</Text>
             <TextInput
-              value={form.name}
+              defaultValue={form.name}
               onChangeText={(v) => onFormChange({ name: v })}
               placeholder={PLACEHOLDER_NAME}
               placeholderTextColor={placeholderColor}

@@ -370,6 +370,7 @@ export default function RepeatScreen() {
 
       {isEditOpen ? (
         <RepeatEditModal
+          key={editTarget?.id ?? 'new'}
           isOpen={isEditOpen}
           mode={editTarget ? 'edit' : 'add'}
           form={draftForm}
