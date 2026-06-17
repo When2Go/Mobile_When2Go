@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
@@ -7,30 +7,100 @@ import { ArrowLeft } from 'lucide-react-native';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import {
-  ARRIVAL_TARGET_PREFIX,
+  ARRIVAL_TIME_PARAM,
   BUFFER_MIN_PARAM,
   CONFIRM_REDIRECT_DELAY_MS,
-  MOCK_ROUTES,
   SCREEN_TITLE,
   SELECT_ROUTE_HEADING,
-  type MockRoute,
+  type RouteDisplayItem,
 } from '@/constants/result';
 import { useSettingsStore } from '@/stores/settingsStore';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { useRouteSearch } from '@/hooks/route/useRouteSearch';
+import type { RouteSearchRequest } from '@/api/route/types';
 import AdSlot from '@/components/common/AdSlot';
 import DepartureTimeHeader from '@/components/result/DepartureTimeHeader';
 import RouteCard from '@/components/result/RouteCard';
 import ReservationCompleteModal from '@/components/result/ReservationCompleteModal';
 
 const SCHEDULE_PATH = '/schedule';
+const ERROR_MESSAGE = '경로를 불러오지 못했습니다. 다시 시도해 주세요.';
+const EMPTY_MESSAGE = '조건에 맞는 경로가 없습니다.';
+const ARRIVAL_TARGET_SUFFIX = '도착을 위한';
+
+function RouteListContent({
+  isLoading,
+  error,
+  routes,
+  onSelect,
+}: {
+  isLoading: boolean;
+  error: unknown;
+  routes: RouteDisplayItem[];
+  onSelect: (route: RouteDisplayItem) => void;
+}) {
+  if (isLoading) {
+    return (
+      <View className="items-center py-12">
+        <ActivityIndicator size="large" color={PALETTE.blue600} />
+      </View>
+    );
+  }
+  if (error) {
+    return (
+      <View className="items-center py-12">
+        <Text className="text-sm text-zinc-500">{ERROR_MESSAGE}</Text>
+      </View>
+    );
+  }
+  if (routes.length === 0) {
+    return (
+      <View className="items-center py-12">
+        <Text className="text-sm text-zinc-500">{EMPTY_MESSAGE}</Text>
+      </View>
+    );
+  }
+  return (
+    <>
+      {routes.map((route) => (
+        <RouteCard key={route.id} route={route} onPress={() => onSelect(route)} />
+      ))}
+    </>
+  );
+}
 
 export default function ResultScreen() {
   const router = useRouter();
   const globalBufferMin = useSettingsStore((s) => s.bufferMinutes);
-  const rawParams = useLocalSearchParams<{ bufferMin?: string }>();
+  const rawParams = useLocalSearchParams<{
+    bufferMin?: string;
+    arrivalTime?: string;
+  }>();
+
   const bufferMinParam = rawParams[BUFFER_MIN_PARAM];
   const safetyBufferMin = bufferMinParam !== undefined ? Number(bufferMinParam) : globalBufferMin;
+  const arrivalTime = rawParams[ARRIVAL_TIME_PARAM] ?? '';
 
-  const [selectedRoute, setSelectedRoute] = useState<MockRoute | null>(null);
+  const fromCoords = useRouteDraftStore((s) => s.fromCoords);
+  const toCoords = useRouteDraftStore((s) => s.toCoords);
+
+  const routeReq = useMemo<RouteSearchRequest | null>(
+    () =>
+      fromCoords && toCoords && arrivalTime
+        ? {
+            originLat: fromCoords.lat,
+            originLng: fromCoords.lng,
+            destLat: toCoords.lat,
+            destLng: toCoords.lng,
+            arrivalTime,
+          }
+        : null,
+    [fromCoords, toCoords, arrivalTime],
+  );
+
+  const { routes, isLoading, error } = useRouteSearch(routeReq, safetyBufferMin);
+
+  const [selectedRoute, setSelectedRoute] = useState<RouteDisplayItem | null>(null);
   const [confirmed, setConfirmed] = useState(false);
   const redirectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -50,7 +120,7 @@ export default function ResultScreen() {
   const backBg = 'bg-zinc-100';
   const backIconColor = PALETTE.zinc500;
 
-  const handleSelectRoute = (route: MockRoute) => {
+  const handleSelectRoute = (route: RouteDisplayItem) => {
     setSelectedRoute(route);
     setConfirmed(false);
   };
@@ -69,6 +139,10 @@ export default function ResultScreen() {
       router.push(SCHEDULE_PATH);
     }, CONFIRM_REDIRECT_DELAY_MS);
   };
+
+  const arrivalTargetPrefix = arrivalTime
+    ? `${arrivalTime} ${ARRIVAL_TARGET_SUFFIX}`
+    : ARRIVAL_TARGET_SUFFIX;
 
   return (
     <SafeAreaView className={`flex-1 ${pageBg}`} edges={['top', 'left', 'right', 'bottom']}>
@@ -95,19 +169,18 @@ export default function ResultScreen() {
         showsVerticalScrollIndicator={false}
       >
         <DepartureTimeHeader
-          targetPrefix={ARRIVAL_TARGET_PREFIX}
+          targetPrefix={arrivalTargetPrefix}
           heading={SELECT_ROUTE_HEADING}
           safetyBufferMin={safetyBufferMin}
         />
 
         <View className="gap-3 px-5">
-          {MOCK_ROUTES.map((route) => (
-            <RouteCard
-              key={route.id}
-              route={route}
-              onPress={() => handleSelectRoute(route)}
-            />
-          ))}
+          <RouteListContent
+            isLoading={isLoading}
+            error={error}
+            routes={routes}
+            onSelect={handleSelectRoute}
+          />
         </View>
       </ScrollView>
 

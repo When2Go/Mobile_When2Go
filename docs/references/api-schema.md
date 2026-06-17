@@ -243,44 +243,73 @@
 
 ## 5. route — 경로 탐색
 
-### GET `/api/routes/search`
+### POST `/api/routes/search`
 
-> ⚠️ 명세 미확정 — 응답에 비용(`cost`) 필드 추가 예정
+> Google Maps Routes API 기반으로 전환됨 (구 ODsay 제거). 2026-06-05 명세 확정.
 
-**Query**
-
-| key | 타입 | Nullable | 설명 |
-|-----|------|----------|------|
-| `originLat` / `originLng` / `destLat` / `destLng` | number | X | 좌표 |
-| `arrivalTime` | string (`HH:mm`) | X |  |
-| `routeOption` | `RouteSearchOption` | X | `DEFAULT` / `SUBWAY_ONLY` / `BUS_ONLY` (※ 위 RouteOption과 다름) |
-
-**Response**
+**Request Body**
 
 | key | 타입 | Nullable | 설명 |
 |-----|------|----------|------|
-| `cached` | boolean | X | 캐시 히트 여부 |
-| `routes[].routeIndex` | number | X |  |
-| `routes[].totalTimeMinutes` | number | X |  |
-| `routes[].transferCount` | number | X |  |
-| `routes[].firstBoardingLat/Lng/Name` | number/string | X | 첫 탑승 위치 |
-| `routes[].steps` | `RouteStep[]` | X |  |
+| `originLat` / `originLng` | number | X | 출발지 좌표 |
+| `destLat` / `destLng` | number | X | 목적지 좌표 |
+| `arrivalTime` | string (`HH:mm`) | X | 도착 목표 시각 |
 
-**Status**: `200` / `400` 필수 누락 또는 좌표 범위 오류 / `401` / `502` (ODsay 호출 실패)
-
----
-
-## 공통 타입 — `RouteStep`
+**Response Envelope** (이 엔드포인트만 `code` 필드 포함):
 
 | key | 타입 | Nullable | 설명 |
 |-----|------|----------|------|
-| `type` | `StepType` | X | `WALK` / `SUBWAY` / `BUS` |
-| `durationMinutes` | number | X |  |
-| `description` | string | O | (`WALK`) 도보 안내 |
-| `line` | string | O | (`SUBWAY`) 노선명 |
-| `startStation` / `endStation` | string | O | (`SUBWAY`) 승/하차 역 |
-| `busNo` | string | O | (`BUS`) |
-| `startStop` / `endStop` | string | O | (`BUS`) 승/하차 정류장 |
+| `success` | boolean | X |  |
+| `code` | string | X | `"OK"` 등 응답 코드 |
+| `message` | string | X |  |
+| `data.routes` | `RouteCandidate[]` | X |  |
+
+**`RouteCandidate`**
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `distanceMeters` | number | X | 전체 이동 거리 (m) |
+| `duration` | string | X | 전체 소요 시간 (Google duration format, `"Xs"`) |
+| `staticDuration` | string | X | 교통 상황 미반영 소요 시간 |
+| `routeLabels` | string[] | O | `["DEFAULT_ROUTE"]` 등 |
+| `localizedValues.distance.text` | string | O | 표시용 거리 (`"5.2 km"`) |
+| `localizedValues.duration.text` | string | O | 표시용 소요 시간 (`"24분"`) |
+| `legs` | `RouteLeg[]` | X | 경로 구간 목록 |
+
+**`RouteLeg`**
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `polyline.encodedPolyline` | string | O | 지도 표시용 인코딩 폴리라인 |
+| `startLocation.latLng` / `endLocation.latLng` | `{latitude, longitude}` | X | 구간 출발/도착 좌표 |
+| `localizedValues.duration.text` | string | O | 구간 표시용 시간 |
+| `steps` | `RouteStep[]` | X | 세부 이동 단계 |
+
+**`RouteStep`**
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `travelMode` | string | X | `WALK` / `TRANSIT` |
+| `distanceMeters` | number | X |  |
+| `staticDuration` | string | X | `"Xs"` |
+| `localizedValues.staticDuration.text` | string | O | 표시용 단계 시간 |
+| `navigationInstruction.instructions` | string | O | 이동 안내 문구 |
+| `transitDetails` | `TransitDetails` | O | `TRANSIT`일 때만 제공 |
+
+**`TransitDetails`**
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `stopDetails.departureStop.name` | string | O | 승차 정류장/역 |
+| `stopDetails.arrivalStop.name` | string | O | 하차 정류장/역 |
+| `stopDetails.departureTime` | string (ISO-8601 UTC) | O | 승차 시각 |
+| `stopDetails.arrivalTime` | string (ISO-8601 UTC) | O | 하차 시각 |
+| `headsign` | string | O | 행선지 |
+| `transitLine.nameShort` | string | O | 노선 번호/약칭 |
+| `transitLine.vehicle.type` | string | O | `BUS` / `SUBWAY` 등 |
+| `stopCount` | number | O | 정차 수 |
+
+**Status**: `200` / `400` 요청값 검증 실패 / `500` 서버 내부 오류 / `502` Google Routes API 호출 실패
 
 ---
 
