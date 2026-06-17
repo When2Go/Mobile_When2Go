@@ -160,7 +160,7 @@ BottomSheetModal 래퍼 사용 (src/components/common/BottomSheetModal.tsx)
 ### 위치 마커 (홈 화면)
 
 ```tsx
-// 내 위치: h-8 w-8 rounded-full bg-blue-500 border-2 border-white + ping 애니메이션
+// 내 위치: h-4 w-4 rounded-full bg-blue-500 border-2 border-white + ping 애니메이션
 // 목적지: rounded-full bg-rose-600 px-2 py-0.5 text-[10px] font-bold text-white
 ```
 

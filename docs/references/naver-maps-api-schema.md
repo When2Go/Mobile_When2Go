@@ -133,24 +133,45 @@ When2Go에서 채택한 주요 props:
 | `caption` / `subCaption` | `CaptionType` / `SubCaptionType` | (미사용) | 마커 라벨 |
 | `onTap` | `() => void` | (미사용) | 마커 탭 콜백 |
 
-### 4.3 위치 추적 (ref API)
+### 4.3 현재 위치 표시 (마커 + 커스텀 뷰)
 
-prop이 아니라 `NaverMapViewRef`의 명령형 메서드로 제어한다.
+현재 위치 파란 점은 `NaverMapMarkerOverlay`의 **커스텀 뷰 마커**로 그린다.
+좌표는 `useCurrentLocation`의 `lat/lng`를 직접 넘기고, 자식 `View`로 디자인 시스템의 "내 위치" 점(파란 원 + 흰 테두리)을 렌더한다.
 
-```ts
-type LocationTrackingMode = 'None' | 'NoFollow' | 'Follow' | 'Face';
-
-mapRef.current?.setLocationTrackingMode(mode);
+```tsx
+{isGranted && (
+  <NaverMapMarkerOverlay
+    latitude={lat}
+    longitude={lng}
+    anchor={{ x: 0.5, y: 0.5 }}     // 점 중앙 정렬
+    width={LOCATION_DOT_SIZE}        // 16 (= h-4 w-4)
+    height={LOCATION_DOT_SIZE}
+  >
+    <View
+      collapsable={false}            // iOS New Architecture 필수
+      className="h-4 w-4 rounded-full border-2 border-white bg-blue-500"
+    />
+  </NaverMapMarkerOverlay>
+)}
 ```
 
-| 모드 | 동작 |
-|---|---|
-| `None` | 위치 추적 비활성. 카메라가 사용자 이동과 무관하게 고정 |
-| `NoFollow` | 위치 오버레이는 추적 활성. 카메라는 고정 |
-| `Follow` | 위치 오버레이 + 카메라가 사용자 위치를 따라간다. **사용자가 지도를 드래그하거나 ref API로 임의 카메라 이동 시 SDK가 자동으로 `NoFollow`로 강등** |
-| `Face` | Follow + 베어링(방향)까지 추적. 운전/내비 화면용 |
+| 항목 | 값 | 비고 |
+|---|---|---|
+| 좌표 | `useCurrentLocation`의 `lat/lng` | 마커는 우리가 준 좌표를 그대로 변환해 그림 |
+| `anchor` | `{ x: 0.5, y: 0.5 }` | 점 중앙 정렬 |
+| `width`/`height` | `LOCATION_DOT_SIZE`(16) | 커스텀 뷰 마커는 크기를 명시해야 함 |
+| 자식 `View` | `collapsable={false}` 필수 | New Architecture에서 뷰 평탄화 방지 |
+| 표시 조건 | `isGranted` | 권한 허용 시에만. 미허용 폴백은 점 없이 캡션만 |
 
-When2Go의 `MapPreview`는 `useCurrentLocation` 훅의 `isGranted` 상태에 따라 마운트/허용 변화 시 `Follow` 또는 `None`을 호출한다. 카메라 follow는 SDK가 OS 위치 서비스를 직접 사용하므로 expo-location의 권한과 동일한 OS 권한을 공유한다 (사용자에게 권한 다이얼로그가 한 번만 뜸).
+> **왜 `setLocationTrackingMode`(`Follow`) / `locationOverlay`를 안 쓰는가** (이슈 #62)
+> 둘 다 위치 점을 **SDK 내부 위치 시스템(OS GPS)** 으로 그린다. 그 결과
+> `useCurrentLocation`(expo-location) 좌표 기준으로 보면 점이 어긋나고, 줌인할수록 정위치로 수렴하는 버그가 있었다
+> (`locationOverlay.position`을 직접 지정해도 SDK 내부 추적이 우선해 동일하게 어긋남).
+> 좌표 소스를 `useCurrentLocation` **하나로** 통일하려면 SDK 위치 시스템을 거치지 않는
+> **일반 마커 오버레이**로 그려야 한다. 마커는 좌표를 그대로 변환해 그리므로 정확하다.
+
+참고 — `NaverMapViewRef.setLocationTrackingMode(mode)` (`'None' | 'NoFollow' | 'Follow' | 'Face'`)는
+SDK 내부 GPS 기반 카메라/위치 추적용 명령형 API다. 위 어긋남 이슈로 `MapPreview`에서는 사용하지 않는다.
 
 ### 4.4 미사용 컴포넌트 (필요 시 도입)
 
@@ -194,28 +215,21 @@ const { lat, lng, isGranted, isLoading, error } = useCurrentLocation();
 
 ## 6. 사용 예시 (`src/components/home/MapPreview.tsx`)
 
-홈 화면 지도 미리보기. 현재 위치 마커 + Follow 모드 카메라 추적.
+홈 화면 지도 미리보기. 현재 위치를 파란 점 마커로 표시 (권한 허용 시).
 
 ```tsx
-import { useEffect, useRef } from 'react';
 import {
   NaverMapMarkerOverlay,
   NaverMapView,
-  type NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 
 const INITIAL_ZOOM = 15;
+const LOCATION_DOT_SIZE = 16;
 
 export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
-  const mapRef = useRef<NaverMapViewRef>(null);
-
-  useEffect(() => {
-    if (isLoading) return;
-    mapRef.current?.setLocationTrackingMode(isGranted ? 'Follow' : 'None');
-  }, [isGranted, isLoading]);
 
   if (isLoading) {
     return <View className="..." accessibilityLabel="지도 미리보기 로딩 중" />;
@@ -224,15 +238,28 @@ export default function MapPreview() {
   return (
     <View className="flex-1" accessibilityLabel="지도 미리보기">
       <NaverMapView
-        ref={mapRef}
         style={{ flex: 1 }}
         initialCamera={{ latitude: lat, longitude: lng, zoom: INITIAL_ZOOM }}
         isShowLocationButton={false}
         isShowZoomControls={false}
         isShowCompass={false}
         isShowScaleBar={false}
+        isShowIndoorLevelPicker={false}
       >
-        <NaverMapMarkerOverlay latitude={lat} longitude={lng} anchor={{ x: 0.5, y: 1 }} />
+        {isGranted && (
+          <NaverMapMarkerOverlay
+            latitude={lat}
+            longitude={lng}
+            anchor={{ x: 0.5, y: 0.5 }}
+            width={LOCATION_DOT_SIZE}
+            height={LOCATION_DOT_SIZE}
+          >
+            <View
+              collapsable={false}
+              className="h-4 w-4 rounded-full border-2 border-white bg-blue-500"
+            />
+          </NaverMapMarkerOverlay>
+        )}
       </NaverMapView>
       {!isGranted && (/* 폴백 안내 캡션 */)}
     </View>

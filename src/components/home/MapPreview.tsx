@@ -1,28 +1,22 @@
-import { useEffect, useRef } from 'react';
 import { Text, View } from 'react-native';
 import {
   NaverMapMarkerOverlay,
   NaverMapView,
-  type NaverMapViewRef,
 } from '@mj-studio/react-native-naver-map';
 
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 
 const INITIAL_ZOOM = 15;
 const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
+// 내 위치 점 한 변(px). 아래 자식 View의 h-4 w-4(16px)와 일치시킨다.
+const LOCATION_DOT_SIZE = 16;
 
 export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
-  const mapRef = useRef<NaverMapViewRef>(null);
 
   const baseBg = 'bg-zinc-200';
   const captionText = 'text-zinc-500';
   const captionBg = 'bg-white/80';
-
-  useEffect(() => {
-    if (isLoading) return;
-    mapRef.current?.setLocationTrackingMode(isGranted ? 'Follow' : 'None');
-  }, [isGranted, isLoading]);
 
   if (isLoading) {
     return (
@@ -36,7 +30,6 @@ export default function MapPreview() {
   return (
     <View className="flex-1" accessibilityLabel="지도 미리보기">
       <NaverMapView
-        ref={mapRef}
         style={{ flex: 1 }}
         initialCamera={{ latitude: lat, longitude: lng, zoom: INITIAL_ZOOM }}
         isShowLocationButton={false}
@@ -45,11 +38,21 @@ export default function MapPreview() {
         isShowScaleBar={false}
         isShowIndoorLevelPicker={false}
       >
-        <NaverMapMarkerOverlay
-          latitude={lat}
-          longitude={lng}
-          anchor={{ x: 0.5, y: 1 }}
-        />
+        {isGranted && (
+          <NaverMapMarkerOverlay
+            latitude={lat}
+            longitude={lng}
+            anchor={{ x: 0.5, y: 0.5 }}
+            width={LOCATION_DOT_SIZE}
+            height={LOCATION_DOT_SIZE}
+          >
+            <View
+              collapsable={false}
+              className="h-4 w-4 rounded-full border-2 border-white bg-blue-500"
+              accessibilityLabel="현재 위치"
+            />
+          </NaverMapMarkerOverlay>
+        )}
       </NaverMapView>
 
       {!isGranted && (
