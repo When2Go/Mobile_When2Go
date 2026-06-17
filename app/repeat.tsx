@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -15,6 +15,7 @@ import { DEFAULT_ROUTE_OPTION } from '@/constants/setup';
 import { STORAGE_KEYS } from '@/constants/storageKeys';
 import { createReservation, deleteReservation, getReservations, updateReservation } from '@/api/reservation';
 import type { ReservationListItem } from '@/api/reservation/types';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import {
   daysToRepeatDays,
   parseArrivalTimeString,
@@ -264,9 +265,35 @@ export default function RepeatScreen() {
     setEditOpen(false);
   };
 
-  // 검색 화면 연동은 후속 이슈(#TBD: 반복 예약 ↔ search.tsx).
-  const handleSelectLocation = (_field: 'origin' | 'destination') => {
-    // no-op
+  useFocusEffect(
+    useCallback(() => {
+      const { consumePendingLocation, fromCoords, toCoords } = useRouteDraftStore.getState();
+      const pending = consumePendingLocation();
+      if (!pending) return;
+
+      if (pending.field === 'from') {
+        setDraftForm((prev) => ({
+          ...prev,
+          origin: pending.location,
+          originLat: fromCoords?.lat,
+          originLng: fromCoords?.lng,
+        }));
+      } else {
+        setDraftForm((prev) => ({
+          ...prev,
+          destination: pending.location,
+          destLat: toCoords?.lat,
+          destLng: toCoords?.lng,
+        }));
+      }
+    }, []),
+  );
+
+  const handleSelectLocation = (field: 'origin' | 'destination') => {
+    router.push({
+      pathname: '/search',
+      params: { mode: 'select-location', field: field === 'origin' ? 'from' : 'to' },
+    });
   };
 
   return (

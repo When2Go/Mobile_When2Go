@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Shield, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
@@ -113,7 +112,7 @@ export default function RepeatEditModal({
           {/* 예약 이름 */}
           <View>
             <Text className={`mb-2 text-sm font-semibold ${labelText}`}>{LABEL_NAME}</Text>
-            <BottomSheetTextInput
+            <TextInput
               value={form.name}
               onChangeText={(v) => onFormChange({ name: v })}
               placeholder={PLACEHOLDER_NAME}
