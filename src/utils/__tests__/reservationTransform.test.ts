@@ -1,4 +1,11 @@
-import { daysToRepeatDays, toArrivalTimeString, routeOptionToApiOption } from '../reservationTransform';
+import {
+  daysToRepeatDays,
+  toArrivalTimeString,
+  routeOptionToApiOption,
+  repeatDaysShortToNumbers,
+  parseArrivalTimeString,
+  routeOptionToApiPutOption,
+} from '../reservationTransform';
 
 describe('daysToRepeatDays', () => {
   test('0~6 숫자 배열을 풀네임 RepeatDay 배열로 변환한다', () => {
@@ -82,5 +89,97 @@ describe('routeOptionToApiOption', () => {
 
   test('bus_only → TRANSIT', () => {
     expect(routeOptionToApiOption('bus_only')).toBe('TRANSIT');
+  });
+});
+
+describe('repeatDaysShortToNumbers', () => {
+  test('3자 약어 배열을 숫자 배열로 변환한다', () => {
+    expect(repeatDaysShortToNumbers(['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'])).toEqual([
+      0, 1, 2, 3, 4, 5, 6,
+    ]);
+  });
+
+  test('평일만 변환한다', () => {
+    expect(repeatDaysShortToNumbers(['MON', 'TUE', 'WED', 'THU', 'FRI'])).toEqual([1, 2, 3, 4, 5]);
+  });
+
+  test('빈 배열이면 빈 배열을 반환한다', () => {
+    expect(repeatDaysShortToNumbers([])).toEqual([]);
+  });
+
+  test('순서를 유지한다', () => {
+    expect(repeatDaysShortToNumbers(['SAT', 'SUN'])).toEqual([6, 0]);
+  });
+});
+
+describe('parseArrivalTimeString', () => {
+  test('09:00 → 오전 9시 0분', () => {
+    expect(parseArrivalTimeString('09:00')).toEqual({
+      arrivalPeriod: '오전',
+      arrivalHour: 9,
+      arrivalMinute: 0,
+    });
+  });
+
+  test('13:30 → 오후 1시 30분', () => {
+    expect(parseArrivalTimeString('13:30')).toEqual({
+      arrivalPeriod: '오후',
+      arrivalHour: 1,
+      arrivalMinute: 30,
+    });
+  });
+
+  test('00:00 → 오전 12시 0분(자정)', () => {
+    expect(parseArrivalTimeString('00:00')).toEqual({
+      arrivalPeriod: '오전',
+      arrivalHour: 12,
+      arrivalMinute: 0,
+    });
+  });
+
+  test('12:00 → 오후 12시 0분(정오)', () => {
+    expect(parseArrivalTimeString('12:00')).toEqual({
+      arrivalPeriod: '오후',
+      arrivalHour: 12,
+      arrivalMinute: 0,
+    });
+  });
+
+  test('23:59 → 오후 11시 59분', () => {
+    expect(parseArrivalTimeString('23:59')).toEqual({
+      arrivalPeriod: '오후',
+      arrivalHour: 11,
+      arrivalMinute: 59,
+    });
+  });
+
+  test('01:05 → 오전 1시 5분', () => {
+    expect(parseArrivalTimeString('01:05')).toEqual({
+      arrivalPeriod: '오전',
+      arrivalHour: 1,
+      arrivalMinute: 5,
+    });
+  });
+
+  test('toArrivalTimeString 역변환 왕복 일치', () => {
+    expect(parseArrivalTimeString(toArrivalTimeString('오후', 3, 45))).toEqual({
+      arrivalPeriod: '오후',
+      arrivalHour: 3,
+      arrivalMinute: 45,
+    });
+  });
+});
+
+describe('routeOptionToApiPutOption', () => {
+  test('subway_bus → OPTIMAL', () => {
+    expect(routeOptionToApiPutOption('subway_bus')).toBe('OPTIMAL');
+  });
+
+  test('subway_only → SUBWAY_FIRST', () => {
+    expect(routeOptionToApiPutOption('subway_only')).toBe('SUBWAY_FIRST');
+  });
+
+  test('bus_only → BUS_ONLY', () => {
+    expect(routeOptionToApiPutOption('bus_only')).toBe('BUS_ONLY');
   });
 });

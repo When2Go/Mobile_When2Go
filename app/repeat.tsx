@@ -11,9 +11,18 @@ import RepeatReservationCard from '@/components/repeat/RepeatReservationCard';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, SCREEN_TITLE } from '@/constants/repeat';
+import { DEFAULT_ROUTE_OPTION } from '@/constants/setup';
 import { STORAGE_KEYS } from '@/constants/storageKeys';
-import { createReservation, deleteReservation } from '@/api/reservation';
-import { daysToRepeatDays, routeOptionToApiOption, toArrivalTimeString } from '@/utils/reservationTransform';
+import { createReservation, deleteReservation, getReservations, updateReservation } from '@/api/reservation';
+import type { ReservationListItem } from '@/api/reservation/types';
+import {
+  daysToRepeatDays,
+  parseArrivalTimeString,
+  repeatDaysShortToNumbers,
+  routeOptionToApiOption,
+  routeOptionToApiPutOption,
+  toArrivalTimeString,
+} from '@/utils/reservationTransform';
 import type { RepeatFormData, RepeatItem } from '@/types/repeat.types';
 
 const LIST_PADDING_CLASS = 'gap-3 p-5';
@@ -37,6 +46,60 @@ async function persistRepeats(items: RepeatItem[]): Promise<void> {
   }
 }
 
+/**
+ * 서버 목록과 로컬 캐시를 병합한다.
+ * - 서버 항목: name/origin/destination/days/arrivalTime은 서버 우선
+ * - 로컬 전용 필드(enabled, safetyBufferMin, 좌표, routeOption)는 캐시에서 복원
+ * - reservationId 없는 로컬 항목(POST 대기 중)은 뒤에 붙여 유지
+ */
+function mergeWithServerList(
+  serverItems: ReservationListItem[],
+  cached: RepeatItem[],
+  startId: number,
+): { items: RepeatItem[]; nextId: number } {
+  let id = startId;
+
+  const merged = serverItems.map((s) => {
+    const local = cached.find((c) => c.reservationId === s.reservationId);
+    if (local) {
+      return {
+        ...local,
+        name: s.nickname ?? local.name,
+        origin: s.originName,
+        destination: s.destName,
+        days: repeatDaysShortToNumbers(s.repeatDays),
+        ...parseArrivalTimeString(s.arrivalTime),
+      };
+    }
+    return {
+      id: id++,
+      reservationId: s.reservationId,
+      name: s.nickname ?? '',
+      origin: s.originName,
+      destination: s.destName,
+      days: repeatDaysShortToNumbers(s.repeatDays),
+      ...parseArrivalTimeString(s.arrivalTime),
+      routeOption: DEFAULT_ROUTE_OPTION,
+      enabled: true,
+    } satisfies RepeatItem;
+  });
+
+  const localOnly = cached.filter((c) => c.reservationId === undefined);
+
+  return { items: [...merged, ...localOnly], nextId: id };
+}
+
+function hasAllCoords(
+  form: Pick<RepeatFormData, 'originLat' | 'originLng' | 'destLat' | 'destLng'>,
+): boolean {
+  return (
+    form.originLat !== undefined &&
+    form.originLng !== undefined &&
+    form.destLat !== undefined &&
+    form.destLng !== undefined
+  );
+}
+
 export default function RepeatScreen() {
   const router = useRouter();
   const nextIdRef = useRef(INITIAL_NEXT_ID);
@@ -54,13 +117,25 @@ export default function RepeatScreen() {
   const addBtnText = 'text-blue-600';
 
   useEffect(() => {
-    loadRepeats().then((items) => {
-      if (items.length > 0) {
-        const maxId = Math.max(...items.map((r) => r.id));
-        nextIdRef.current = maxId + 1;
+    async function init() {
+      const cached = await loadRepeats();
+      const startId =
+        cached.length > 0 ? Math.max(...cached.map((r) => r.id)) + 1 : INITIAL_NEXT_ID;
+
+      try {
+        const serverItems = await getReservations();
+        const { items, nextId } = mergeWithServerList(serverItems, cached, startId);
+        nextIdRef.current = nextId;
+        setRepeats(items);
+        persistRepeats(items);
+      } catch {
+        // GET 실패 시 로컬 캐시로 폴백
+        nextIdRef.current = startId;
+        setRepeats(cached);
       }
-      setRepeats(items);
-    });
+    }
+
+    init();
   }, []);
 
   const handleAdd = () => {
@@ -113,11 +188,31 @@ export default function RepeatScreen() {
 
   const handleSave = async () => {
     if (editTarget) {
-      // PUT API 미구현 — 로컬 상태만 갱신
+      if (editTarget.reservationId !== undefined && hasAllCoords(draftForm)) {
+        try {
+          await updateReservation(editTarget.reservationId, {
+            nickname: draftForm.name || undefined,
+            originName: draftForm.origin,
+            originLat: draftForm.originLat!,
+            originLng: draftForm.originLng!,
+            destName: draftForm.destination,
+            destLat: draftForm.destLat!,
+            destLng: draftForm.destLng!,
+            routeOption: routeOptionToApiPutOption(draftForm.routeOption),
+            arrivalTime: toArrivalTimeString(
+              draftForm.arrivalPeriod,
+              draftForm.arrivalHour,
+              draftForm.arrivalMinute,
+            ),
+            repeatDays: daysToRepeatDays(draftForm.days),
+          });
+        } catch {
+          // PUT 실패 시 로컬 상태만 갱신
+        }
+      }
+
       setRepeats((prev) => {
-        const next = prev.map((r) =>
-          r.id === editTarget.id ? { ...r, ...draftForm } : r,
-        );
+        const next = prev.map((r) => (r.id === editTarget.id ? { ...r, ...draftForm } : r));
         persistRepeats(next);
         return next;
       });
@@ -131,13 +226,7 @@ export default function RepeatScreen() {
       enabled: true,
     };
 
-    const hasCoords =
-      draftForm.originLat !== undefined &&
-      draftForm.originLng !== undefined &&
-      draftForm.destLat !== undefined &&
-      draftForm.destLng !== undefined;
-
-    if (hasCoords) {
+    if (hasAllCoords(draftForm)) {
       try {
         const res = await createReservation({
           nickname: draftForm.name || undefined,
