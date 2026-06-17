@@ -3,8 +3,6 @@ import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import EmptyState from '@/components/repeat/EmptyState';
 import RepeatEditModal from '@/components/repeat/RepeatEditModal';
 import RepeatReservationCard from '@/components/repeat/RepeatReservationCard';
@@ -12,9 +10,7 @@ import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, SCREEN_TITLE } from '@/constants/repeat';
 import { DEFAULT_ROUTE_OPTION } from '@/constants/setup';
-import { STORAGE_KEYS } from '@/constants/storageKeys';
 import { createReservation, deleteReservation, getReservations, updateReservation } from '@/api/reservation';
-import type { ReservationListItem } from '@/api/reservation/types';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import {
   daysToRepeatDays,
@@ -29,66 +25,6 @@ import type { RepeatFormData, RepeatItem } from '@/types/repeat.types';
 const LIST_PADDING_CLASS = 'gap-3 p-5';
 const INITIAL_NEXT_ID = 1;
 const HIT_SLOP_BACK = 8;
-
-async function loadRepeats(): Promise<RepeatItem[]> {
-  try {
-    const raw = await AsyncStorage.getItem(STORAGE_KEYS.REPEATS);
-    return raw ? (JSON.parse(raw) as RepeatItem[]) : [];
-  } catch {
-    return [];
-  }
-}
-
-async function persistRepeats(items: RepeatItem[]): Promise<void> {
-  try {
-    await AsyncStorage.setItem(STORAGE_KEYS.REPEATS, JSON.stringify(items));
-  } catch {
-    // 스토리지 오류는 무시 — 다음 실행에 재시도
-  }
-}
-
-/**
- * 서버 목록과 로컬 캐시를 병합한다.
- * - 서버 항목: name/origin/destination/days/arrivalTime은 서버 우선
- * - 로컬 전용 필드(enabled, safetyBufferMin, 좌표, routeOption)는 캐시에서 복원
- * - reservationId 없는 로컬 항목(POST 대기 중)은 뒤에 붙여 유지
- */
-function mergeWithServerList(
-  serverItems: ReservationListItem[],
-  cached: RepeatItem[],
-  startId: number,
-): { items: RepeatItem[]; nextId: number } {
-  let id = startId;
-
-  const merged = serverItems.map((s) => {
-    const local = cached.find((c) => c.reservationId === s.reservationId);
-    if (local) {
-      return {
-        ...local,
-        name: s.nickname ?? local.name,
-        origin: s.originName,
-        destination: s.destName,
-        days: repeatDaysShortToNumbers(s.repeatDays),
-        ...parseArrivalTimeString(s.arrivalTime),
-      };
-    }
-    return {
-      id: id++,
-      reservationId: s.reservationId,
-      name: s.nickname ?? '',
-      origin: s.originName,
-      destination: s.destName,
-      days: repeatDaysShortToNumbers(s.repeatDays),
-      ...parseArrivalTimeString(s.arrivalTime),
-      routeOption: DEFAULT_ROUTE_OPTION,
-      enabled: true,
-    } satisfies RepeatItem;
-  });
-
-  const localOnly = cached.filter((c) => c.reservationId === undefined);
-
-  return { items: [...merged, ...localOnly], nextId: id };
-}
 
 function hasAllCoords(
   form: Pick<RepeatFormData, 'originLat' | 'originLng' | 'destLat' | 'destLng'>,
@@ -120,20 +56,24 @@ export default function RepeatScreen() {
 
   useEffect(() => {
     async function init() {
-      const cached = await loadRepeats();
-      const startId =
-        cached.length > 0 ? Math.max(...cached.map((r) => r.id)) + 1 : INITIAL_NEXT_ID;
-
       try {
         const serverItems = await getReservations();
-        const { items, nextId } = mergeWithServerList(serverItems, cached, startId);
-        nextIdRef.current = nextId;
+        let id = INITIAL_NEXT_ID;
+        const items: RepeatItem[] = serverItems.map((s) => ({
+          id: id++,
+          reservationId: s.reservationId,
+          name: s.nickname ?? '',
+          origin: s.originName,
+          destination: s.destName,
+          days: repeatDaysShortToNumbers(s.repeatDays),
+          ...parseArrivalTimeString(s.arrivalTime),
+          routeOption: DEFAULT_ROUTE_OPTION,
+          enabled: true,
+        }));
+        nextIdRef.current = id;
         setRepeats(items);
-        persistRepeats(items);
       } catch {
-        // GET 실패 시 로컬 캐시로 폴백
-        nextIdRef.current = startId;
-        setRepeats(cached);
+        setRepeats([]);
       }
     }
 
@@ -167,11 +107,7 @@ export default function RepeatScreen() {
   };
 
   const handleToggle = (id: number) => {
-    setRepeats((prev) => {
-      const next = prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r));
-      persistRepeats(next);
-      return next;
-    });
+    setRepeats((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
   };
 
   const handleDelete = (id: number) => {
@@ -181,11 +117,7 @@ export default function RepeatScreen() {
         // 서버 삭제 실패 시 로컬에서만 제거 (재시도는 사용자 재진입 시)
       });
     }
-    setRepeats((prev) => {
-      const next = prev.filter((r) => r.id !== id);
-      persistRepeats(next);
-      return next;
-    });
+    setRepeats((prev) => prev.filter((r) => r.id !== id));
   };
 
   const handleSave = async () => {
@@ -213,11 +145,7 @@ export default function RepeatScreen() {
         }
       }
 
-      setRepeats((prev) => {
-        const next = prev.map((r) => (r.id === editTarget.id ? { ...r, ...draftForm } : r));
-        persistRepeats(next);
-        return next;
-      });
+      setRepeats((prev) => prev.map((r) => (r.id === editTarget.id ? { ...r, ...draftForm } : r)));
       setEditOpen(false);
       return;
     }
@@ -262,11 +190,7 @@ export default function RepeatScreen() {
       console.log('[repeat] POST skipped — coords missing, saved locally only');
     }
 
-    setRepeats((prev) => {
-      const next = [...prev, newItem];
-      persistRepeats(next);
-      return next;
-    });
+    setRepeats((prev) => [...prev, newItem]);
     setEditOpen(false);
   };
 
