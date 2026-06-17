@@ -72,7 +72,8 @@ export default function RepeatScreen() {
         }));
         nextIdRef.current = id;
         setRepeats(items);
-      } catch {
+      } catch (e) {
+        console.log('[reservation] GET error:', e);
         setRepeats([]);
       }
     }
