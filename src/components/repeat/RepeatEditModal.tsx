@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Pressable, Text, View } from 'react-native';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { ChevronDown, ChevronRight, Clock, MapPin, Navigation, Shield, Trash2 } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
@@ -66,7 +65,11 @@ export default function RepeatEditModal({
   const effectiveBufferMin = resolveRepeatBufferMinutes(form, globalBufferMin);
 
   const title = mode === 'edit' ? EDIT_MODAL_TITLE : ADD_MODAL_TITLE;
-  const isValid = form.name.trim().length > 0 && form.days.length > 0;
+  const isValid =
+    form.name.trim().length > 0 &&
+    form.days.length > 0 &&
+    form.origin.trim().length > 0 &&
+    form.destination.trim().length > 0;
 
   // 색상 토큰
   const inputBg = 'bg-white border-zinc-200 text-zinc-900';
@@ -108,13 +111,14 @@ export default function RepeatEditModal({
       title={title}
       snapPoints={EDIT_SHEET_SNAP_POINTS}
       scrollable
+      keyboardBehavior="interactive"
     >
       <View className="gap-5 pb-2">
           {/* 예약 이름 */}
           <View>
             <Text className={`mb-2 text-sm font-semibold ${labelText}`}>{LABEL_NAME}</Text>
-            <BottomSheetTextInput
-              value={form.name}
+            <TextInput
+              defaultValue={form.name}
               onChangeText={(v) => onFormChange({ name: v })}
               placeholder={PLACEHOLDER_NAME}
               placeholderTextColor={placeholderColor}

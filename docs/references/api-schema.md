@@ -34,6 +34,8 @@
 | GET    | `/api/trips/{tripId}`               | trip        | 여정 상세 | X-Device-Id |
 | DELETE | `/api/trips/{tripId}`               | trip        | 여정 삭제(취소) | X-Device-Id |
 | POST   | `/api/reservations`                 | reservation | 예약 생성 (반복) | X-Device-Id |
+| GET    | `/api/reservations`                 | reservation | 예약 목록 조회 | X-Device-Id |
+| PUT    | `/api/reservations/{reservationId}` | reservation | 예약 수정 | X-Device-Id |
 | DELETE | `/api/reservations/{reservationId}` | reservation | 예약 삭제 | X-Device-Id |
 | POST   | `/api/routes/search`                | route       | 대중교통 경로 검색 (Google Routes 프록시) | — |
 
@@ -48,8 +50,6 @@
 | POST   | `/api/parse/schedule`               | parse 도메인 전체 미존재 (자연어 일정 파싱) |
 | GET    | `/api/users/me`                     | 대신 `GET /api/users/status` 제공 |
 | PATCH  | `/api/users/me`                     | 버퍼 시간 등 설정 변경 미존재 |
-| GET    | `/api/reservations`                 | 예약 목록 조회 미존재 |
-| PUT    | `/api/reservations/{reservationId}` | 예약 수정 미존재 |
 
 > 또한 FCM 토큰 갱신 메서드가 `PUT` → **`PATCH`** 로 변경됨.
 
@@ -201,8 +201,6 @@
 
 ## 3. reservation — 예약 (반복)
 
-> ⚠️ 현재 백엔드는 **생성·삭제만** 제공한다. 목록 조회(`GET`)·수정(`PUT`)은 미구현.
-
 ### POST `/api/reservations`
 
 **Request** (`ReservationCreateRequest`)
@@ -220,6 +218,95 @@
 
 **Response**: `data: ApiResponse` 봉투
 **Status**: `200` / `400` / `404`
+
+### GET `/api/reservations` — 목록 조회
+
+**Response** (`data: Array<ReservationListResponse>`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `reservationId` | number (int64) | X | 예약 ID |
+| `nickname` | string | O | 별명 |
+| `originName` | string | X | 출발지명 |
+| `destName` | string | X | 목적지명 |
+| `arrivalTime` | string | X | 도착 목표 시각 (`HH:mm`) |
+| `repeatDays` | string[] | X | 반복 요일 (`MON`/`TUE`/`WED`/`THU`/`FRI`/`SAT`/`SUN`) |
+
+> ⚠️ `repeatDays` 값이 POST/PUT의 `MONDAY~SUNDAY` 풀네임과 달리 **3자 약어**(`MON`~`SUN`)로 반환된다.
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "reservationId": 10,
+      "nickname": "매일 출근",
+      "originName": "선릉역",
+      "destName": "강남역",
+      "arrivalTime": "09:00",
+      "repeatDays": ["MON", "TUE", "WED", "THU", "FRI"]
+    }
+  ],
+  "message": null
+}
+```
+
+**Status**: `200` / `401`
+
+### PUT `/api/reservations/{reservationId}` — 수정
+
+**Request** (`ReservationUpdateRequest`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `nickname` | string | O | 별명 |
+| `originName` | string | X | 출발지명 |
+| `originLat` / `originLng` | number (double) | X | 출발지 좌표 |
+| `destName` | string | X | 목적지명 |
+| `destLat` / `destLng` | number (double) | X | 목적지 좌표 |
+| `routeOption` | string | X | `OPTIMAL` / `MIN_TRANSFER` / `SUBWAY_FIRST` / `BUS_ONLY` |
+| `arrivalTime` | string | X | 도착 목표 시각 (`HH:mm`) |
+| `repeatDays` | `RepeatDay[]` | X | 반복 요일 배열 (최소 1개, 중복 불가) |
+
+> ⚠️ PUT의 `routeOption` enum(`OPTIMAL/MIN_TRANSFER/SUBWAY_FIRST/BUS_ONLY`)이 POST(`DRIVE/WALK/BICYCLE/TRANSIT`)와 다르다. 연동 시 주의.
+
+**Response** (`data`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `nickname` | string | O |  |
+| `originName` | string | X |  |
+| `originLat` / `originLng` | number (double) | X |  |
+| `destName` | string | X |  |
+| `destLat` / `destLng` | number (double) | X |  |
+| `routeOption` | string | X |  |
+| `arrivalTime` | string | X | `HH:mm` |
+| `repeatDays` | `RepeatDay[]` | X |  |
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": {
+    "nickname": "매일 출근",
+    "originName": "선릉역",
+    "originLat": 37.5045,
+    "originLng": 127.0498,
+    "destName": "강남역",
+    "destLat": 37.4979,
+    "destLng": 127.0276,
+    "routeOption": "OPTIMAL",
+    "arrivalTime": "09:00",
+    "repeatDays": ["MONDAY"]
+  },
+  "message": null
+}
+```
+
+**Status**: `200` / `400` / `401` / `404`
 
 ### DELETE `/api/reservations/{reservationId}`
 

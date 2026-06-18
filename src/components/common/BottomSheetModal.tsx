@@ -25,6 +25,8 @@ interface BottomSheetModalProps {
   snapPoints?: string[];
   /** 콘텐츠가 시트 높이를 넘으면 스크롤되도록 BottomSheetScrollView로 감싼다. */
   scrollable?: boolean;
+  /** 키보드 등장 시 시트 동작. TextInput 포함 시트는 "interactive" 권장. */
+  keyboardBehavior?: 'extend' | 'fillParent' | 'interactive';
   children: ReactNode;
 }
 
@@ -34,6 +36,7 @@ export default function BottomSheetModal({
   title,
   snapPoints = DEFAULT_SNAP_POINTS,
   scrollable = false,
+  keyboardBehavior,
   children,
 }: BottomSheetModalProps) {
   const ref = useRef<RNBottomSheetModal>(null);
@@ -80,6 +83,8 @@ export default function BottomSheetModal({
       backdropComponent={renderBackdrop}
       handleComponent={renderHandle}
       backgroundStyle={backgroundStyle}
+      keyboardBehavior={keyboardBehavior}
+      keyboardBlurBehavior="restore"
     >
       {scrollable ? (
         <BottomSheetScrollView showsVerticalScrollIndicator={false}>

@@ -1,24 +1,47 @@
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { ArrowLeft, Plus } from 'lucide-react-native';
-
 import EmptyState from '@/components/repeat/EmptyState';
 import RepeatEditModal from '@/components/repeat/RepeatEditModal';
 import RepeatReservationCard from '@/components/repeat/RepeatReservationCard';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
-import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, MOCK_REPEATS, SCREEN_TITLE } from '@/constants/repeat';
+import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, SCREEN_TITLE } from '@/constants/repeat';
+import { DEFAULT_ROUTE_OPTION } from '@/constants/setup';
+import { createReservation, deleteReservation, getReservations, updateReservation } from '@/api/reservation';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import {
+  daysToRepeatDays,
+  parseArrivalTimeString,
+  repeatDaysShortToNumbers,
+  routeOptionToApiOption,
+  routeOptionToApiPutOption,
+  toArrivalTimeString,
+} from '@/utils/reservationTransform';
 import type { RepeatFormData, RepeatItem } from '@/types/repeat.types';
 
 const LIST_PADDING_CLASS = 'gap-3 p-5';
-const INITIAL_NEXT_ID = MOCK_REPEATS.length + 1;
+const INITIAL_NEXT_ID = 1;
+const HIT_SLOP_BACK = 8;
+
+function hasAllCoords(
+  form: Pick<RepeatFormData, 'originLat' | 'originLng' | 'destLat' | 'destLng'>,
+): boolean {
+  return (
+    form.originLat !== undefined &&
+    form.originLng !== undefined &&
+    form.destLat !== undefined &&
+    form.destLng !== undefined
+  );
+}
 
 export default function RepeatScreen() {
   const router = useRouter();
   const nextIdRef = useRef(INITIAL_NEXT_ID);
-  const [repeats, setRepeats] = useState<RepeatItem[]>(MOCK_REPEATS);
+  const locationSelectingRef = useRef(false);
+  const [repeats, setRepeats] = useState<RepeatItem[]>([]);
   const [editTarget, setEditTarget] = useState<RepeatItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
   const [draftForm, setDraftForm] = useState<RepeatFormData>(EMPTY_REPEAT_FORM);
@@ -30,6 +53,33 @@ export default function RepeatScreen() {
   const backIconColor = PALETTE.zinc500;
   const addBtnBg = 'bg-blue-50';
   const addBtnText = 'text-blue-600';
+
+  useEffect(() => {
+    async function init() {
+      try {
+        const serverItems = await getReservations();
+        let id = INITIAL_NEXT_ID;
+        const items: RepeatItem[] = serverItems.map((s) => ({
+          id: id++,
+          reservationId: s.reservationId,
+          name: s.nickname ?? '',
+          origin: s.originName,
+          destination: s.destName,
+          days: repeatDaysShortToNumbers(s.repeatDays),
+          ...parseArrivalTimeString(s.arrivalTime),
+          routeOption: DEFAULT_ROUTE_OPTION,
+          enabled: true,
+        }));
+        nextIdRef.current = id;
+        setRepeats(items);
+      } catch (e) {
+        console.log('[reservation] GET error:', e);
+        setRepeats([]);
+      }
+    }
+
+    init();
+  }, []);
 
   const handleAdd = () => {
     setEditTarget(undefined);
@@ -43,6 +93,10 @@ export default function RepeatScreen() {
       name: item.name,
       origin: item.origin,
       destination: item.destination,
+      originLat: item.originLat,
+      originLng: item.originLng,
+      destLat: item.destLat,
+      destLng: item.destLng,
       days: [...item.days],
       arrivalPeriod: item.arrivalPeriod,
       arrivalHour: item.arrivalHour,
@@ -54,24 +108,90 @@ export default function RepeatScreen() {
   };
 
   const handleToggle = (id: number) => {
-    setRepeats((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)),
-    );
+    setRepeats((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
   };
 
   const handleDelete = (id: number) => {
+    const target = repeats.find((r) => r.id === id);
+    if (target?.reservationId) {
+      deleteReservation(target.reservationId).catch(() => {
+        // 서버 삭제 실패 시 로컬에서만 제거 (재시도는 사용자 재진입 시)
+      });
+    }
     setRepeats((prev) => prev.filter((r) => r.id !== id));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editTarget) {
-      setRepeats((prev) =>
-        prev.map((r) => (r.id === editTarget.id ? { ...r, ...draftForm } : r)),
-      );
-    } else {
-      const newItem: RepeatItem = { ...draftForm, id: nextIdRef.current++, enabled: true };
-      setRepeats((prev) => [...prev, newItem]);
+      if (editTarget.reservationId !== undefined && hasAllCoords(draftForm)) {
+        try {
+          await updateReservation(editTarget.reservationId, {
+            nickname: draftForm.name || undefined,
+            originName: draftForm.origin,
+            originLat: draftForm.originLat!,
+            originLng: draftForm.originLng!,
+            destName: draftForm.destination,
+            destLat: draftForm.destLat!,
+            destLng: draftForm.destLng!,
+            routeOption: routeOptionToApiPutOption(draftForm.routeOption),
+            arrivalTime: toArrivalTimeString(
+              draftForm.arrivalPeriod,
+              draftForm.arrivalHour,
+              draftForm.arrivalMinute,
+            ),
+            repeatDays: daysToRepeatDays(draftForm.days),
+          });
+        } catch {
+          // PUT 실패 시 로컬 상태만 갱신
+        }
+      }
+
+      setRepeats((prev) => prev.map((r) => (r.id === editTarget.id ? { ...r, ...draftForm } : r)));
+      setEditOpen(false);
+      return;
     }
+
+    const newItem: RepeatItem = {
+      ...draftForm,
+      id: nextIdRef.current++,
+      enabled: true,
+    };
+
+    console.log('[repeat] coords:', {
+      originLat: draftForm.originLat,
+      originLng: draftForm.originLng,
+      destLat: draftForm.destLat,
+      destLng: draftForm.destLng,
+      hasCoords: hasAllCoords(draftForm),
+    });
+
+    if (hasAllCoords(draftForm)) {
+      try {
+        const res = await createReservation({
+          nickname: draftForm.name || undefined,
+          originName: draftForm.origin,
+          originLat: draftForm.originLat!,
+          originLng: draftForm.originLng!,
+          destName: draftForm.destination,
+          destLat: draftForm.destLat!,
+          destLng: draftForm.destLng!,
+          routeOption: routeOptionToApiOption(draftForm.routeOption),
+          arrivalTime: toArrivalTimeString(
+            draftForm.arrivalPeriod,
+            draftForm.arrivalHour,
+            draftForm.arrivalMinute,
+          ),
+          repeatDays: daysToRepeatDays(draftForm.days),
+        });
+        newItem.reservationId = res.reservationId;
+      } catch (e) {
+        console.log('[repeat] POST error:', e);
+      }
+    } else {
+      console.log('[repeat] POST skipped — coords missing, saved locally only');
+    }
+
+    setRepeats((prev) => [...prev, newItem]);
     setEditOpen(false);
   };
 
@@ -81,10 +201,47 @@ export default function RepeatScreen() {
     setEditOpen(false);
   };
 
-  // mock 단계 — 검색 화면 연동은 후속 이슈(#TBD: 반복 예약 ↔ search.tsx).
-  // 콜백만 받아 두고 동작은 비워 둔다. UI 동선·prop 시그니처만 먼저 굳히기 위한 stub.
-  const handleSelectLocation = (_field: 'origin' | 'destination') => {
-    // no-op
+  useFocusEffect(
+    useCallback(() => {
+      if (!locationSelectingRef.current) return;
+      locationSelectingRef.current = false;
+
+      const { consumePendingLocation, fromCoords, toCoords } = useRouteDraftStore.getState();
+      const pending = consumePendingLocation();
+
+      console.log('[repeat] returned from search, pending:', pending);
+
+      if (pending) {
+        if (pending.field === 'from') {
+          setDraftForm((prev) => ({
+            ...prev,
+            origin: pending.location,
+            originLat: fromCoords?.lat,
+            originLng: fromCoords?.lng,
+          }));
+          console.log('[repeat] origin set:', pending.location, fromCoords);
+        } else {
+          setDraftForm((prev) => ({
+            ...prev,
+            destination: pending.location,
+            destLat: toCoords?.lat,
+            destLng: toCoords?.lng,
+          }));
+          console.log('[repeat] destination set:', pending.location, toCoords);
+        }
+      }
+      // 선택했든 취소했든 모달을 다시 열어준다
+      setEditOpen(true);
+    }, []),
+  );
+
+  const handleSelectLocation = (field: 'origin' | 'destination') => {
+    locationSelectingRef.current = true;
+    setEditOpen(false);
+    router.push({
+      pathname: '/search',
+      params: { mode: 'select-location', field: field === 'origin' ? 'from' : 'to' },
+    });
   };
 
   return (
@@ -96,7 +253,7 @@ export default function RepeatScreen() {
             onPress={() => router.back()}
             accessibilityRole="button"
             accessibilityLabel="뒤로 가기"
-            hitSlop={8}
+            hitSlop={HIT_SLOP_BACK}
             className={`h-9 w-9 items-center justify-center rounded-full active:opacity-70 ${backBg}`}
           >
             <ArrowLeft size={ICON_SIZE.header} color={backIconColor} />
@@ -138,6 +295,7 @@ export default function RepeatScreen() {
 
       {isEditOpen ? (
         <RepeatEditModal
+          key={editTarget?.id ?? 'new'}
           isOpen={isEditOpen}
           mode={editTarget ? 'edit' : 'add'}
           form={draftForm}
