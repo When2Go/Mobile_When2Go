@@ -4,11 +4,11 @@ import { ChevronRight, Repeat2 } from 'lucide-react-native';
 
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
+import { useReservationStore } from '@/stores/reservationStore';
 
 const LABEL = '반복 예약';
 const ROW_GAP_CLASS = 'gap-3';
 const REPEAT_ROUTE = '/repeat' as Href;
-const MOCK_REPEAT_COUNT = 2;
 
 interface RepeatReservationLinkProps {
   noBorder?: boolean;
@@ -16,6 +16,7 @@ interface RepeatReservationLinkProps {
 
 export default function RepeatReservationLink({ noBorder }: RepeatReservationLinkProps) {
   const router = useRouter();
+  const count = useReservationStore((state) => state.items.length);
 
   const labelText = 'text-zinc-800';
   const countText = 'text-zinc-500';
@@ -26,7 +27,7 @@ export default function RepeatReservationLink({ noBorder }: RepeatReservationLin
     <Pressable
       onPress={() => router.push(REPEAT_ROUTE)}
       accessibilityRole="button"
-      accessibilityLabel={`${LABEL} ${MOCK_REPEAT_COUNT}개`}
+      accessibilityLabel={`${LABEL} ${count}개`}
       className={`flex-row items-center justify-between py-3 active:opacity-60 ${borderClass}`}
     >
       <View className={`flex-row items-center ${ROW_GAP_CLASS}`}>
@@ -34,7 +35,7 @@ export default function RepeatReservationLink({ noBorder }: RepeatReservationLin
         <Text className={`text-[15px] font-medium ${labelText}`}>{LABEL}</Text>
       </View>
       <View className="flex-row items-center gap-2">
-        <Text className={`text-sm ${countText}`}>{MOCK_REPEAT_COUNT}개</Text>
+        <Text className={`text-sm ${countText}`}>{count}개</Text>
         <ChevronRight size={ICON_SIZE.card} color={chevronColor} />
       </View>
     </Pressable>
