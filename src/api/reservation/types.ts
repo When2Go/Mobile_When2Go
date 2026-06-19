@@ -33,12 +33,12 @@ export interface ReservationCreateResponse {
 }
 
 export interface ReservationListItem {
-  reservationId: number;
+  id: number;
   nickname: string | null;
   originName: string;
   destName: string;
   arrivalTime: string;
-  repeatDays: RepeatDayShort[];
+  repeatDays: RepeatDay[];
 }
 
 export interface ReservationUpdateRequest {

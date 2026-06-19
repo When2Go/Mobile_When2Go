@@ -15,7 +15,7 @@ import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import {
   daysToRepeatDays,
   parseArrivalTimeString,
-  repeatDaysShortToNumbers,
+  repeatDaysToNumbers,
   routeOptionToApiOption,
   routeOptionToApiPutOption,
   toArrivalTimeString,
@@ -61,11 +61,11 @@ export default function RepeatScreen() {
         let id = INITIAL_NEXT_ID;
         const items: RepeatItem[] = serverItems.map((s) => ({
           id: id++,
-          reservationId: s.reservationId,
+          reservationId: s.id,
           name: s.nickname ?? '',
           origin: s.originName,
           destination: s.destName,
-          days: repeatDaysShortToNumbers(s.repeatDays),
+          days: repeatDaysToNumbers(s.repeatDays),
           ...parseArrivalTimeString(s.arrivalTime),
           routeOption: DEFAULT_ROUTE_OPTION,
           enabled: true,
@@ -73,7 +73,6 @@ export default function RepeatScreen() {
         nextIdRef.current = id;
         setRepeats(items);
       } catch (e) {
-        console.log('[reservation] GET error:', e);
         setRepeats([]);
       }
     }
@@ -157,14 +156,6 @@ export default function RepeatScreen() {
       enabled: true,
     };
 
-    console.log('[repeat] coords:', {
-      originLat: draftForm.originLat,
-      originLng: draftForm.originLng,
-      destLat: draftForm.destLat,
-      destLng: draftForm.destLng,
-      hasCoords: hasAllCoords(draftForm),
-    });
-
     if (hasAllCoords(draftForm)) {
       try {
         const res = await createReservation({
@@ -185,10 +176,8 @@ export default function RepeatScreen() {
         });
         newItem.reservationId = res.reservationId;
       } catch (e) {
-        console.log('[repeat] POST error:', e);
+        // POST 실패 시 로컬에만 저장
       }
-    } else {
-      console.log('[repeat] POST skipped — coords missing, saved locally only');
     }
 
     setRepeats((prev) => [...prev, newItem]);
@@ -209,8 +198,6 @@ export default function RepeatScreen() {
       const { consumePendingLocation, fromCoords, toCoords } = useRouteDraftStore.getState();
       const pending = consumePendingLocation();
 
-      console.log('[repeat] returned from search, pending:', pending);
-
       if (pending) {
         if (pending.field === 'from') {
           setDraftForm((prev) => ({
@@ -219,7 +206,6 @@ export default function RepeatScreen() {
             originLat: fromCoords?.lat,
             originLng: fromCoords?.lng,
           }));
-          console.log('[repeat] origin set:', pending.location, fromCoords);
         } else {
           setDraftForm((prev) => ({
             ...prev,
@@ -227,7 +213,6 @@ export default function RepeatScreen() {
             destLat: toCoords?.lat,
             destLng: toCoords?.lng,
           }));
-          console.log('[repeat] destination set:', pending.location, toCoords);
         }
       }
       // 선택했든 취소했든 모달을 다시 열어준다
