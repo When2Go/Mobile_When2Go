@@ -5,6 +5,8 @@ const { getApp } = require('@react-native-firebase/app');
 const { getMessaging } = require('@react-native-firebase/messaging');
 const AsyncStorage = require('@react-native-async-storage/async-storage').default;
 
+// 이 값은 src/constants/storageKeys.ts의 STORAGE_KEYS.RESERVATION_TOGGLE과 반드시 동일해야 합니다.
+// CJS require 한계로 TypeScript 모듈을 직접 import할 수 없어 별도 리터럴로 관리합니다.
 const RESERVATION_TOGGLE_KEY = 'when2go.reservationToggle';
 
 getMessaging(getApp()).setBackgroundMessageHandler(async (remoteMessage) => {

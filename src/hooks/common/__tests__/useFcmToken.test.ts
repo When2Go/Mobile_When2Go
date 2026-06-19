@@ -28,12 +28,14 @@ jest.mock('@react-native-firebase/messaging', () => ({
   },
 }));
 
-jest.mock('@/stores/reservationToggleStore', () => ({
-  __esModule: true,
-  useReservationToggleStore: {
-    getState: () => ({ disabledIds: [] }),
-  },
-}));
+jest.mock('@/stores/reservationToggleStore', () => {
+  const getState = jest.fn(() => ({ disabledIds: [] as number[] }));
+  return {
+    __esModule: true,
+    __getState: getState,
+    useReservationToggleStore: { getState },
+  };
+});
 
 jest.mock('@/api/notification', () => ({
   registerFcmToken: jest.fn(),
@@ -72,6 +74,7 @@ import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
 import {
   AuthorizationStatus,
   getToken,
+  onMessage,
   requestPermission,
 } from '@react-native-firebase/messaging';
 
@@ -80,9 +83,12 @@ import { getUserStatus, registerUser } from '@/api/user';
 import { useFcmToken } from '../useFcmToken';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const deviceStoreMock = require('@/stores/deviceStore');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const toggleStoreMock = require('@/stores/reservationToggleStore');
 
 const mockGetToken = getToken as jest.Mock;
 const mockRequestPermission = requestPermission as jest.Mock;
+const mockOnMessage = onMessage as jest.Mock;
 
 function setPlatform(os: string, version: number) {
   Object.defineProperty(Platform, 'OS', { value: os, configurable: true });
@@ -274,6 +280,47 @@ describe('useFcmToken', () => {
       renderHook(() => useFcmToken());
 
       await waitFor(() => expect(Alert.alert).toHaveBeenCalled());
+    });
+  });
+
+  describe('onMessage 포그라운드 차단', () => {
+    let capturedCallback: ((msg: Record<string, unknown>) => void) | null = null;
+
+    beforeEach(() => {
+      capturedCallback = null;
+      mockOnMessage.mockImplementation(
+        (_m: unknown, cb: (msg: Record<string, unknown>) => void) => {
+          capturedCallback = cb;
+          return jest.fn();
+        },
+      );
+      (toggleStoreMock.__getState as jest.Mock).mockReturnValue({ disabledIds: [] });
+    });
+
+    it('onMessage 핸들러가 등록된다', () => {
+      renderHook(() => useFcmToken());
+      expect(mockOnMessage).toHaveBeenCalled();
+      expect(capturedCallback).not.toBeNull();
+    });
+
+    it('reservationId가 없는 메시지는 스토어를 조회하지 않는다', () => {
+      renderHook(() => useFcmToken());
+      capturedCallback!({ data: {} });
+      expect(toggleStoreMock.__getState).not.toHaveBeenCalled();
+    });
+
+    it('disabledIds에 포함된 reservationId 메시지는 스토어를 조회하고 에러 없이 반환된다', () => {
+      (toggleStoreMock.__getState as jest.Mock).mockReturnValue({ disabledIds: [10] });
+      renderHook(() => useFcmToken());
+      expect(() => capturedCallback!({ data: { reservationId: '10' } })).not.toThrow();
+      expect(toggleStoreMock.__getState).toHaveBeenCalled();
+    });
+
+    it('disabledIds에 없는 reservationId 메시지는 스토어를 조회하고 에러 없이 통과한다', () => {
+      (toggleStoreMock.__getState as jest.Mock).mockReturnValue({ disabledIds: [] });
+      renderHook(() => useFcmToken());
+      expect(() => capturedCallback!({ data: { reservationId: '99' } })).not.toThrow();
+      expect(toggleStoreMock.__getState).toHaveBeenCalled();
     });
   });
 });
