@@ -1,6 +1,13 @@
+jest.mock('@react-native-firebase/app', () => ({
+  __esModule: true,
+  getApp: jest.fn(() => ({})),
+}));
+
 jest.mock('@react-native-firebase/messaging', () => ({
   __esModule: true,
-  default: jest.fn(),
+  getMessaging: jest.fn(() => ({})),
+  requestPermission: jest.fn(),
+  getToken: jest.fn(),
   AuthorizationStatus: {
     NOT_DETERMINED: -1,
     DENIED: 0,
@@ -44,7 +51,11 @@ jest.mock('@/stores/deviceStore', () => {
 
 import { renderHook, waitFor } from '@testing-library/react-native';
 import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
-import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
+import {
+  AuthorizationStatus,
+  getToken,
+  requestPermission,
+} from '@react-native-firebase/messaging';
 
 import { registerFcmToken } from '@/api/notification';
 import { getUserStatus, registerUser } from '@/api/user';
@@ -52,8 +63,8 @@ import { useFcmToken } from '../useFcmToken';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const deviceStoreMock = require('@/stores/deviceStore');
 
-const mockGetToken = jest.fn();
-const mockRequestPermission = jest.fn();
+const mockGetToken = getToken as jest.Mock;
+const mockRequestPermission = requestPermission as jest.Mock;
 
 function setPlatform(os: string, version: number) {
   Object.defineProperty(Platform, 'OS', { value: os, configurable: true });
@@ -71,10 +82,6 @@ beforeEach(() => {
   setPlatform('android', 33);
   mockGetToken.mockResolvedValue('mock-fcm-token');
   mockRequestPermission.mockResolvedValue(AuthorizationStatus.AUTHORIZED);
-  (messaging as unknown as jest.Mock).mockReturnValue({
-    getToken: mockGetToken,
-    requestPermission: mockRequestPermission,
-  });
   (getUserStatus as jest.Mock).mockResolvedValue({ exists: true });
   (registerFcmToken as jest.Mock).mockResolvedValue({});
   (registerUser as jest.Mock).mockResolvedValue({});
