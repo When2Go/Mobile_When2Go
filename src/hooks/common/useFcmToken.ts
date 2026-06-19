@@ -1,6 +1,12 @@
 import { useEffect } from 'react';
 import { Alert, BackHandler, PermissionsAndroid, Platform } from 'react-native';
-import messaging, { AuthorizationStatus } from '@react-native-firebase/messaging';
+import { getApp } from '@react-native-firebase/app';
+import {
+  AuthorizationStatus,
+  getMessaging,
+  getToken,
+  requestPermission,
+} from '@react-native-firebase/messaging';
 
 import { registerFcmToken } from '@/api/notification';
 import { getUserStatus, registerUser } from '@/api/user';
@@ -16,7 +22,7 @@ const FCM_ALERT_BUTTON = '확인';
 
 async function requestNotificationPermission(): Promise<boolean> {
   if (Platform.OS === 'ios') {
-    const status = await messaging().requestPermission();
+    const status = await requestPermission(getMessaging(getApp()));
     return (
       status === AuthorizationStatus.AUTHORIZED ||
       status === AuthorizationStatus.PROVISIONAL
@@ -63,7 +69,7 @@ export function useFcmToken(): void {
       const hasPermission = await requestNotificationPermission();
       if (!hasPermission) return;
 
-      const token = await messaging().getToken();
+      const token = await getToken(getMessaging(getApp()));
 
       const { ensureDeviceId, lastFcmToken, setLastFcmToken } =
         useDeviceStore.getState();
