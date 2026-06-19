@@ -86,13 +86,10 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
     - 시뮬레이터/에뮬레이터에 앱이 아예 설치돼 있지 않음 (첫 실행)
   - JS-only 패키지(zustand, dayjs, lucide-react-native 같은 순수 JS 라이브러리)는 재빌드 불필요.
 - **PR 검증 분업**: 한 PR을 두 OS에서 모두 검증한다. 작성자는 자기 OS, 리뷰어는 반대 OS로 돌려본다. 한쪽만 OK는 [WARNING], 양쪽 OK여야 머지
-- **자동 트리거**: 화면/컴포넌트가 변경되는 작업이 끝나면 사용자가 바로 확인할 수 있도록 시뮬레이터/에뮬레이터를 띄워준다.
-  - **시뮬레이터 자체를 먼저 띄워야 한다.** `expo start`만으로는 부팅돼 있지 않은 시뮬레이터가 켜지지 않는다. 순서: `xcrun simctl list devices booted`로 부팅 여부 확인 → 미부팅이면 `xcrun simctl boot <기본 UDID>` + `open -a Simulator` → 그다음 `expo start` 또는 `expo run:ios`.
-  - 재빌드 조건에 해당하면 → 호스트 OS에 맞는 `expo run:ios --device <기본 UDID>` / `expo run:android`를 `run_in_background`로 실행
-  - 해당하지 않으면 → `expo start`를 `run_in_background`로 실행 (이전 빌드 재사용)
-  - 순수 문서/설정/테스트 변경만이면 자동 실행 X
-- **EAS 실기기 빌드** (`eas build --profile development --platform <ios|android>`)는 자동 트리거 X. 푸시·백그라운드 위치·OS 보안 등 에뮬레이터 재현 불가 동작 또는 사용자 명시 요청 시에만
-- 사용자가 "빌드하지 마" 명시 시 자동 실행 X
+- **실기기 테스트 default**: 이제 모든 동작 확인은 **실제 기기**에서 한다. 작업이 끝나도 시뮬레이터/에뮬레이터를 자동으로 띄우지 않는다.
+  - 작업 완료 후에는 사용자가 직접 실기기에서 확인한다. 에이전트는 빌드/실행을 자동 트리거하지 않고, 변경 요약과 "직접 확인하는 법"만 전달한다.
+  - 실기기 빌드가 필요하면 `eas build --profile development --platform <ios|android>` 또는 `expo run:ios --device <실기기 UDID>` 등을 사용자가 명시 요청할 때만 실행한다.
+  - 시뮬레이터/에뮬레이터 실행이 필요한 경우(사용자 명시 요청 시)에만 위 "재빌드 vs 재실행" 기준을 따른다.
 
 ## 단위 테스트
 

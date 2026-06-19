@@ -14,6 +14,8 @@ export interface RouteDisplayItem {
   departureTime: string;
   arrivalTime: string;
   durationLabel: string;
+  /** 예상 소요 시간(초). Trip 생성 요청의 durationSeconds로 전달. NaN이면 0. */
+  durationSeconds: number;
   steps: readonly string[];
   transferCount: number;
   fareLabel: string;

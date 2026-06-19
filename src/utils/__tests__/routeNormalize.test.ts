@@ -48,6 +48,16 @@ describe('normalizeRoute', () => {
     expect(item.durationLabel).toBe('30분');
   });
 
+  it('durationSeconds는 duration("1800s")을 초로 파싱', () => {
+    const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
+    expect(item.durationSeconds).toBe(1800);
+  });
+
+  it('duration 파싱 불가 시 durationSeconds는 0', () => {
+    const item = normalizeRoute(makeRoute({ duration: 'NaNs' }), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
+    expect(item.durationSeconds).toBe(0);
+  });
+
   it('TRANSIT step에서 승/하차 역명 추출', () => {
     const item = normalizeRoute(makeRoute(), 0, 'optimal', ARRIVAL_TIME, BUFFER_MIN);
     expect(item.steps).toEqual(['주안역환승정류장', '인하대역']);

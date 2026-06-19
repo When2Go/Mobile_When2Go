@@ -3,7 +3,7 @@
  * mock 단계에서는 화면 전용으로만 쓰이며, 실제 Trip API 연동 시 재배치/확장 예정.
  */
 
-export type ScheduleStatus = '예정' | '진행중' | '완료';
+export type ScheduleStatus = '예정' | '확정' | '완료';
 
 export interface ScheduleItem {
   id: number;
@@ -29,4 +29,6 @@ export interface ScheduleItem {
   from: string;
   /** 도착지 표시명 (상세 시트에서 사용) */
   to: string;
+  /** 일정 날짜 키 ("YYYY-MM-DD", KST 기준). 달력 필터·마커 기준. */
+  date: string;
 }
