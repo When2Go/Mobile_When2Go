@@ -5,8 +5,8 @@ import type { TripCreateRequest } from '@/api/trip/types';
 import type { ApiFailure } from '@/types/api.types';
 
 interface UseCreateTripState {
-  /** 생성 성공 시 true, 실패 시 false 반환(예외를 삼켜 호출처 분기를 단순화). */
-  create: (req: TripCreateRequest) => Promise<boolean>;
+  /** 성공 시 null, 실패 시 ApiFailure 반환(예외를 삼켜 호출처가 사유로 분기 가능). */
+  create: (req: TripCreateRequest) => Promise<ApiFailure | null>;
   isCreating: boolean;
   error: ApiFailure | null;
 }
@@ -16,17 +16,18 @@ export function useCreateTrip(): UseCreateTripState {
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<ApiFailure | null>(null);
 
-  const create = async (req: TripCreateRequest): Promise<boolean> => {
+  const create = async (req: TripCreateRequest): Promise<ApiFailure | null> => {
     setIsCreating(true);
     setError(null);
     try {
       await createTrip(req);
       setIsCreating(false);
-      return true;
+      return null;
     } catch (err) {
-      setError(err as ApiFailure);
+      const failure = err as ApiFailure;
+      setError(failure);
       setIsCreating(false);
-      return false;
+      return failure;
     }
   };
 

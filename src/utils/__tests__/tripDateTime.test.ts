@@ -1,26 +1,4 @@
-import {
-  dateToParam,
-  isoToDateKey,
-  isoToHHmmKST,
-  isoToKoreanTime,
-  toISO8601KST,
-} from '../tripDateTime';
-
-describe('toISO8601KST', () => {
-  // 정상
-  it('"2026-06-17 09:00" → ISO 8601 (+09:00 오프셋)', () => {
-    expect(toISO8601KST('2026-06-17 09:00')).toBe('2026-06-17T09:00:00+09:00');
-  });
-
-  it('"2026-05-22 13:30" → "2026-05-22T13:30:00+09:00"', () => {
-    expect(toISO8601KST('2026-05-22 13:30')).toBe('2026-05-22T13:30:00+09:00');
-  });
-
-  // 경계
-  it('자정 "2026-01-01 00:00"', () => {
-    expect(toISO8601KST('2026-01-01 00:00')).toBe('2026-01-01T00:00:00+09:00');
-  });
-});
+import { dateToParam, isoToDateKey, isoToHHmmKST, isoToKoreanTime } from '../tripDateTime';
 
 describe('isoToKoreanTime', () => {
   // 정상

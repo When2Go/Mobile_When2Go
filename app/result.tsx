@@ -19,7 +19,6 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import { useRouteSearch } from '@/hooks/route/useRouteSearch';
 import { useCreateTrip } from '@/hooks/trip/useCreateTrip';
-import { toISO8601KST } from '@/utils/tripDateTime';
 import type { RouteSearchRequest } from '@/api/route/types';
 import type { TripCreateRequest } from '@/api/trip/types';
 import AdSlot from '@/components/common/AdSlot';
@@ -149,14 +148,16 @@ export default function ResultScreen() {
       destName: toName ?? selectedRoute.steps[selectedRoute.steps.length - 1] ?? ORIGIN_CURRENT_LOCATION,
       destLat: toCoords.lat,
       destLng: toCoords.lng,
-      arrivalTime: toISO8601KST(arrivalTime),
+      // 백엔드는 "yyyy-MM-dd HH:mm"(공백 구분, T·초·오프셋 없음)만 파싱한다.
+      // setup의 toDateTimeString이 이미 이 형식이므로 변환 없이 그대로 전달.
+      arrivalTime,
       bufferMinutes: safetyBufferMin,
       durationSeconds: selectedRoute.durationSeconds,
     };
 
-    const ok = await create(payload);
-    if (!ok) {
-      Alert.alert(SAVE_ERROR_TITLE, SAVE_ERROR_MESSAGE);
+    const failure = await create(payload);
+    if (failure) {
+      Alert.alert(SAVE_ERROR_TITLE, failure.message ?? SAVE_ERROR_MESSAGE);
       return;
     }
 

@@ -141,7 +141,7 @@
 | `originLat` / `originLng` | number (double) | X | 출발지 좌표 |
 | `destName` | string | X | 목적지명 |
 | `destLat` / `destLng` | number (double) | X | 목적지 좌표 |
-| `arrivalTime` | string (ISO 8601) | X | 도착 목표 절대 시각 |
+| `arrivalTime` | string `yyyy-MM-dd HH:mm` | X | 도착 목표 시각. **⚠️ 공백 구분 · T/초/오프셋 불가** — `T`나 초(`:00`)가 붙으면 `GLOBAL_004 잘못된 JSON 형식`(400)으로 거부됨 (2026-06-17 probe 확인). |
 | `bufferMinutes` | number (int32) | X | 안전 버퍼 분 |
 | `durationSeconds` | number (int32) | X | 예상 소요 시간(초) — **신규 필수 필드** |
 

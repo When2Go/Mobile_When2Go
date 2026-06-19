@@ -5,7 +5,6 @@
  */
 
 const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
-const KST_ISO_SUFFIX = ':00+09:00';
 
 function pad2(n: number): string {
   return String(n).padStart(2, '0');
@@ -14,15 +13,6 @@ function pad2(n: number): string {
 /** ISO instant를 KST 벽시계(UTC 필드로 읽을 수 있는 Date)로 옮긴다. */
 function toKstClock(iso: string): Date {
   return new Date(new Date(iso).getTime() + KST_OFFSET_MS);
-}
-
-/**
- * 화면의 "YYYY-MM-DD HH:mm"(KST 로컬)을 ISO 8601(+09:00)로 변환한다.
- * 예: "2026-06-17 09:00" → "2026-06-17T09:00:00+09:00".
- */
-export function toISO8601KST(localDateTime: string): string {
-  const [datePart, timePart] = localDateTime.split(' ');
-  return `${datePart}T${timePart}${KST_ISO_SUFFIX}`;
 }
 
 /**
