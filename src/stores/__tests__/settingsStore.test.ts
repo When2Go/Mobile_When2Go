@@ -23,6 +23,7 @@ import {
   BUFFER_MIN_MINUTES,
   DEFAULT_BUFFER_MINUTES,
   DEFAULT_NICKNAME,
+  DEFAULT_WIDGET_ENABLED,
   NICKNAME_MAX_LENGTH,
   useSettingsStore,
 } from '../settingsStore';
@@ -32,6 +33,7 @@ describe('settingsStore', () => {
     useSettingsStore.setState({
       bufferMinutes: DEFAULT_BUFFER_MINUTES,
       nickname: DEFAULT_NICKNAME,
+      widgetEnabled: DEFAULT_WIDGET_ENABLED,
     });
   });
 
@@ -94,5 +96,31 @@ describe('settingsStore', () => {
     const long = 'ㄱ'.repeat(NICKNAME_MAX_LENGTH + 5);
     useSettingsStore.getState().setNickname(long);
     expect(useSettingsStore.getState().nickname).toHaveLength(NICKNAME_MAX_LENGTH);
+  });
+
+  // F-W06: 위젯 끄기 토글
+  test('초기 widgetEnabled는 기본값(true)이다', () => {
+    expect(useSettingsStore.getState().widgetEnabled).toBe(true);
+  });
+
+  test('setWidgetEnabled(false)이면 widgetEnabled === false', () => {
+    useSettingsStore.getState().setWidgetEnabled(false);
+    expect(useSettingsStore.getState().widgetEnabled).toBe(false);
+  });
+
+  test('setWidgetEnabled(true)이면 widgetEnabled === true', () => {
+    useSettingsStore.setState({ widgetEnabled: false });
+    useSettingsStore.getState().setWidgetEnabled(true);
+    expect(useSettingsStore.getState().widgetEnabled).toBe(true);
+  });
+
+  test('toggleWidget은 현재 값을 반전한다', () => {
+    expect(useSettingsStore.getState().widgetEnabled).toBe(true);
+
+    useSettingsStore.getState().toggleWidget();
+    expect(useSettingsStore.getState().widgetEnabled).toBe(false);
+
+    useSettingsStore.getState().toggleWidget();
+    expect(useSettingsStore.getState().widgetEnabled).toBe(true);
   });
 });

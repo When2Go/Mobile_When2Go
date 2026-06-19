@@ -9,6 +9,7 @@ import SafetyBufferRow from '@/components/mypage/SafetyBufferRow';
 import BufferSheetBody from '@/components/common/BufferSheetBody';
 import NotificationSettingsRow from '@/components/mypage/NotificationSettingsRow';
 import RepeatReservationLink from '@/components/mypage/RepeatReservationLink';
+import LockWidgetLink from '@/components/mypage/LockWidgetLink';
 import TermsLink from '@/components/mypage/TermsLink';
 import VersionRow from '@/components/mypage/VersionRow';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -62,6 +63,7 @@ export default function MyPageScreen() {
             </Text>
             <SafetyBufferRow value={bufferMinutes} onPress={() => setBufferSheetOpen(true)} />
             <NotificationSettingsRow onPress={handleOpenSystemNotificationSettings} />
+            <LockWidgetLink />
             <RepeatReservationLink noBorder />
           </View>
 

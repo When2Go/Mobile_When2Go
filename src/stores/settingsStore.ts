@@ -7,14 +7,19 @@ export const BUFFER_MAX_MINUTES = 30;
 export const DEFAULT_BUFFER_MINUTES = 10;
 export const DEFAULT_NICKNAME = '게스트';
 export const NICKNAME_MAX_LENGTH = 12;
+export const DEFAULT_WIDGET_ENABLED = true;
 
 const STORAGE_KEY = 'when2go.settings';
 
 interface SettingsState {
   bufferMinutes: number;
   nickname: string;
+  /** F-W06: 잠금화면 위젯 표시 여부 (mock — 실제 위젯 익스텐션과는 별개). */
+  widgetEnabled: boolean;
   setBufferMinutes: (value: number) => void;
   setNickname: (value: string) => void;
+  setWidgetEnabled: (value: boolean) => void;
+  toggleWidget: () => void;
 }
 
 function clampBuffer(value: number): number {
@@ -29,6 +34,7 @@ export const useSettingsStore = create<SettingsState>()(
     (set) => ({
       bufferMinutes: DEFAULT_BUFFER_MINUTES,
       nickname: DEFAULT_NICKNAME,
+      widgetEnabled: DEFAULT_WIDGET_ENABLED,
       setBufferMinutes: (value) => {
         set({ bufferMinutes: clampBuffer(value) });
       },
@@ -41,6 +47,12 @@ export const useSettingsStore = create<SettingsState>()(
             : trimmed;
         set({ nickname: capped });
       },
+      setWidgetEnabled: (value) => {
+        set({ widgetEnabled: value });
+      },
+      toggleWidget: () => {
+        set((state) => ({ widgetEnabled: !state.widgetEnabled }));
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -48,6 +60,7 @@ export const useSettingsStore = create<SettingsState>()(
       partialize: (state) => ({
         bufferMinutes: state.bufferMinutes,
         nickname: state.nickname,
+        widgetEnabled: state.widgetEnabled,
       }),
     },
   ),
