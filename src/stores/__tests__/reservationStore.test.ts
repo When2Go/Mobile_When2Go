@@ -7,10 +7,10 @@ const ITEM_A: RepeatItem = {
   origin: '집',
   destination: '회사',
   days: [1, 2, 3, 4, 5],
-  arrivalPeriod: 'AM',
+  arrivalPeriod: '오전',
   arrivalHour: 9,
   arrivalMinute: 0,
-  routeOption: 'OPTIMAL',
+  routeOption: 'subway_bus',
   enabled: true,
 };
 
@@ -20,10 +20,10 @@ const ITEM_B: RepeatItem = {
   origin: '회사',
   destination: '집',
   days: [1, 2, 3, 4, 5],
-  arrivalPeriod: 'PM',
+  arrivalPeriod: '오후',
   arrivalHour: 7,
   arrivalMinute: 0,
-  routeOption: 'OPTIMAL',
+  routeOption: 'subway_bus',
   enabled: true,
 };
 

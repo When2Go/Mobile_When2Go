@@ -42,14 +42,9 @@ export function routeOptionToApiOption(_option: RouteOptionId): ApiRouteOption {
   return 'TRANSIT';
 }
 
-/** 앱 내부 경로 옵션 → PUT API RouteOption (POST와 enum이 다름). */
-export function routeOptionToApiPutOption(option: RouteOptionId): PutRouteOption {
-  const map: Record<RouteOptionId, PutRouteOption> = {
-    subway_bus: 'OPTIMAL',
-    subway_only: 'SUBWAY_FIRST',
-    bus_only: 'BUS_ONLY',
-  };
-  return map[option];
+/** PUT API routeOption — UI 제거 후 OPTIMAL 고정 (POST의 TRANSIT에 대응). */
+export function routeOptionToApiPutOption(_option: RouteOptionId): PutRouteOption {
+  return 'OPTIMAL';
 }
 
 /** 오전/오후 + 1~12시 + 분 → HH:mm 24시간 포맷. */
