@@ -22,6 +22,7 @@ export default function RoutesScreen() {
   const addRoute = useRouteStore((s) => s.addRoute);
   const updateRoute = useRouteStore((s) => s.updateRoute);
   const removeRoute = useRouteStore((s) => s.removeRoute);
+  const toggleFavorite = useRouteStore((s) => s.toggleFavorite);
 
   const [editTarget, setEditTarget] = useState<RouteItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
@@ -149,6 +150,7 @@ export default function RoutesScreen() {
                   onNavigateToSetup={handleNavigateToSetup}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onToggleFavorite={toggleFavorite}
                 />
               ))}
             </View>

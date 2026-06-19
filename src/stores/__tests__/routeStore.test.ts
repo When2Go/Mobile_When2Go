@@ -64,6 +64,29 @@ describe('routeStore', () => {
     expect(routes[0].frequency).toBe('주 4회 이용');
   });
 
+  it('toggleFavorite: isFavorite 를 켜고 끈다', () => {
+    useRouteStore.getState().addRoute(makeForm());
+    const { id } = useRouteStore.getState().routes[0];
+
+    useRouteStore.getState().toggleFavorite(id);
+    expect(useRouteStore.getState().routes[0].isFavorite).toBe(true);
+
+    useRouteStore.getState().toggleFavorite(id);
+    expect(useRouteStore.getState().routes[0].isFavorite).toBe(false);
+  });
+
+  it('updateRoute: 폼에 없는 isFavorite 는 기존 값을 보존한다', () => {
+    useRouteStore.getState().addRoute(makeForm());
+    const { id } = useRouteStore.getState().routes[0];
+    useRouteStore.getState().toggleFavorite(id);
+
+    useRouteStore.getState().updateRoute(id, makeForm({ name: '수정됨' }));
+
+    const route = useRouteStore.getState().routes[0];
+    expect(route.name).toBe('수정됨');
+    expect(route.isFavorite).toBe(true);
+  });
+
   it('removeRoute: id로 경로를 삭제한다', () => {
     useRouteStore.getState().addRoute(makeForm({ name: 'A' }));
     useRouteStore.getState().addRoute(makeForm({ name: 'B' }));

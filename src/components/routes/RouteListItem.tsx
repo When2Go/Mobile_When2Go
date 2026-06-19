@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import { MapPin, Pencil, Trash2 } from 'lucide-react-native';
+import { MapPin, Pencil, Star, Trash2 } from 'lucide-react-native';
 
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
@@ -28,9 +28,16 @@ interface RouteListItemProps {
   onNavigateToSetup: (route: RouteItem) => void;
   onEdit: (route: RouteItem) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (id: string) => void;
 }
 
-export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDelete }: RouteListItemProps) {
+export default function RouteListItem({
+  route,
+  onNavigateToSetup,
+  onEdit,
+  onDelete,
+  onToggleFavorite,
+}: RouteListItemProps) {
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
 
@@ -103,15 +110,34 @@ export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDele
           >
             <View className="mb-3 flex-row items-start justify-between">
               <Text className={`text-base font-bold ${heading}`}>{route.name}</Text>
-              <Pressable
-                onPress={() => onEdit(route)}
-                accessibilityRole="button"
-                accessibilityLabel="편집"
-                hitSlop={8}
-                className="rounded-lg p-1.5 active:opacity-60"
-              >
-                <Pencil size={ICON_SIZE.card} color={PALETTE.zinc500} />
-              </Pressable>
+              <View className="flex-row items-center gap-1">
+                <Pressable
+                  onPress={() => onToggleFavorite(route.id)}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    route.isFavorite
+                      ? `${route.name} 자주 가는 곳에서 제거`
+                      : `${route.name} 자주 가는 곳에 추가`
+                  }
+                  hitSlop={8}
+                  className="rounded-lg p-1.5 active:opacity-60"
+                >
+                  <Star
+                    size={ICON_SIZE.card}
+                    color={route.isFavorite ? PALETTE.amber500 : PALETTE.zinc400}
+                    fill={route.isFavorite ? PALETTE.amber500 : 'transparent'}
+                  />
+                </Pressable>
+                <Pressable
+                  onPress={() => onEdit(route)}
+                  accessibilityRole="button"
+                  accessibilityLabel="편집"
+                  hitSlop={8}
+                  className="rounded-lg p-1.5 active:opacity-60"
+                >
+                  <Pencil size={ICON_SIZE.card} color={PALETTE.zinc500} />
+                </Pressable>
+              </View>
             </View>
 
             {/* Route row */}

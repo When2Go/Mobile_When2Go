@@ -18,6 +18,7 @@ interface RouteState extends PersistedState {
   addRoute: (form: RouteFormData) => void;
   updateRoute: (id: string, form: RouteFormData) => void;
   removeRoute: (id: string) => void;
+  toggleFavorite: (id: string) => void;
 }
 
 function saveToStorage({ routes, _seq }: PersistedState) {
@@ -59,7 +60,8 @@ export const useRouteStore = create<RouteState>((set, get) => ({
 
   updateRoute: (id, form) =>
     set((s) => {
-      const routes = s.routes.map((r) => (r.id === id ? { ...form, id } : r));
+      // 폼에 없는 필드(isFavorite 등)는 기존 값을 보존한다.
+      const routes = s.routes.map((r) => (r.id === id ? { ...r, ...form, id } : r));
       saveToStorage({ routes, _seq: s._seq });
       return { routes };
     }),
@@ -67,6 +69,15 @@ export const useRouteStore = create<RouteState>((set, get) => ({
   removeRoute: (id) =>
     set((s) => {
       const routes = s.routes.filter((r) => r.id !== id);
+      saveToStorage({ routes, _seq: s._seq });
+      return { routes };
+    }),
+
+  toggleFavorite: (id) =>
+    set((s) => {
+      const routes = s.routes.map((r) =>
+        r.id === id ? { ...r, isFavorite: !r.isFavorite } : r,
+      );
       saveToStorage({ routes, _seq: s._seq });
       return { routes };
     }),

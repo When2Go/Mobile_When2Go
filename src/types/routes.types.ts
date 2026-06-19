@@ -13,6 +13,8 @@ export interface RouteItem {
   fromCoords?: Coords;
   /** 목적지 좌표. setup 진입 시 재검색 없이 재사용한다. */
   toCoords?: Coords;
+  /** 홈 '자주 가는 곳' 노출 여부. 경로 목록의 별 버튼으로 토글한다. */
+  isFavorite?: boolean;
 }
 
 export type RouteFormData = Omit<RouteItem, 'id'>;
