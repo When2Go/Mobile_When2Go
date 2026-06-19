@@ -25,6 +25,7 @@ import {
   DEFAULT_BUFFER_MINUTES,
   DEFAULT_NICKNAME,
   NICKNAME_MAX_LENGTH,
+  STORAGE_KEY,
   useSettingsStore,
 } from '../settingsStore';
 
@@ -99,14 +100,14 @@ describe('settingsStore', () => {
 });
 
 describe('settingsStore — persist 동작', () => {
-  const STORAGE_KEY = 'when2go.settings';
-
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeEach(async () => {
+    // setState 먼저(setItem 유발) → clearAllMocks로 call history 초기화 → memoryStore 비우기
     useSettingsStore.setState({
       bufferMinutes: DEFAULT_BUFFER_MINUTES,
       nickname: DEFAULT_NICKNAME,
     });
+    jest.clearAllMocks();
+    await AsyncStorage.clear();
   });
 
   test('setBufferMinutes 호출 후 AsyncStorage.setItem이 올바른 키로 호출된다', () => {
@@ -127,6 +128,7 @@ describe('settingsStore — persist 동작', () => {
 
   test('partialize — 저장 JSON에는 bufferMinutes·nickname만 포함되고 액션 함수는 제외된다', () => {
     useSettingsStore.getState().setBufferMinutes(15);
+    expect(AsyncStorage.setItem).toHaveBeenCalled();
     const lastCall = (AsyncStorage.setItem as jest.Mock).mock.calls.at(-1) as [string, string];
     const parsed = JSON.parse(lastCall[1]) as { state: Record<string, unknown> };
     expect(parsed.state).toHaveProperty('bufferMinutes');
