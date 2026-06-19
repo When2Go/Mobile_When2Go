@@ -270,7 +270,6 @@ export default function RepeatScreen() {
             <RepeatReservationCard
               key={item.id}
               item={item}
-              onPress={handleEdit}
               onToggle={handleToggle}
               onDelete={handleDelete}
             />

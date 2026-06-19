@@ -32,7 +32,7 @@ const TOGGLE_OFFSET_TOP_CLASS = 'top-4';
 
 interface RepeatReservationCardProps {
   item: RepeatItem;
-  onPress: (item: RepeatItem) => void;
+  onPress?: (item: RepeatItem) => void;
   onToggle: (id: number) => void;
   onDelete: (id: number) => void;
 }
@@ -73,7 +73,7 @@ export default function RepeatReservationCard({
   }, [onDelete, item.id]);
 
   const handlePress = useCallback(() => {
-    onPress(item);
+    onPress?.(item);
   }, [onPress, item]);
 
   const handleToggle = useCallback(() => {
