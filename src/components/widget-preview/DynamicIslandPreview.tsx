@@ -11,7 +11,7 @@ import { Smartphone, TrainFront, Zap } from 'lucide-react-native';
 
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
-import { WIDGET_MOCK } from './widgetMockData';
+import { RUNNER_EMOJI, WIDGET_MOCK } from './widgetMockData';
 
 const COMPACT_WIDTH = 160;
 const EXPANDED_WIDTH = 280;
@@ -112,7 +112,7 @@ export default function DynamicIslandPreview() {
                       style={{ transform: [{ translateX: fillWidth - RUNNER_BOX / 2 }] }}
                       className="absolute -top-2.5 left-0 text-sm leading-none"
                     >
-                      🏃
+                      {RUNNER_EMOJI}
                     </Text>
                   </View>
 

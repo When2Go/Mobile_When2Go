@@ -14,6 +14,8 @@ import { WIDGET_MOCK } from './widgetMockData';
 const LOCK_BG_GRADIENT = ['#1e1b4b', '#1f2937', '#0f172a'] as const;
 const MOCK_HEIGHT = 560;
 const WIDGET_AD_HEIGHT = 36;
+const LOCK_CLOCK_FONT = 64;
+const LOCK_CLOCK_LINE_HEIGHT = 70;
 
 /** iOS 잠금화면 하단 Live Activity 위젯 미리보기 (F-W01). */
 export default function IOSLiveActivityPreview() {
@@ -54,7 +56,10 @@ export default function IOSLiveActivityPreview() {
         {/* 잠금화면 시계 + 푸시 알림 */}
         <View className="items-center px-6 pb-4 pt-16">
           <Text className="mt-2 text-sm font-medium text-zinc-400">{WIDGET_MOCK.lockDate}</Text>
-          <Text className="mt-1 font-thin text-white" style={{ fontSize: 64, lineHeight: 70 }}>
+          <Text
+            className="mt-1 font-thin text-white"
+            style={{ fontSize: LOCK_CLOCK_FONT, lineHeight: LOCK_CLOCK_LINE_HEIGHT }}
+          >
             {WIDGET_MOCK.lockClock}
           </Text>
 
