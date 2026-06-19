@@ -22,7 +22,7 @@ const PAGE_TITLE: Record<string, string> = {
   '/schedule': '일정',
 };
 
-const HIDE_BOTTOM_NAV_PATHS = ['/setup', '/active', '/onboarding'];
+const HIDE_BOTTOM_NAV_PATHS = ['/setup', '/active'];
 /** 탭 루트 경로 — 뒤로가기 없는 메인 화면. 헤더 자체를 숨긴다. */
 const TAB_ROOT_PATHS = ['/', '/schedule', '/routes', '/mypage'];
 
