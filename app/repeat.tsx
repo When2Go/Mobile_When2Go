@@ -72,7 +72,7 @@ export default function RepeatScreen() {
         }));
         nextIdRef.current = id;
         setRepeats(items);
-      } catch (e) {
+      } catch {
         setRepeats([]);
       }
     }
@@ -86,6 +86,7 @@ export default function RepeatScreen() {
     setEditOpen(true);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleEdit = (item: RepeatItem) => {
     setEditTarget(item);
     setDraftForm({
@@ -175,7 +176,7 @@ export default function RepeatScreen() {
           repeatDays: daysToRepeatDays(draftForm.days),
         });
         newItem.reservationId = res.reservationId;
-      } catch (e) {
+      } catch {
         // POST 실패 시 로컬에만 저장
       }
     }
@@ -270,7 +271,6 @@ export default function RepeatScreen() {
             <RepeatReservationCard
               key={item.id}
               item={item}
-              onPress={handleEdit}
               onToggle={handleToggle}
               onDelete={handleDelete}
             />
