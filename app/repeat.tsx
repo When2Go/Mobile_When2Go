@@ -12,6 +12,7 @@ import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, SCREEN_TITLE } from '@/constants/repe
 import { DEFAULT_ROUTE_OPTION } from '@/constants/setup';
 import { createReservation, deleteReservation, getReservations, updateReservation } from '@/api/reservation';
 import { useReservationStore } from '@/stores/reservationStore';
+import { useReservationToggleStore } from '@/stores/reservationToggleStore';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import {
   daysToRepeatDays,
@@ -65,6 +66,7 @@ export default function RepeatScreen() {
     async function init() {
       try {
         const serverItems = await getReservations();
+        const { disabledIds } = useReservationToggleStore.getState();
         let id = INITIAL_NEXT_ID;
         const items: RepeatItem[] = serverItems.map((s) => ({
           id: id++,
@@ -75,7 +77,7 @@ export default function RepeatScreen() {
           days: repeatDaysToNumbers(s.repeatDays),
           ...parseArrivalTimeString(s.arrivalTime),
           routeOption: DEFAULT_ROUTE_OPTION,
-          enabled: true,
+          enabled: !disabledIds.includes(s.id),
         }));
         nextIdRef.current = id;
         setRepeats(items);
@@ -115,7 +117,21 @@ export default function RepeatScreen() {
   };
 
   const handleToggle = (id: number) => {
-    setRepeats((prev) => prev.map((r) => (r.id === id ? { ...r, enabled: !r.enabled } : r)));
+    setRepeats((prev) =>
+      prev.map((r) => {
+        if (r.id !== id) return r;
+        const newEnabled = !r.enabled;
+        if (r.reservationId !== undefined) {
+          const { disable, enable } = useReservationToggleStore.getState();
+          if (newEnabled) {
+            enable(r.reservationId);
+          } else {
+            disable(r.reservationId);
+          }
+        }
+        return { ...r, enabled: newEnabled };
+      }),
+    );
   };
 
   const handleDelete = (id: number) => {
@@ -124,6 +140,7 @@ export default function RepeatScreen() {
       deleteReservation(target.reservationId).catch(() => {
         // 서버 삭제 실패 시 로컬에서만 제거 (재시도는 사용자 재진입 시)
       });
+      useReservationToggleStore.getState().remove(target.reservationId);
     }
     setRepeats((prev) => prev.filter((r) => r.id !== id));
   };
