@@ -29,7 +29,7 @@ const config: ExpoConfig = {
     package: 'kr.co.when2go.app',
     googleServicesFile: './google-services.json',
     adaptiveIcon: {
-      backgroundColor: '#E6F4FE',
+      backgroundColor: '#ffffff',
       foregroundImage: './assets/images/android-icon-foreground.png',
       backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
@@ -52,7 +52,6 @@ const config: ExpoConfig = {
         imageWidth: 200,
         resizeMode: 'contain',
         backgroundColor: '#ffffff',
-        dark: { backgroundColor: '#000000' },
       },
     ],
     [
