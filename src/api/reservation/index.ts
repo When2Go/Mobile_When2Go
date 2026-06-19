@@ -13,7 +13,7 @@ export async function getReservations(): Promise<ReservationListItem[]> {
   console.log('[reservation] GET req');
   const { data } = await api.get<ApiEnvelope<ReservationListItem[]>>(RESERVATIONS_PATH);
   console.log('[reservation] GET res:', JSON.stringify(data, null, 2));
-  return data.data ?? [];
+  return Array.isArray(data.data) ? data.data : [];
 }
 
 export async function createReservation(
