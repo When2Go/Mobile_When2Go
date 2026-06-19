@@ -27,7 +27,7 @@ interface RouteListItemProps {
   route: RouteItem;
   onNavigateToSetup: (route: RouteItem) => void;
   onEdit: (route: RouteItem) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 export default function RouteListItem({ route, onNavigateToSetup, onEdit, onDelete }: RouteListItemProps) {

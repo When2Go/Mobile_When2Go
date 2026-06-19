@@ -1,11 +1,8 @@
 import { create } from 'zustand';
 
-type LocationField = 'from' | 'to';
+import type { Coords } from '@/types/routes.types';
 
-interface Coords {
-  lat: number;
-  lng: number;
-}
+type LocationField = 'from' | 'to';
 
 interface RouteDraftState {
   pendingLocation: { location: string; field: LocationField } | null;
