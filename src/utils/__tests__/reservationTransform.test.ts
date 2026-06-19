@@ -171,15 +171,9 @@ describe('parseArrivalTimeString', () => {
 });
 
 describe('routeOptionToApiPutOption', () => {
-  test('subway_bus → OPTIMAL', () => {
+  test('routeOption 값과 무관하게 OPTIMAL을 반환한다', () => {
     expect(routeOptionToApiPutOption('subway_bus')).toBe('OPTIMAL');
-  });
-
-  test('subway_only → SUBWAY_FIRST', () => {
-    expect(routeOptionToApiPutOption('subway_only')).toBe('SUBWAY_FIRST');
-  });
-
-  test('bus_only → BUS_ONLY', () => {
-    expect(routeOptionToApiPutOption('bus_only')).toBe('BUS_ONLY');
+    expect(routeOptionToApiPutOption('subway_only')).toBe('OPTIMAL');
+    expect(routeOptionToApiPutOption('bus_only')).toBe('OPTIMAL');
   });
 });

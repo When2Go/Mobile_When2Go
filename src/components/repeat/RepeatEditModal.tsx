@@ -7,7 +7,6 @@ import BufferSlider from '@/components/common/BufferSlider';
 import TimeWheelPicker from '@/components/setup/TimeWheelPicker';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
-import { ROUTE_OPTIONS } from '@/constants/setup';
 import {
   ADD_MODAL_TITLE,
   ARRIVAL_TAP_HINT,
@@ -19,7 +18,6 @@ import {
   LABEL_DAYS,
   LABEL_LOCATIONS,
   LABEL_NAME,
-  LABEL_ROUTE,
   PLACEHOLDER_DESTINATION,
   PLACEHOLDER_NAME,
   PLACEHOLDER_ORIGIN,
@@ -81,9 +79,6 @@ export default function RepeatEditModal({
   const arrivalBoxBg = 'bg-white border-zinc-200';
   const dayBtnActive = 'bg-blue-600 border-blue-600';
   const dayBtnInactive = 'bg-white border-zinc-200';
-  const routeActiveBg = 'border-blue-600 bg-blue-50';
-  const routeInactiveBg = 'border-zinc-200 bg-white';
-
   const locationPlaceholderText = 'text-zinc-400';
   const locationValueText = 'text-zinc-900';
   const locationFieldText = (value: string) =>
@@ -225,31 +220,6 @@ export default function RepeatEditModal({
                 />
               </View>
             ) : null}
-          </View>
-
-          {/* 경로 옵션 — 항상 한 줄(3개 균등) */}
-          <View>
-            <Text className={`mb-3 text-sm font-semibold ${labelText}`}>{LABEL_ROUTE}</Text>
-            <View className="flex-row gap-2">
-              {ROUTE_OPTIONS.map((opt) => {
-                const isActive = form.routeOption === opt.id;
-                const btnBg = isActive ? routeActiveBg : routeInactiveBg;
-                const btnText = isActive ? 'text-blue-700' : 'text-zinc-600';
-                return (
-                  <Pressable
-                    key={opt.id}
-                    onPress={() => onFormChange({ routeOption: opt.id })}
-                    accessibilityRole="button"
-                    accessibilityLabel={`경로 옵션 ${opt.label}`}
-                    className={`flex-1 items-center justify-center rounded-xl border px-2 py-3 active:opacity-70 ${btnBg}`}
-                  >
-                    <Text className={`text-sm font-medium ${btnText}`} numberOfLines={1}>
-                      {opt.label}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
           </View>
 
           {/* 안전 버퍼 (collapsible) — 미설정 시 전역 설정값 fallback */}

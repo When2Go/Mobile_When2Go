@@ -11,11 +11,9 @@ import {
   DEFAULT_HOUR,
   DEFAULT_MINUTE,
   DEFAULT_PERIOD,
-  DEFAULT_ROUTE_OPTION,
   SAFETY_BUFFER_SHEET_TITLE,
   SCREEN_TITLE,
   type Period,
-  type RouteOptionId,
 } from '@/constants/setup';
 import { ARRIVAL_TIME_PARAM, BUFFER_MIN_PARAM } from '@/constants/result';
 import { useSettingsStore } from '@/stores/settingsStore';
@@ -24,7 +22,6 @@ import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 import { toDateTimeString } from '@/utils/timeFormat';
 import DestinationHeader from '@/components/setup/DestinationHeader';
 import ArrivalTimePicker from '@/components/setup/ArrivalTimePicker';
-import RouteOptionList from '@/components/setup/RouteOptionList';
 import DepartButton from '@/components/setup/DepartButton';
 import BottomSheetModal from '@/components/common/BottomSheetModal';
 import BufferSheetBody from '@/components/common/BufferSheetBody';
@@ -55,8 +52,6 @@ export default function SetupScreen() {
   const [period, setPeriod] = useState<Period>(DEFAULT_PERIOD);
   const [hour, setHour] = useState<number>(DEFAULT_HOUR);
   const [minute, setMinute] = useState<number>(DEFAULT_MINUTE);
-
-  const [routeType, setRouteType] = useState<RouteOptionId>(DEFAULT_ROUTE_OPTION);
 
   // 사용자 default 안전 버퍼(마이페이지). 이 경로에서는 store를 직접 수정하지 않고
   // local override만 둔다. 표시값 = override ?? defaultFromStore.
@@ -158,9 +153,7 @@ export default function SetupScreen() {
           />
         </View>
 
-        <View className={`mt-2 ${cardBg}`}>
-          <RouteOptionList value={routeType} onChange={setRouteType} />
-        </View>
+
       </ScrollView>
 
       {/* Bottom CTA */}
