@@ -18,6 +18,7 @@ jest.mock('@react-native-async-storage/async-storage', () => {
 });
 
 // eslint-disable-next-line import/first -- jest.mock must execute before the SUT import
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   BUFFER_MAX_MINUTES,
   BUFFER_MIN_MINUTES,
@@ -94,5 +95,61 @@ describe('settingsStore', () => {
     const long = 'ㄱ'.repeat(NICKNAME_MAX_LENGTH + 5);
     useSettingsStore.getState().setNickname(long);
     expect(useSettingsStore.getState().nickname).toHaveLength(NICKNAME_MAX_LENGTH);
+  });
+});
+
+describe('settingsStore — persist 동작', () => {
+  const STORAGE_KEY = 'when2go.settings';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    useSettingsStore.setState({
+      bufferMinutes: DEFAULT_BUFFER_MINUTES,
+      nickname: DEFAULT_NICKNAME,
+    });
+  });
+
+  test('setBufferMinutes 호출 후 AsyncStorage.setItem이 올바른 키로 호출된다', () => {
+    useSettingsStore.getState().setBufferMinutes(20);
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      STORAGE_KEY,
+      expect.stringContaining('"bufferMinutes":20'),
+    );
+  });
+
+  test('setNickname 호출 후 AsyncStorage.setItem이 올바른 키로 호출된다', () => {
+    useSettingsStore.getState().setNickname('주환');
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith(
+      STORAGE_KEY,
+      expect.stringContaining('"nickname":"주환"'),
+    );
+  });
+
+  test('partialize — 저장 JSON에는 bufferMinutes·nickname만 포함되고 액션 함수는 제외된다', () => {
+    useSettingsStore.getState().setBufferMinutes(15);
+    const lastCall = (AsyncStorage.setItem as jest.Mock).mock.calls.at(-1) as [string, string];
+    const parsed = JSON.parse(lastCall[1]) as { state: Record<string, unknown> };
+    expect(parsed.state).toHaveProperty('bufferMinutes');
+    expect(parsed.state).toHaveProperty('nickname');
+    expect(parsed.state).not.toHaveProperty('setBufferMinutes');
+    expect(parsed.state).not.toHaveProperty('setNickname');
+  });
+
+  test('rehydrate — AsyncStorage에 저장된 값으로 복원되면 store 상태가 갱신된다', async () => {
+    const stored = JSON.stringify({
+      state: { bufferMinutes: 25, nickname: '복원닉' },
+      version: 0,
+    });
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(stored);
+    await useSettingsStore.persist.rehydrate();
+    expect(useSettingsStore.getState().bufferMinutes).toBe(25);
+    expect(useSettingsStore.getState().nickname).toBe('복원닉');
+  });
+
+  test('rehydrate — AsyncStorage가 비어 있으면 기본값이 유지된다', async () => {
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce(null);
+    await useSettingsStore.persist.rehydrate();
+    expect(useSettingsStore.getState().bufferMinutes).toBe(DEFAULT_BUFFER_MINUTES);
+    expect(useSettingsStore.getState().nickname).toBe(DEFAULT_NICKNAME);
   });
 });
