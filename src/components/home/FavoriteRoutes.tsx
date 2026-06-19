@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MapPin, Star } from 'lucide-react-native';
@@ -13,7 +14,9 @@ const CARD_GAP = 12;
 
 export default function FavoriteRoutes() {
   const router = useRouter();
-  const favorites = useRouteStore((s) => s.routes.filter((r) => r.isFavorite));
+  // 셀렉터에서 filter 하면 매 렌더마다 새 배열이라 무한 루프. 안정적인 routes를 구독하고 파생한다.
+  const routes = useRouteStore((s) => s.routes);
+  const favorites = useMemo(() => routes.filter((r) => r.isFavorite), [routes]);
 
   const sectionTitle = 'text-zinc-800';
   const card = 'bg-zinc-50 border-zinc-200';
