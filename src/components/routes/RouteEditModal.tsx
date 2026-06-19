@@ -1,5 +1,4 @@
-import { Pressable, Text, View } from 'react-native';
-import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
+import { Pressable, Text, TextInput, View } from 'react-native';
 import { ChevronRight, MapPin } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
@@ -50,13 +49,19 @@ export default function RouteEditModal({
   const locationFieldText = (value: string) => (value ? locationValueText : locationPlaceholderText);
 
   return (
-    <BottomSheetModal isOpen={isOpen} onClose={onClose} title={title} snapPoints={SNAP_POINTS}>
+    <BottomSheetModal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={title}
+      snapPoints={SNAP_POINTS}
+      keyboardBehavior="interactive"
+    >
       <View className="gap-5">
         {/* 경로 이름 */}
         <View>
           <Text className={`mb-2 text-sm font-semibold ${labelText}`}>경로 이름</Text>
-          <BottomSheetTextInput
-            value={form.name}
+          <TextInput
+            defaultValue={form.name}
             onChangeText={(v) => onFormChange({ name: v })}
             placeholder={FIELD_PLACEHOLDER_NAME}
             placeholderTextColor={placeholderColor}
@@ -101,8 +106,8 @@ export default function RouteEditModal({
         {/* 이용 빈도 */}
         <View>
           <Text className={`mb-2 text-sm font-semibold ${labelText}`}>이용 빈도</Text>
-          <BottomSheetTextInput
-            value={form.frequency}
+          <TextInput
+            defaultValue={form.frequency}
             onChangeText={(v) => onFormChange({ frequency: v })}
             placeholder={FIELD_PLACEHOLDER_FREQ}
             placeholderTextColor={placeholderColor}

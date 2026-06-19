@@ -8,6 +8,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useDeviceStore } from '@/stores/deviceStore';
+import { useRouteStore } from '@/stores/routeStore';
 import { useFcmToken } from '@/hooks/common/useFcmToken';
 import SplashView from '@/components/splash/SplashView';
 
@@ -20,6 +21,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     void useDeviceStore.getState().ensureDeviceId();
+    useRouteStore.getState().hydrate();
   }, []);
 
   return (

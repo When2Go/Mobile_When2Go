@@ -11,23 +11,19 @@ import RouteEditModal from '@/components/routes/RouteEditModal';
 import { PALETTE } from '@/constants/colors';
 import { ICON_SIZE } from '@/constants/icons';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { useRouteStore } from '@/stores/routeStore';
 import type { RouteFormData, RouteItem } from '@/types/routes.types';
-
-const MOCK_ROUTES: RouteItem[] = [
-  { id: 1, name: '출근', from: '인하대 정문', to: '강남역 2호선', frequency: '주 5회 이용' },
-  { id: 2, name: '퇴근', from: '강남역 2호선', to: '인하대 정문', frequency: '주 5회 이용' },
-  { id: 3, name: '헬스장', from: '집', to: '애니타임 피트니스', frequency: '주 3회 이용' },
-  { id: 4, name: '부모님댁', from: '집', to: '수원역', frequency: '월 2회 이용' },
-  { id: 5, name: '병원', from: '집', to: '서울대학교 병원', frequency: '월 1회 이용' },
-];
 
 const EMPTY_FORM: RouteFormData = { name: '', from: '', to: '', frequency: '' };
 
-let nextId = MOCK_ROUTES.length + 1;
-
 export default function RoutesScreen() {
   const router = useRouter();
-  const [routes, setRoutes] = useState<RouteItem[]>(MOCK_ROUTES);
+  const routes = useRouteStore((s) => s.routes);
+  const addRoute = useRouteStore((s) => s.addRoute);
+  const updateRoute = useRouteStore((s) => s.updateRoute);
+  const removeRoute = useRouteStore((s) => s.removeRoute);
+  const toggleFavorite = useRouteStore((s) => s.toggleFavorite);
+
   const [editTarget, setEditTarget] = useState<RouteItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
   const [draftForm, setDraftForm] = useState<RouteFormData>(EMPTY_FORM);
@@ -35,15 +31,22 @@ export default function RoutesScreen() {
   // search → routes 위치 선택 복귀 여부 추적
   const isAwaitingLocationRef = useRef(false);
 
-  // 검색 화면에서 위치 선택 후 복귀했을 때 draft 적용 + 모달 재오픈
+  // 검색 화면에서 위치 선택 후 복귀했을 때 draft 적용(텍스트 + 좌표) + 모달 재오픈
   useFocusEffect(
     useCallback(() => {
       if (!isAwaitingLocationRef.current) return;
       isAwaitingLocationRef.current = false;
 
-      const pending = useRouteDraftStore.getState().consumePendingLocation();
+      const draft = useRouteDraftStore.getState();
+      const pending = draft.consumePendingLocation();
       if (pending) {
-        setDraftForm((prev) => ({ ...prev, [pending.field]: pending.location }));
+        const coordsKey = pending.field === 'from' ? 'fromCoords' : 'toCoords';
+        const coords = pending.field === 'from' ? draft.fromCoords : draft.toCoords;
+        setDraftForm((prev) => ({
+          ...prev,
+          [pending.field]: pending.location,
+          [coordsKey]: coords ?? undefined,
+        }));
       }
       setEditOpen(true);
     }, []),
@@ -64,24 +67,34 @@ export default function RoutesScreen() {
 
   const handleEdit = (route: RouteItem) => {
     setEditTarget(route);
-    setDraftForm({ name: route.name, from: route.from, to: route.to, frequency: route.frequency });
+    setDraftForm({
+      name: route.name,
+      from: route.from,
+      to: route.to,
+      frequency: route.frequency,
+      fromCoords: route.fromCoords,
+      toCoords: route.toCoords,
+    });
     setEditOpen(true);
   };
 
+  // 저장된 목적지 좌표를 draft 스토어에 주입 → setup 진입 시 재검색 없이 재사용
   const handleNavigateToSetup = (route: RouteItem) => {
+    const draft = useRouteDraftStore.getState();
+    if (route.toCoords) draft.setCoords('to', route.toCoords);
+    draft.setToName(route.to);
     router.push({ pathname: '/setup', params: { destination: route.to } });
   };
 
-  const handleDelete = (id: number) => {
-    setRoutes((prev) => prev.filter((r) => r.id !== id));
+  const handleDelete = (id: string) => {
+    removeRoute(id);
   };
 
   const handleSave = () => {
     if (editTarget) {
-      setRoutes((prev) => prev.map((r) => (r.id === editTarget.id ? { ...draftForm, id: r.id } : r)));
+      updateRoute(editTarget.id, draftForm);
     } else {
-      const newRoute: RouteItem = { ...draftForm, id: nextId++ };
-      setRoutes((prev) => [...prev, newRoute]);
+      addRoute(draftForm);
     }
     setEditOpen(false);
   };
@@ -137,6 +150,7 @@ export default function RoutesScreen() {
                   onNavigateToSetup={handleNavigateToSetup}
                   onEdit={handleEdit}
                   onDelete={handleDelete}
+                  onToggleFavorite={toggleFavorite}
                 />
               ))}
             </View>
