@@ -11,6 +11,7 @@ import { ICON_SIZE } from '@/constants/icons';
 import { ADD_CTA_LABEL, EMPTY_REPEAT_FORM, SCREEN_TITLE } from '@/constants/repeat';
 import { DEFAULT_ROUTE_OPTION } from '@/constants/setup';
 import { createReservation, deleteReservation, getReservations, updateReservation } from '@/api/reservation';
+import { useReservationStore } from '@/stores/reservationStore';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import {
   daysToRepeatDays,
@@ -45,6 +46,12 @@ export default function RepeatScreen() {
   const [editTarget, setEditTarget] = useState<RepeatItem | undefined>(undefined);
   const [isEditOpen, setEditOpen] = useState(false);
   const [draftForm, setDraftForm] = useState<RepeatFormData>(EMPTY_REPEAT_FORM);
+
+  const setItems = useReservationStore((state) => state.setItems);
+
+  useEffect(() => {
+    setItems(repeats);
+  }, [repeats, setItems]);
 
   const pageBg = 'bg-zinc-50';
   const headerBg = 'bg-white border-zinc-100';
