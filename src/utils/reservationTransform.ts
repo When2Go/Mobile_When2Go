@@ -32,6 +32,11 @@ export function repeatDaysShortToNumbers(days: RepeatDayShort[]): number[] {
   return days.map((d) => SHORT_DAY_MAP[d]);
 }
 
+/** RepeatDay[](GET 풀네임 MONDAY~SUNDAY) → days number[](0=일~6=토). */
+export function repeatDaysToNumbers(days: RepeatDay[]): number[] {
+  return days.map((d) => DAY_MAP.indexOf(d));
+}
+
 /** 앱 내부 경로 옵션 → POST API RouteOption. 대중교통 3종 모두 TRANSIT으로 매핑. */
 export function routeOptionToApiOption(_option: RouteOptionId): ApiRouteOption {
   return 'TRANSIT';

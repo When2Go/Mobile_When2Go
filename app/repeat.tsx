@@ -15,7 +15,7 @@ import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import {
   daysToRepeatDays,
   parseArrivalTimeString,
-  repeatDaysShortToNumbers,
+  repeatDaysToNumbers,
   routeOptionToApiOption,
   routeOptionToApiPutOption,
   toArrivalTimeString,
@@ -61,11 +61,11 @@ export default function RepeatScreen() {
         let id = INITIAL_NEXT_ID;
         const items: RepeatItem[] = serverItems.map((s) => ({
           id: id++,
-          reservationId: s.reservationId,
+          reservationId: s.id,
           name: s.nickname ?? '',
           origin: s.originName,
           destination: s.destName,
-          days: repeatDaysShortToNumbers(s.repeatDays),
+          days: repeatDaysToNumbers(s.repeatDays),
           ...parseArrivalTimeString(s.arrivalTime),
           routeOption: DEFAULT_ROUTE_OPTION,
           enabled: true,

@@ -11,12 +11,12 @@ import type { ReservationListItem } from '../types';
 const mockGet = api.get as jest.Mock;
 
 const ITEM: ReservationListItem = {
-  reservationId: 1,
-  nickname: '집',
-  originName: '서울역',
-  destName: '강남역',
-  arrivalTime: '09:00',
-  repeatDays: ['MON', 'TUE'],
+  id: 4,
+  nickname: 'Roh',
+  originName: '호구포역',
+  destName: '인하대역',
+  arrivalTime: '22:30:00',
+  repeatDays: ['MONDAY', 'TUESDAY', 'WEDNESDAY'],
 };
 
 beforeEach(() => {
@@ -24,14 +24,14 @@ beforeEach(() => {
 });
 
 describe('getReservations', () => {
-  test('정상 배열 응답 — 아이템 목록을 그대로 반환한다', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: [ITEM] } });
+  test('정상 응답 — items 배열을 그대로 반환한다', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { items: [ITEM] } } });
     const result = await getReservations();
     expect(result).toEqual([ITEM]);
   });
 
-  test('빈 배열 응답 — 빈 배열을 반환한다', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: [] } });
+  test('items가 빈 배열 — 빈 배열을 반환한다', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { items: [] } } });
     const result = await getReservations();
     expect(result).toEqual([]);
   });
@@ -48,14 +48,14 @@ describe('getReservations', () => {
     expect(result).toEqual([]);
   });
 
-  test('data.data가 빈 객체({}) — TypeError 없이 빈 배열을 반환한다', async () => {
+  test('data.data.items가 없는 객체 — TypeError 없이 빈 배열을 반환한다', async () => {
     mockGet.mockResolvedValueOnce({ data: { data: {} } });
     const result = await getReservations();
     expect(result).toEqual([]);
   });
 
-  test('data.data가 페이지네이션 객체 — TypeError 없이 빈 배열을 반환한다', async () => {
-    mockGet.mockResolvedValueOnce({ data: { data: { content: [ITEM], totalElements: 1 } } });
+  test('data.data.items가 배열이 아닌 값 — 빈 배열을 반환한다', async () => {
+    mockGet.mockResolvedValueOnce({ data: { data: { items: null } } });
     const result = await getReservations();
     expect(result).toEqual([]);
   });
