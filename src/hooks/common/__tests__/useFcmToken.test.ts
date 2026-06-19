@@ -1,3 +1,13 @@
+jest.mock('@react-native-async-storage/async-storage', () => ({
+  __esModule: true,
+  default: {
+    getItem: jest.fn(async () => null),
+    setItem: jest.fn(async () => {}),
+    removeItem: jest.fn(async () => {}),
+    clear: jest.fn(async () => {}),
+  },
+}));
+
 jest.mock('@react-native-firebase/app', () => ({
   __esModule: true,
   getApp: jest.fn(() => ({})),
@@ -8,12 +18,20 @@ jest.mock('@react-native-firebase/messaging', () => ({
   getMessaging: jest.fn(() => ({})),
   requestPermission: jest.fn(),
   getToken: jest.fn(),
+  onMessage: jest.fn(() => jest.fn()),
   AuthorizationStatus: {
     NOT_DETERMINED: -1,
     DENIED: 0,
     AUTHORIZED: 1,
     PROVISIONAL: 2,
     EPHEMERAL: 3,
+  },
+}));
+
+jest.mock('@/stores/reservationToggleStore', () => ({
+  __esModule: true,
+  useReservationToggleStore: {
+    getState: () => ({ disabledIds: [] }),
   },
 }));
 

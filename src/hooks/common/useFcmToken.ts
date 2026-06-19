@@ -5,6 +5,7 @@ import {
   AuthorizationStatus,
   getMessaging,
   getToken,
+  onMessage,
   requestPermission,
 } from '@react-native-firebase/messaging';
 
@@ -12,6 +13,7 @@ import { registerFcmToken } from '@/api/notification';
 import { getUserStatus, registerUser } from '@/api/user';
 import type { DevicePlatform } from '@/api/user/types';
 import { useDeviceStore } from '@/stores/deviceStore';
+import { useReservationToggleStore } from '@/stores/reservationToggleStore';
 
 const FCM_RETRY_COUNT = 1;
 const ANDROID_MIN_NOTIFICATION_API = 33;
@@ -64,6 +66,16 @@ function showFatalAlert(): void {
 }
 
 export function useFcmToken(): void {
+  // 포그라운드 data-only 메시지: reservationId가 비활성 목록에 있으면 무시
+  useEffect(() => {
+    return onMessage(getMessaging(getApp()), (remoteMessage) => {
+      const rawId = remoteMessage.data?.reservationId;
+      if (!rawId) return;
+      const { disabledIds } = useReservationToggleStore.getState();
+      if (disabledIds.includes(Number(rawId))) return;
+    });
+  }, []);
+
   useEffect(() => {
     const init = async () => {
       const hasPermission = await requestNotificationPermission();
