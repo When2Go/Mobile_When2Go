@@ -8,7 +8,7 @@ export const DEFAULT_BUFFER_MINUTES = 10;
 export const DEFAULT_NICKNAME = '게스트';
 export const NICKNAME_MAX_LENGTH = 12;
 
-const STORAGE_KEY = 'when2go.settings';
+export const STORAGE_KEY = 'when2go.settings';
 
 interface SettingsState {
   bufferMinutes: number;
