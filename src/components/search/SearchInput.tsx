@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 import { Search, X } from 'lucide-react-native';
 
@@ -6,7 +5,6 @@ import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 
 const PLACEHOLDER_TEXT = '장소, 버스, 지하철 검색';
-const AUTOFOCUS_DELAY_MS = 100;
 
 interface Props {
   value: string;
@@ -16,13 +14,6 @@ interface Props {
 }
 
 export default function SearchInput({ value, onChangeText, onClear, onSubmit }: Props) {
-  const inputRef = useRef<TextInput>(null);
-
-  useEffect(() => {
-    const timer = setTimeout(() => inputRef.current?.focus(), AUTOFOCUS_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, []);
-
   const inputBg = 'bg-zinc-100';
   const textColor = PALETTE.zinc900;
   const clearBg = 'bg-zinc-300';
@@ -31,7 +22,6 @@ export default function SearchInput({ value, onChangeText, onClear, onSubmit }: 
     <View className={`flex-1 flex-row items-center gap-2 rounded-xl px-3 py-2.5 ${inputBg}`}>
       <Search size={ICON_SIZE.header} color={PALETTE.zinc400} />
       <TextInput
-        ref={inputRef}
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmit}
