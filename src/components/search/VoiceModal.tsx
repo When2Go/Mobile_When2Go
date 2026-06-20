@@ -122,6 +122,9 @@ export default function VoiceModal({ isOpen, onClose, onComplete }: VoiceModalPr
           <Text className={`mb-10 text-center text-base font-bold ${headingText}`}>
             듣고 있어요...
           </Text>
+          <Text className={`-mt-6 mb-6 text-center text-xs ${sub}`}>
+            마이크를 탭하면 녹음이 종료됩니다
+          </Text>
 
           <View className="mb-10 h-28 items-center justify-center">
             <Animated.View
@@ -146,9 +149,14 @@ export default function VoiceModal({ isOpen, onClose, onComplete }: VoiceModalPr
                 transform: [{ scale: pulse2Scale }],
               }}
             />
-            <View className="h-16 w-16 items-center justify-center rounded-full bg-blue-600">
+            <Pressable
+              onPress={stop}
+              accessibilityRole="button"
+              accessibilityLabel="녹음 종료"
+              className="h-16 w-16 items-center justify-center rounded-full bg-blue-600 active:opacity-70"
+            >
               <Mic size={MIC_ICON_SIZE} color={PALETTE.white} />
-            </View>
+            </Pressable>
           </View>
 
           <View className="mb-10 h-10 flex-row items-center justify-center gap-1">
