@@ -33,16 +33,13 @@ export default function VoiceModal({ isOpen, onClose, onComplete }: VoiceModalPr
   const pulse2 = useRef(new Animated.Value(0)).current;
   const spinAnim = useRef(new Animated.Value(0)).current;
 
-  // 모달 열릴 때 녹음 시작, 최대 시간 후 자동 종료
+  // 모달 열릴 때 녹음 시작, MAX_RECORD_MS 후 자동 종료
   useEffect(() => {
     if (!isOpen) return;
     start();
     const timer = setTimeout(() => stop(), MAX_RECORD_MS);
     return () => clearTimeout(timer);
-    // start/stop은 렌더마다 새 참조가 생기지 않도록 useCallback을 쓰지 않았으므로
-    // 의존성 배열에서 제외해 mount 시 1회만 실행한다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, start, stop]);
 
   // 완료: result 세팅 후 onComplete 호출
   useEffect(() => {
@@ -63,9 +60,7 @@ export default function VoiceModal({ isOpen, onClose, onComplete }: VoiceModalPr
     if (!isOpen) {
       cancel();
     }
-    // cancel은 ref 기반이라 의존성 배열에서 안전하게 제외
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+  }, [isOpen, cancel]);
 
   // 펄스 애니메이션 (listening 단계)
   useEffect(() => {

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Audio } from 'expo-av';
 
 import { transcribeVoice } from '@/api/voice';
@@ -23,33 +23,39 @@ export function useVoiceRecognition(): UseVoiceRecognitionReturn {
   const [error, setError] = useState<VoiceError | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setStage('idle');
     setResult(null);
     setError(null);
-  };
+  }, []);
 
-  const start = async () => {
+  const start = useCallback(async () => {
     const { status } = await Audio.requestPermissionsAsync();
     if (status !== 'granted') {
       setError('permission_denied');
       setStage('error');
       return;
     }
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-    const { recording } = await Audio.Recording.createAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY,
-    );
-    recordingRef.current = recording;
-    setStage('recording');
-  };
+    try {
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      );
+      recordingRef.current = recording;
+      setStage('recording');
+    } catch {
+      setError('recording_failed');
+      setStage('error');
+    }
+  }, []);
 
-  const stop = async () => {
+  const stop = useCallback(async () => {
     if (!recordingRef.current) return;
     setStage('processing');
     await recordingRef.current.stopAndUnloadAsync();
     const uri = recordingRef.current.getURI();
     recordingRef.current = null;
+    console.log('[Voice] 녹음 파일 URI:', uri);
     if (!uri) {
       setError('recording_failed');
       setStage('error');
@@ -59,19 +65,20 @@ export function useVoiceRecognition(): UseVoiceRecognitionReturn {
       const data = await transcribeVoice(uri);
       setResult(data);
       setStage('done');
-    } catch {
+    } catch (err) {
+      console.error('[Voice] 서버 요청 실패:', err);
       setError('server_error');
       setStage('error');
     }
-  };
+  }, []);
 
-  const cancel = async () => {
+  const cancel = useCallback(async () => {
     if (recordingRef.current) {
       await recordingRef.current.stopAndUnloadAsync();
       recordingRef.current = null;
     }
     reset();
-  };
+  }, [reset]);
 
   return { stage, result, error, start, stop, cancel, reset };
 }

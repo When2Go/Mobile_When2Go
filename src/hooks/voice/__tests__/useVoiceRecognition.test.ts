@@ -88,6 +88,22 @@ describe('useVoiceRecognition', () => {
     });
   });
 
+  describe('분기: 권한 허용 후 createAsync 실패 → error=recording_failed', () => {
+    it('createAsync가 throw하면 error=recording_failed, stage=error가 된다', async () => {
+      mockRequestPermissions.mockResolvedValueOnce({ status: 'granted' });
+      mockCreateAsync.mockRejectedValueOnce(new Error('hardware busy'));
+
+      const { result } = renderHook(() => useVoiceRecognition());
+
+      await act(async () => {
+        await result.current.start();
+      });
+
+      expect(result.current.stage).toBe('error');
+      expect(result.current.error).toBe('recording_failed');
+    });
+  });
+
   describe('분기: 권한 거부 → error=permission_denied', () => {
     it('권한 거부 시 error가 permission_denied, stage가 error가 된다', async () => {
       mockRequestPermissions.mockResolvedValueOnce({ status: 'denied' });
