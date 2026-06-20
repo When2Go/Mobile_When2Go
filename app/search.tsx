@@ -114,7 +114,16 @@ export default function SearchScreen() {
         <VoiceModal
           isOpen={voiceOpen}
           onClose={cancelVoice}
-          onComplete={() => { cancelVoice(); router.push('/setup'); }}
+          onComplete={(result) => {
+            cancelVoice();
+            router.push({
+              pathname: '/setup',
+              params: {
+                destination: result.endLocation,
+                ...(result.appointmentTime ? { appointmentTime: result.appointmentTime } : {}),
+              },
+            });
+          }}
         />
       )}
     </SafeAreaView>
