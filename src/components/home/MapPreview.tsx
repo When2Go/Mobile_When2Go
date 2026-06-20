@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import {
-  NaverMapArrowheadPathOverlay,
   NaverMapMarkerOverlay,
+  NaverMapPathOverlay,
   NaverMapPolylineOverlay,
   NaverMapView,
 } from '@mj-studio/react-native-naver-map';
@@ -16,18 +16,23 @@ import { decodePolyline, findBoardingIndex } from '@/utils/route/decodePolyline'
 const INITIAL_ZOOM = 15;
 const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
 const LOCATION_DOT_SIZE = 16;
-// 대중교통 구간 화살표 경로
-const TRANSIT_PATH_WIDTH = 5;
+// 대중교통 구간 — 흰색 화살표 패턴이 들어간 두꺼운 파란 경로선
+const TRANSIT_PATH_WIDTH = 12;
 const TRANSIT_PATH_COLOR = PALETTE.blue600;
-const TRANSIT_OUTLINE_WIDTH = 1.5;
+const TRANSIT_OUTLINE_WIDTH = 1;
 const TRANSIT_OUTLINE_COLOR = PALETTE.white;
-const TRANSIT_HEAD_SIZE_RATIO = 2.5;
+const TRANSIT_PATTERN_INTERVAL = 50; // dp 단위, 화살표 반복 간격
+const TRANSIT_ARROW_IMAGE = require('@/assets/images/map/arrow_white.png');
 // 현재 위치 → 탑승 지점 점선
 const CONNECTOR_WIDTH = 3;
 const CONNECTOR_COLOR = PALETTE.zinc400;
 const CONNECTOR_PATTERN = [6, 6]; // 6dp 선 + 6dp 간격
 const START_MARKER_SIZE = 20;
 const DESTINATION_ICON_SIZE = 32;
+// 목적지 핀 — 중앙 흰색 원
+const DESTINATION_DOT_SIZE = 8;
+const DESTINATION_DOT_RADIUS = 4;
+const DESTINATION_DOT_TOP = 5;
 
 export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
@@ -107,15 +112,16 @@ export default function MapPreview() {
           />
         )}
 
-        {/* 대중교통 경로 화살표 (탑승 지점부터, 방향 표시) */}
+        {/* 대중교통 경로 (탑승 지점부터, 일정 간격 흰색 화살표 패턴) */}
         {transitCoords && transitCoords.length > 1 && (
-          <NaverMapArrowheadPathOverlay
+          <NaverMapPathOverlay
             coords={transitCoords}
             width={TRANSIT_PATH_WIDTH}
             color={TRANSIT_PATH_COLOR}
             outlineWidth={TRANSIT_OUTLINE_WIDTH}
             outlineColor={TRANSIT_OUTLINE_COLOR}
-            headSizeRatio={TRANSIT_HEAD_SIZE_RATIO}
+            patternImage={TRANSIT_ARROW_IMAGE}
+            patternInterval={TRANSIT_PATTERN_INTERVAL}
           />
         )}
 
@@ -136,7 +142,7 @@ export default function MapPreview() {
           </NaverMapMarkerOverlay>
         )}
 
-        {/* 목적지 마커 (핀) */}
+        {/* 목적지 마커 — 빨간 핀 + 중앙 흰색 원 */}
         {destinationCoord && (
           <NaverMapMarkerOverlay
             latitude={destinationCoord.latitude}
@@ -145,8 +151,22 @@ export default function MapPreview() {
             width={DESTINATION_ICON_SIZE}
             height={DESTINATION_ICON_SIZE}
           >
-            <View collapsable={false}>
+            <View
+              collapsable={false}
+              style={{ width: DESTINATION_ICON_SIZE, height: DESTINATION_ICON_SIZE }}
+            >
               <MapPin size={DESTINATION_ICON_SIZE} color={PALETTE.red500} fill={PALETTE.red500} />
+              <View
+                style={{
+                  position: 'absolute',
+                  top: DESTINATION_DOT_TOP,
+                  alignSelf: 'center',
+                  width: DESTINATION_DOT_SIZE,
+                  height: DESTINATION_DOT_SIZE,
+                  borderRadius: DESTINATION_DOT_RADIUS,
+                  backgroundColor: PALETTE.white,
+                }}
+              />
             </View>
           </NaverMapMarkerOverlay>
         )}
