@@ -11,9 +11,11 @@ import VoiceButton from '@/components/search/VoiceButton';
 import VoiceModal from '@/components/search/VoiceModal';
 import RecentSearchList from '@/components/search/RecentSearchList';
 import SearchResultList from '@/components/search/SearchResultList';
+import { searchPlaces } from '@/api/kakao/search';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import { useRecentSearches } from '@/hooks/search/useRecentSearches';
 import type { Place } from '@/api/kakao/types';
+import type { TripParseResponse } from '@/api/voice/types';
 
 export default function SearchScreen() {
   const router = useRouter();
@@ -27,6 +29,30 @@ export default function SearchScreen() {
 
   const startVoice = () => setVoiceOpen(true);
   const cancelVoice = () => setVoiceOpen(false);
+
+  const handleVoiceComplete = async (result: TripParseResponse) => {
+    cancelVoice();
+    let destName = result.endLocation;
+    try {
+      const places = await searchPlaces(result.endLocation);
+      if (places.length > 0) {
+        const top = places[0];
+        setCoords('to', { lat: top.lat, lng: top.lng });
+        destName = top.name;
+        console.log('[Voice] 목적지 좌표 확정 →', top.name, top.lat, top.lng);
+      }
+    } catch {
+      // 카카오 검색 실패 시 raw 텍스트로 fallback
+      console.warn('[Voice] 목적지 좌표 조회 실패, 텍스트만 전달');
+    }
+    router.push({
+      pathname: '/setup',
+      params: {
+        destination: destName,
+        ...(result.appointmentTime ? { appointmentTime: result.appointmentTime } : {}),
+      },
+    });
+  };
 
   const handleSelect = (place: Place) => {
     const f = (field ?? 'from') as 'from' | 'to';
@@ -114,16 +140,7 @@ export default function SearchScreen() {
         <VoiceModal
           isOpen={voiceOpen}
           onClose={cancelVoice}
-          onComplete={(result) => {
-            cancelVoice();
-            router.push({
-              pathname: '/setup',
-              params: {
-                destination: result.endLocation,
-                ...(result.appointmentTime ? { appointmentTime: result.appointmentTime } : {}),
-              },
-            });
-          }}
+          onComplete={handleVoiceComplete}
         />
       )}
     </SafeAreaView>
