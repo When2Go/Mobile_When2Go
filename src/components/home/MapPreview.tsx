@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import {
+  NaverMapArrowheadPathOverlay,
   NaverMapMarkerOverlay,
   NaverMapPolylineOverlay,
   NaverMapView,
@@ -15,8 +16,12 @@ import { decodePolyline, findBoardingIndex } from '@/utils/route/decodePolyline'
 const INITIAL_ZOOM = 15;
 const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
 const LOCATION_DOT_SIZE = 16;
-const TRANSIT_POLYLINE_WIDTH = 5;
-const TRANSIT_POLYLINE_COLOR = PALETTE.blue600;
+// 대중교통 구간 화살표 경로
+const TRANSIT_PATH_WIDTH = 5;
+const TRANSIT_PATH_COLOR = PALETTE.blue600;
+const TRANSIT_OUTLINE_WIDTH = 1.5;
+const TRANSIT_OUTLINE_COLOR = PALETTE.white;
+const TRANSIT_HEAD_SIZE_RATIO = 2.5;
 // 현재 위치 → 탑승 지점 점선
 const CONNECTOR_WIDTH = 3;
 const CONNECTOR_COLOR = PALETTE.zinc400;
@@ -102,12 +107,15 @@ export default function MapPreview() {
           />
         )}
 
-        {/* 대중교통 경로 실선 (탑승 지점부터) */}
+        {/* 대중교통 경로 화살표 (탑승 지점부터, 방향 표시) */}
         {transitCoords && transitCoords.length > 1 && (
-          <NaverMapPolylineOverlay
+          <NaverMapArrowheadPathOverlay
             coords={transitCoords}
-            width={TRANSIT_POLYLINE_WIDTH}
-            color={TRANSIT_POLYLINE_COLOR}
+            width={TRANSIT_PATH_WIDTH}
+            color={TRANSIT_PATH_COLOR}
+            outlineWidth={TRANSIT_OUTLINE_WIDTH}
+            outlineColor={TRANSIT_OUTLINE_COLOR}
+            headSizeRatio={TRANSIT_HEAD_SIZE_RATIO}
           />
         )}
 
@@ -138,7 +146,7 @@ export default function MapPreview() {
             height={DESTINATION_ICON_SIZE}
           >
             <View collapsable={false}>
-              <MapPin size={DESTINATION_ICON_SIZE} color={PALETTE.red500} />
+              <MapPin size={DESTINATION_ICON_SIZE} color={PALETTE.red500} fill={PALETTE.red500} />
             </View>
           </NaverMapMarkerOverlay>
         )}
