@@ -60,7 +60,6 @@ export function useVoiceRecognition(): UseVoiceRecognitionReturn {
     const uri = recordingRef.current.getURI();
     recordingRef.current = null;
     await releaseAudioSession();
-    console.log('[Voice] 녹음 파일 URI:', uri);
     if (!uri) {
       setError('recording_failed');
       setStage('error');
@@ -70,8 +69,7 @@ export function useVoiceRecognition(): UseVoiceRecognitionReturn {
       const data = await transcribeVoice(uri);
       setResult(data);
       setStage('done');
-    } catch (err) {
-      console.error('[Voice] 서버 요청 실패:', err);
+    } catch {
       setError('server_error');
       setStage('error');
     }

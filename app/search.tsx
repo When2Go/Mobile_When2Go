@@ -39,11 +39,9 @@ export default function SearchScreen() {
         const top = places[0];
         setCoords('to', { lat: top.lat, lng: top.lng });
         destName = top.name;
-        console.log('[Voice] 목적지 좌표 확정 →', top.name, top.lat, top.lng);
       }
     } catch {
       // 카카오 검색 실패 시 raw 텍스트로 fallback
-      console.warn('[Voice] 목적지 좌표 조회 실패, 텍스트만 전달');
     }
     router.push({
       pathname: '/setup',
