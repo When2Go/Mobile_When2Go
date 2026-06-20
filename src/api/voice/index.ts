@@ -11,7 +11,7 @@ const RECORDING_MIME_TYPE = 'audio/m4a';
  */
 export async function transcribeVoice(uri: string): Promise<TripParseResponse> {
   const form = new FormData();
-  form.append('file', { uri, name: RECORDING_FILE_NAME, type: RECORDING_MIME_TYPE } as unknown as Blob);
+  form.append('audio', { uri, name: RECORDING_FILE_NAME, type: RECORDING_MIME_TYPE } as unknown as Blob);
 
   console.log('[Voice] 서버 전송 시작:', VOICE_PARSE_PATH, '| 파일:', uri);
   const res = await api.post<{ data: TripParseResponse }>(VOICE_PARSE_PATH, form);
