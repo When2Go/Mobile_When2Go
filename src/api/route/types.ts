@@ -45,6 +45,9 @@ export interface RouteStep {
   travelMode: 'WALK' | 'TRANSIT';
   distanceMeters: number;
   staticDuration: string; // "Xs"
+  polyline?: { encodedPolyline: string };
+  startLocation?: { latLng: LatLng };
+  endLocation?: { latLng: LatLng };
   localizedValues?: {
     distance?: LocalizedText;
     staticDuration?: LocalizedText;

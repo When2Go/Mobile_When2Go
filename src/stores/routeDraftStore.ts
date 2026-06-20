@@ -12,11 +12,14 @@ interface RouteDraftState {
   toName: string | null;
   /** 선택 경로의 Route 레벨 encodedPolyline. MapPreview 폴리라인 렌더용. */
   selectedPolyline: string | null;
+  /** 첫 TRANSIT step 시작 좌표. 점선(도보)↔실선(대중교통) 분기 기준점. */
+  selectedBoardingCoord: { latitude: number; longitude: number } | null;
   setPendingLocation: (location: string, field: LocationField) => void;
   consumePendingLocation: () => { location: string; field: LocationField } | null;
   setCoords: (field: LocationField, coords: Coords) => void;
   setToName: (name: string) => void;
   setSelectedPolyline: (encoded: string | null) => void;
+  setSelectedBoardingCoord: (coord: { latitude: number; longitude: number } | null) => void;
 }
 
 export const useRouteDraftStore = create<RouteDraftState>((set, get) => ({
@@ -25,6 +28,7 @@ export const useRouteDraftStore = create<RouteDraftState>((set, get) => ({
   toCoords: null,
   toName: null,
   selectedPolyline: null,
+  selectedBoardingCoord: null,
   setPendingLocation: (location, field) => set({ pendingLocation: { location, field } }),
   consumePendingLocation: () => {
     const current = get().pendingLocation;
@@ -35,4 +39,5 @@ export const useRouteDraftStore = create<RouteDraftState>((set, get) => ({
     set(field === 'from' ? { fromCoords: coords } : { toCoords: coords }),
   setToName: (name) => set({ toName: name }),
   setSelectedPolyline: (encoded) => set({ selectedPolyline: encoded }),
+  setSelectedBoardingCoord: (coord) => set({ selectedBoardingCoord: coord }),
 }));

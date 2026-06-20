@@ -90,6 +90,7 @@ export default function ResultScreen() {
   const toCoords = useRouteDraftStore((s) => s.toCoords);
   const toName = useRouteDraftStore((s) => s.toName);
   const setSelectedPolyline = useRouteDraftStore((s) => s.setSelectedPolyline);
+  const setSelectedBoardingCoord = useRouteDraftStore((s) => s.setSelectedBoardingCoord);
   const { create, isCreating } = useCreateTrip();
 
   const routeReq = useMemo<RouteSearchRequest | null>(
@@ -119,8 +120,9 @@ export default function ResultScreen() {
         redirectTimerRef.current = null;
       }
       setSelectedPolyline(null);
+      setSelectedBoardingCoord(null);
     };
-  }, [setSelectedPolyline]);
+  }, [setSelectedPolyline, setSelectedBoardingCoord]);
 
   const pageBg = 'bg-zinc-50';
   const cardBg = 'bg-white';
@@ -133,12 +135,14 @@ export default function ResultScreen() {
     setSelectedRoute(route);
     setConfirmed(false);
     setSelectedPolyline(route.encodedPolyline ?? null);
+    setSelectedBoardingCoord(route.boardingCoord ?? null);
   };
 
   const handleCloseModal = () => {
     if (confirmed) return;
     setSelectedRoute(null);
     setSelectedPolyline(null);
+    setSelectedBoardingCoord(null);
   };
 
   const handleConfirm = async () => {

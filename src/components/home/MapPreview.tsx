@@ -10,14 +10,14 @@ import { MapPin } from 'lucide-react-native';
 import { PALETTE } from '@/constants/colors';
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
-import { decodePolyline } from '@/utils/route/decodePolyline';
+import { decodePolyline, findBoardingIndex } from '@/utils/route/decodePolyline';
 
 const INITIAL_ZOOM = 15;
 const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
 const LOCATION_DOT_SIZE = 16;
-const POLYLINE_WIDTH = 5;
-const POLYLINE_COLOR = PALETTE.blue600;
-// 현재 위치 → 경로 시작점 연결선 (점선)
+const TRANSIT_POLYLINE_WIDTH = 5;
+const TRANSIT_POLYLINE_COLOR = PALETTE.blue600;
+// 현재 위치 → 탑승 지점 점선
 const CONNECTOR_WIDTH = 3;
 const CONNECTOR_COLOR = PALETTE.zinc400;
 const CONNECTOR_PATTERN = [6, 6]; // 6dp 선 + 6dp 간격
@@ -27,16 +27,29 @@ const DESTINATION_ICON_SIZE = 32;
 export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
   const selectedPolyline = useRouteDraftStore((s) => s.selectedPolyline);
-  const polylineCoords = useMemo(
+  const selectedBoardingCoord = useRouteDraftStore((s) => s.selectedBoardingCoord);
+
+  const allCoords = useMemo(
     () => (selectedPolyline ? decodePolyline(selectedPolyline) : null),
     [selectedPolyline],
   );
 
-  const polylineStart = polylineCoords && polylineCoords.length > 0 ? polylineCoords[0] : null;
-  const polylineEnd =
-    polylineCoords && polylineCoords.length > 0
-      ? polylineCoords[polylineCoords.length - 1]
-      : null;
+  // 탑승 지점 이후 좌표만 실선으로 표시 (도보 구간 제외)
+  const transitCoords = useMemo(() => {
+    if (!allCoords || allCoords.length < 2) return allCoords;
+    if (!selectedBoardingCoord) return allCoords;
+    const idx = findBoardingIndex(allCoords, selectedBoardingCoord);
+    return allCoords.slice(idx);
+  }, [allCoords, selectedBoardingCoord]);
+
+  // 점선 연결: 현재 위치 → 탑승 지점 (boardingCoord 없으면 비표시)
+  const connectorCoords = useMemo(() => {
+    if (!selectedBoardingCoord) return null;
+    return [{ latitude: lat, longitude: lng }, selectedBoardingCoord];
+  }, [lat, lng, selectedBoardingCoord]);
+
+  const boardingMarker = selectedBoardingCoord;
+  const destinationCoord = allCoords && allCoords.length > 0 ? allCoords[allCoords.length - 1] : null;
 
   const baseBg = 'bg-zinc-200';
   const captionText = 'text-zinc-500';
@@ -79,30 +92,30 @@ export default function MapPreview() {
           </NaverMapMarkerOverlay>
         )}
 
-        {/* 선택 경로 폴리라인 (실선) */}
-        {polylineCoords && polylineCoords.length > 1 && (
+        {/* 현재 위치 → 탑승 지점 점선 (도보 구간) */}
+        {connectorCoords && (
           <NaverMapPolylineOverlay
-            coords={polylineCoords}
-            width={POLYLINE_WIDTH}
-            color={POLYLINE_COLOR}
-          />
-        )}
-
-        {/* 현재 위치 → 경로 시작점 점선 */}
-        {polylineStart && (
-          <NaverMapPolylineOverlay
-            coords={[{ latitude: lat, longitude: lng }, polylineStart]}
+            coords={connectorCoords}
             width={CONNECTOR_WIDTH}
             color={CONNECTOR_COLOR}
             pattern={CONNECTOR_PATTERN}
           />
         )}
 
-        {/* 경로 시작 마커 (흰 동그라미) */}
-        {polylineStart && (
+        {/* 대중교통 경로 실선 (탑승 지점부터) */}
+        {transitCoords && transitCoords.length > 1 && (
+          <NaverMapPolylineOverlay
+            coords={transitCoords}
+            width={TRANSIT_POLYLINE_WIDTH}
+            color={TRANSIT_POLYLINE_COLOR}
+          />
+        )}
+
+        {/* 탑승 지점 마커 (흰 동그라미) */}
+        {boardingMarker && (
           <NaverMapMarkerOverlay
-            latitude={polylineStart.latitude}
-            longitude={polylineStart.longitude}
+            latitude={boardingMarker.latitude}
+            longitude={boardingMarker.longitude}
             anchor={{ x: 0.5, y: 0.5 }}
             width={START_MARKER_SIZE}
             height={START_MARKER_SIZE}
@@ -116,10 +129,10 @@ export default function MapPreview() {
         )}
 
         {/* 목적지 마커 (핀) */}
-        {polylineEnd && (
+        {destinationCoord && (
           <NaverMapMarkerOverlay
-            latitude={polylineEnd.latitude}
-            longitude={polylineEnd.longitude}
+            latitude={destinationCoord.latitude}
+            longitude={destinationCoord.longitude}
             anchor={{ x: 0.5, y: 1 }}
             width={DESTINATION_ICON_SIZE}
             height={DESTINATION_ICON_SIZE}

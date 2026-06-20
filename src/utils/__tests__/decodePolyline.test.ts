@@ -1,4 +1,4 @@
-import { decodePolyline } from '../route/decodePolyline';
+import { decodePolyline, findBoardingIndex } from '../route/decodePolyline';
 
 // @mapbox/polyline encode([[38.5,-120.2],[40.7,-120.95],[43.252,-126.453]])
 const MULTI_POINT_ENCODED = '_p~iF~ps|U_ulLnnqC_mqNvxq`@';
@@ -50,6 +50,45 @@ describe('decodePolyline', () => {
 
     it('null 입력 시 빈 배열을 반환한다', () => {
       expect(decodePolyline(null as unknown as string)).toEqual([]);
+    });
+  });
+});
+
+describe('findBoardingIndex', () => {
+  const COORDS = [
+    { latitude: 37.5000, longitude: 126.9000 }, // 0 — 현재 위치 (도보 시작)
+    { latitude: 37.5010, longitude: 126.9010 }, // 1
+    { latitude: 37.5020, longitude: 126.9020 }, // 2 — 탑승 지점
+    { latitude: 37.5030, longitude: 126.9030 }, // 3
+    { latitude: 37.5040, longitude: 126.9040 }, // 4
+  ];
+
+  describe('정상 케이스', () => {
+    it('탑승 좌표와 정확히 일치하는 인덱스를 반환한다', () => {
+      expect(findBoardingIndex(COORDS, { latitude: 37.5020, longitude: 126.9020 })).toBe(2);
+    });
+  });
+
+  describe('경계 케이스', () => {
+    it('탑승 좌표가 첫 번째 점과 일치하면 0을 반환한다', () => {
+      expect(findBoardingIndex(COORDS, { latitude: 37.5000, longitude: 126.9000 })).toBe(0);
+    });
+
+    it('탑승 좌표가 마지막 점과 일치하면 마지막 인덱스를 반환한다', () => {
+      expect(findBoardingIndex(COORDS, { latitude: 37.5040, longitude: 126.9040 })).toBe(4);
+    });
+  });
+
+  describe('분기 케이스', () => {
+    it('정확히 일치하는 좌표가 없으면 가장 가까운 인덱스를 반환한다', () => {
+      // (37.5021, 126.9021)은 index 2에 가장 가깝다
+      expect(findBoardingIndex(COORDS, { latitude: 37.5021, longitude: 126.9021 })).toBe(2);
+    });
+  });
+
+  describe('에러 케이스', () => {
+    it('빈 배열이면 0을 반환한다', () => {
+      expect(findBoardingIndex([], { latitude: 37.5, longitude: 126.9 })).toBe(0);
     });
   });
 });

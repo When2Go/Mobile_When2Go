@@ -2,6 +2,18 @@ import type { RouteCandidate, RouteLeg } from '@/api/route/types';
 import type { RouteBadgeId, RouteDisplayItem, TransitIcon } from '@/constants/result';
 import { calcArrivalDisplay, calcDepartureTime } from './timeFormat';
 
+function extractBoardingCoord(
+  legs: RouteLeg[],
+): { latitude: number; longitude: number } | undefined {
+  const steps = legs.flatMap((l) => l.steps);
+  const firstTransit = steps.find((s) => s.travelMode === 'TRANSIT');
+  if (!firstTransit) return undefined;
+  const latLng =
+    firstTransit.startLocation?.latLng ??
+    firstTransit.transitDetails?.stopDetails?.departureStop?.location?.latLng;
+  return latLng ? { latitude: latLng.latitude, longitude: latLng.longitude } : undefined;
+}
+
 const FALLBACK_TIME = '--:--';
 
 function assignBadges(candidates: RouteCandidate[]): (RouteBadgeId | null)[] {
@@ -81,6 +93,7 @@ export function normalizeRoute(
     fareLabel: '-',
     icon: resolveIcon(route.legs),
     encodedPolyline: route.polyline?.encodedPolyline,
+    boardingCoord: extractBoardingCoord(route.legs),
   };
 }
 
