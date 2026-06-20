@@ -33,6 +33,7 @@
 | GET    | `/api/trips`                        | trip        | 여정 목록 (status/date 필터) | X-Device-Id |
 | GET    | `/api/trips/{tripId}`               | trip        | 여정 상세 | X-Device-Id |
 | DELETE | `/api/trips/{tripId}`               | trip        | 여정 삭제(취소) | X-Device-Id |
+| POST   | `/api/trips/parse`                  | trip        | 자연어 오디오 → 일정 파싱 | X-Device-Id |
 | POST   | `/api/reservations`                 | reservation | 예약 생성 (반복) | X-Device-Id |
 | GET    | `/api/reservations`                 | reservation | 예약 목록 조회 | X-Device-Id |
 | PUT    | `/api/reservations/{reservationId}` | reservation | 예약 수정 | X-Device-Id |
@@ -47,9 +48,10 @@
 
 | Method | Path | 비고 |
 |--------|------|------|
-| POST   | `/api/parse/schedule`               | parse 도메인 전체 미존재 (자연어 일정 파싱) |
 | GET    | `/api/users/me`                     | 대신 `GET /api/users/status` 제공 |
 | PATCH  | `/api/users/me`                     | 버퍼 시간 등 설정 변경 미존재 |
+
+> `POST /api/parse/schedule` (이전 명세) → `POST /api/trips/parse` 로 경로 확정 (2026-06-20).
 
 > 또한 FCM 토큰 갱신 메서드가 `PUT` → **`PATCH`** 로 변경됨.
 
@@ -196,6 +198,50 @@
 
 **Response**: `data: null`
 **Status**: `200` / `404`
+
+### POST `/api/trips/parse` — 자연어 오디오 → 일정 파싱
+
+> 음성 파일을 서버에 전송하면 목적지·도착 시각을 추출해 반환한다.
+
+**Request** (`multipart/form-data`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| 오디오 파일 | file | X | 지원 포맷: `mp3 · wav · m4a · aac · flac · ogg` |
+
+> 헤더 `X-Device-Id` 필수 (axios 인터셉터가 자동 주입).
+
+**Response** (`data: TripParseResponse`)
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `startLocation` | string | **O** | 출발지명 — 음성에서 언급 없으면 `null` |
+| `endLocation` | string | X | 도착지명 |
+| `appointmentTime` | string | **O** | 도착 목표 시각 (`"YYYY-MM-DD HH:mm"` 형식, 공백 구분) — 언급 없으면 `null` |
+
+> ⚠️ `appointmentTime` 포맷은 `"2026-05-07 14:00"` (공백 구분). 기존 ISO 8601 T 구분자(`2026-05-07T14:00:00`)와 **다르므로** 파싱 시 주의.
+
+**Example**
+
+```json
+{
+  "success": true,
+  "data": {
+    "startLocation": null,
+    "endLocation": "강남역",
+    "appointmentTime": "2026-05-07 14:00"
+  },
+  "message": null
+}
+```
+
+**Status**
+
+| code | 설명 |
+|------|------|
+| `200` | 파싱 성공 |
+| `400` | 잘못된 오디오 타입 |
+| `502` | 파싱 실패 (STT 외부 서비스 오류) |
 
 ---
 
@@ -405,10 +451,11 @@
 | 도메인 폴더 | 대응 엔드포인트 |
 |------------|----------------|
 | `user/`        | `POST /api/users`, `GET /api/users/status`, `PATCH /api/users/me/fcm-token` |
-| `trip/`        | `POST·GET /api/trips`, `GET·DELETE /api/trips/{tripId}` |
+| `trip/`        | `POST·GET /api/trips`, `GET·DELETE /api/trips/{tripId}`, `POST /api/trips/parse` |
 | `reservation/` | `POST /api/reservations`, `DELETE /api/reservations/{reservationId}` |
 | `route/`       | `POST /api/routes/search` |
+| `voice/`       | `POST /api/trips/parse` 호출 래퍼 (multipart 전송 전용) |
 
-> `parse/` 도메인은 백엔드 미구현이므로 폴더를 만들지 않는다. 예약 목록/수정, 사용자 설정 변경(`PATCH /api/users/me`)도 백엔드 구현 후 반영한다.
+> 예약 목록/수정, 사용자 설정 변경(`PATCH /api/users/me`)도 백엔드 구현 후 반영한다.
 
 각 도메인 폴더 구조: `src/api/{domain}/{index.ts, types.ts}` 패턴 유지.

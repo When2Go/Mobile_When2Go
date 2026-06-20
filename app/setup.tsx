@@ -20,6 +20,7 @@ import { useSettingsStore } from '@/stores/settingsStore';
 import { useRouteDraftStore } from '@/stores/routeDraftStore';
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
 import { toDateTimeString } from '@/utils/timeFormat';
+import { parseAppointmentTime } from '@/utils/voiceParse';
 import DestinationHeader from '@/components/setup/DestinationHeader';
 import ArrivalTimePicker from '@/components/setup/ArrivalTimePicker';
 import DepartButton from '@/components/setup/DepartButton';
@@ -40,18 +41,25 @@ function formatTimeChip(period: Period, hour: number, minute: number): string {
 
 export default function SetupScreen() {
   const router = useRouter();
-  const { destination: destinationParam } = useLocalSearchParams<{ destination?: string }>();
+  const { destination: destinationParam, appointmentTime: appointmentTimeParam } =
+    useLocalSearchParams<{ destination?: string; appointmentTime?: string }>();
   const destination = destinationParam?.trim() ? destinationParam.trim() : DEFAULT_DESTINATION;
 
   const today = useMemo(() => new Date(), []);
 
-  const [pickerMode, setPickerMode] = useState<PickerMode>('time');
-  const [displayMonth, setDisplayMonth] = useState<Date>(today);
-  const [selectedDate, setSelectedDate] = useState<Date>(today);
+  // 음성 인식 결과로 넘어온 appointmentTime("YYYY-MM-DD HH:mm")을 파싱해 초기값으로 사용
+  const parsedAppointment = useMemo(
+    () => (appointmentTimeParam ? parseAppointmentTime(appointmentTimeParam) : null),
+    [appointmentTimeParam],
+  );
 
-  const [period, setPeriod] = useState<Period>(DEFAULT_PERIOD);
-  const [hour, setHour] = useState<number>(DEFAULT_HOUR);
-  const [minute, setMinute] = useState<number>(DEFAULT_MINUTE);
+  const [pickerMode, setPickerMode] = useState<PickerMode>('time');
+  const [displayMonth, setDisplayMonth] = useState<Date>(parsedAppointment?.date ?? today);
+  const [selectedDate, setSelectedDate] = useState<Date>(parsedAppointment?.date ?? today);
+
+  const [period, setPeriod] = useState<Period>(parsedAppointment?.period ?? DEFAULT_PERIOD);
+  const [hour, setHour] = useState<number>(parsedAppointment?.hour ?? DEFAULT_HOUR);
+  const [minute, setMinute] = useState<number>(parsedAppointment?.minute ?? DEFAULT_MINUTE);
 
   // 사용자 default 안전 버퍼(마이페이지). 이 경로에서는 store를 직접 수정하지 않고
   // local override만 둔다. 표시값 = override ?? defaultFromStore.

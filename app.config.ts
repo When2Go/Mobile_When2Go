@@ -23,6 +23,7 @@ const config: ExpoConfig = {
       ITSAppUsesNonExemptEncryption: false,
       UIBackgroundModes: ['remote-notification'],
       NSPushNotificationUsageDescription: '출발 알림을 받으려면 알림 권한이 필요합니다.',
+      NSMicrophoneUsageDescription: '음성으로 목적지와 도착 시간을 입력하려면 마이크 권한이 필요합니다.',
     },
   },
   android: {
@@ -62,6 +63,7 @@ const config: ExpoConfig = {
           ACCESS_FINE_LOCATION: true,
           ACCESS_COARSE_LOCATION: true,
           ACCESS_BACKGROUND_LOCATION: false,
+          RECORD_AUDIO: true,
         },
         ios: {
           NSLocationWhenInUseUsageDescription:
