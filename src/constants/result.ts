@@ -20,6 +20,10 @@ export interface RouteDisplayItem {
   transferCount: number;
   fareLabel: string;
   icon: TransitIcon;
+  /** Route 레벨 폴리라인 (도보+대중교통 전체). 없으면 undefined. */
+  encodedPolyline?: string;
+  /** 첫 TRANSIT step의 시작 좌표. 도보→탑승 경계점으로, 점선/실선 분기에 사용. */
+  boardingCoord?: { latitude: number; longitude: number };
 }
 
 export const BADGE_LABEL: Record<RouteBadgeId, string> = {

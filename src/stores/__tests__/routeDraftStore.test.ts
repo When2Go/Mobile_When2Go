@@ -2,7 +2,7 @@ import { useRouteDraftStore } from '../routeDraftStore';
 
 describe('routeDraftStore', () => {
   beforeEach(() => {
-    useRouteDraftStore.setState({ pendingLocation: null });
+    useRouteDraftStore.setState({ pendingLocation: null, selectedPolyline: null });
   });
 
   test('① 설정 후 소비하면 저장된 값을 반환하고 상태가 null이 된다', () => {
@@ -35,5 +35,20 @@ describe('routeDraftStore', () => {
     const result = useRouteDraftStore.getState().consumePendingLocation();
 
     expect(result).toEqual({ location: '인하대 정문', field: 'from' });
+  });
+
+  describe('setSelectedPolyline', () => {
+    test('⑤ encodedPolyline 문자열을 저장한다', () => {
+      useRouteDraftStore.getState().setSelectedPolyline('_p~iF~ps|U');
+
+      expect(useRouteDraftStore.getState().selectedPolyline).toBe('_p~iF~ps|U');
+    });
+
+    test('⑥ null 전달 시 selectedPolyline을 초기화한다', () => {
+      useRouteDraftStore.getState().setSelectedPolyline('_p~iF~ps|U');
+      useRouteDraftStore.getState().setSelectedPolyline(null);
+
+      expect(useRouteDraftStore.getState().selectedPolyline).toBeNull();
+    });
   });
 });
