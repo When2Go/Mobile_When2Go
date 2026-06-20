@@ -110,20 +110,22 @@ export default function SearchScreen() {
         <View className="h-8" />
       </ScrollView>
 
-      <VoiceModal
-        isOpen={voiceOpen}
-        onClose={cancelVoice}
-        onComplete={(result) => {
-          cancelVoice();
-          router.push({
-            pathname: '/setup',
-            params: {
-              destination: result.endLocation,
-              ...(result.appointmentTime ? { appointmentTime: result.appointmentTime } : {}),
-            },
-          });
-        }}
-      />
+      {voiceOpen && (
+        <VoiceModal
+          isOpen={voiceOpen}
+          onClose={cancelVoice}
+          onComplete={(result) => {
+            cancelVoice();
+            router.push({
+              pathname: '/setup',
+              params: {
+                destination: result.endLocation,
+                ...(result.appointmentTime ? { appointmentTime: result.appointmentTime } : {}),
+              },
+            });
+          }}
+        />
+      )}
     </SafeAreaView>
   );
 }

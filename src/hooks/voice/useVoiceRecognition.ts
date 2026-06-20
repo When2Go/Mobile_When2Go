@@ -49,12 +49,17 @@ export function useVoiceRecognition(): UseVoiceRecognitionReturn {
     }
   }, []);
 
+  const releaseAudioSession = useCallback(async () => {
+    await Audio.setAudioModeAsync({ allowsRecordingIOS: false, playsInSilentModeIOS: false });
+  }, []);
+
   const stop = useCallback(async () => {
     if (!recordingRef.current) return;
     setStage('processing');
     await recordingRef.current.stopAndUnloadAsync();
     const uri = recordingRef.current.getURI();
     recordingRef.current = null;
+    await releaseAudioSession();
     console.log('[Voice] 녹음 파일 URI:', uri);
     if (!uri) {
       setError('recording_failed');
@@ -70,15 +75,16 @@ export function useVoiceRecognition(): UseVoiceRecognitionReturn {
       setError('server_error');
       setStage('error');
     }
-  }, []);
+  }, [releaseAudioSession]);
 
   const cancel = useCallback(async () => {
     if (recordingRef.current) {
       await recordingRef.current.stopAndUnloadAsync();
       recordingRef.current = null;
     }
+    await releaseAudioSession();
     reset();
-  }, [reset]);
+  }, [releaseAudioSession, reset]);
 
   return { stage, result, error, start, stop, cancel, reset };
 }
