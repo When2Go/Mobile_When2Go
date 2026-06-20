@@ -20,6 +20,8 @@ export interface RouteDisplayItem {
   transferCount: number;
   fareLabel: string;
   icon: TransitIcon;
+  /** Route 레벨 폴리라인. 없으면 undefined. */
+  encodedPolyline?: string;
 }
 
 export const BADGE_LABEL: Record<RouteBadgeId, string> = {

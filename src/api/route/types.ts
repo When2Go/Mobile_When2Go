@@ -73,6 +73,7 @@ export interface RouteCandidate {
   duration: string; // "Xs"
   staticDuration: string;
   legs: RouteLeg[];
+  polyline?: { encodedPolyline: string };
   routeLabels?: string[];
   localizedValues?: {
     distance?: LocalizedText;

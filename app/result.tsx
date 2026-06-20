@@ -89,6 +89,7 @@ export default function ResultScreen() {
   const fromCoords = useRouteDraftStore((s) => s.fromCoords);
   const toCoords = useRouteDraftStore((s) => s.toCoords);
   const toName = useRouteDraftStore((s) => s.toName);
+  const setSelectedPolyline = useRouteDraftStore((s) => s.setSelectedPolyline);
   const { create, isCreating } = useCreateTrip();
 
   const routeReq = useMemo<RouteSearchRequest | null>(
@@ -117,8 +118,9 @@ export default function ResultScreen() {
         clearTimeout(redirectTimerRef.current);
         redirectTimerRef.current = null;
       }
+      setSelectedPolyline(null);
     };
-  }, []);
+  }, [setSelectedPolyline]);
 
   const pageBg = 'bg-zinc-50';
   const cardBg = 'bg-white';
@@ -130,11 +132,13 @@ export default function ResultScreen() {
   const handleSelectRoute = (route: RouteDisplayItem) => {
     setSelectedRoute(route);
     setConfirmed(false);
+    setSelectedPolyline(route.encodedPolyline ?? null);
   };
 
   const handleCloseModal = () => {
     if (confirmed) return;
     setSelectedRoute(null);
+    setSelectedPolyline(null);
   };
 
   const handleConfirm = async () => {

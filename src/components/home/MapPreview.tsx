@@ -1,18 +1,29 @@
+import { useMemo } from 'react';
 import { Text, View } from 'react-native';
 import {
   NaverMapMarkerOverlay,
+  NaverMapPolylineOverlay,
   NaverMapView,
 } from '@mj-studio/react-native-naver-map';
 
+import { PALETTE } from '@/constants/colors';
 import { useCurrentLocation } from '@/hooks/location/useCurrentLocation';
+import { useRouteDraftStore } from '@/stores/routeDraftStore';
+import { decodePolyline } from '@/utils/route/decodePolyline';
 
 const INITIAL_ZOOM = 15;
 const FALLBACK_NOTE = '위치 권한이 없어 서울 시청을 기준으로 표시합니다.';
-// 내 위치 점 한 변(px). 아래 자식 View의 h-4 w-4(16px)와 일치시킨다.
 const LOCATION_DOT_SIZE = 16;
+const POLYLINE_WIDTH = 5;
+const POLYLINE_COLOR = PALETTE.blue600;
 
 export default function MapPreview() {
   const { lat, lng, isGranted, isLoading } = useCurrentLocation();
+  const selectedPolyline = useRouteDraftStore((s) => s.selectedPolyline);
+  const polylineCoords = useMemo(
+    () => (selectedPolyline ? decodePolyline(selectedPolyline) : null),
+    [selectedPolyline],
+  );
 
   const baseBg = 'bg-zinc-200';
   const captionText = 'text-zinc-500';
@@ -52,6 +63,13 @@ export default function MapPreview() {
               accessibilityLabel="현재 위치"
             />
           </NaverMapMarkerOverlay>
+        )}
+        {polylineCoords && polylineCoords.length > 1 && (
+          <NaverMapPolylineOverlay
+            coords={polylineCoords}
+            width={POLYLINE_WIDTH}
+            color={POLYLINE_COLOR}
+          />
         )}
       </NaverMapView>
 

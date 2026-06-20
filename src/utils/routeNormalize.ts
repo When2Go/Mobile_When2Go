@@ -80,6 +80,7 @@ export function normalizeRoute(
     transferCount: countTransfers(route.legs),
     fareLabel: '-',
     icon: resolveIcon(route.legs),
+    encodedPolyline: route.polyline?.encodedPolyline,
   };
 }
 
