@@ -28,6 +28,8 @@ const MODAL_MAP_HEIGHT = 180;
 const MODAL_MAP_ZOOM = 13;
 // 모달 BottomSheetModal의 px-5 패딩(20px)을 상쇄해 지도가 좌우 전체 너비를 채우도록.
 const MODAL_MAP_HORIZONTAL_BLEED = -20;
+const MODAL_MAP_MARGIN_BOTTOM = 20;
+const MODAL_MAP_BORDER_RADIUS = 12;
 // 지도 내 경로 스타일 (MapPreview와 동일)
 const TRANSIT_PATH_WIDTH = 12;
 const TRANSIT_PATH_COLOR = PALETTE.blue600;
@@ -136,8 +138,8 @@ export default function ReservationCompleteModal({
               style={{
                 height: MODAL_MAP_HEIGHT,
                 marginHorizontal: MODAL_MAP_HORIZONTAL_BLEED,
-                marginBottom: 20,
-                borderRadius: 12,
+                marginBottom: MODAL_MAP_MARGIN_BOTTOM,
+                borderRadius: MODAL_MAP_BORDER_RADIUS,
                 overflow: 'hidden',
               }}
             >
