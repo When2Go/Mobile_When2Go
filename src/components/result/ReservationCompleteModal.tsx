@@ -135,6 +135,7 @@ export default function ReservationCompleteModal({
           {/* 경로 지도 미리보기 */}
           {route.encodedPolyline ? (
             <View
+              pointerEvents="none"
               style={{
                 height: MODAL_MAP_HEIGHT,
                 marginHorizontal: MODAL_MAP_HORIZONTAL_BLEED,

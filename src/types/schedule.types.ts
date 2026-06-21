@@ -37,8 +37,4 @@ export interface ScheduleItem {
   date: string;
   /** 목적지 인근 추천 장소. 상세 API에서만 채워지며, 목록에서는 빈 배열. */
   nearbyRecommendations: NearbyRecommendation[];
-  /** 선택 경로의 encodedPolyline. ReservationCard 출발하기 버튼 + 홈 지도 표시에 사용. */
-  encodedPolyline?: string;
-  /** 첫 TRANSIT step 시작 좌표. 도보↔대중교통 경계점. */
-  boardingCoord?: { latitude: number; longitude: number };
 }
