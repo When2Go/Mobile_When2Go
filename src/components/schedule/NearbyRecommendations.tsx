@@ -20,13 +20,13 @@ export default function NearbyRecommendations({ items }: NearbyRecommendationsPr
       </View>
       {items.map((item, index) => (
         <View
-          key={index}
+          key={`${index}-${item.name}`}
           className="rounded-xl border border-zinc-100 bg-zinc-50 p-3"
         >
           <View className="mb-1 flex-row items-center justify-between">
             <Text className="text-sm font-bold text-zinc-900">{item.name}</Text>
-            <View className="rounded-full bg-blue-50 px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-blue-600">{item.category}</Text>
+            <View className="rounded-full bg-primary-soft px-2 py-0.5">
+              <Text className="text-[10px] font-bold text-primary">{item.category}</Text>
             </View>
           </View>
           <Text className="text-xs text-zinc-500">{item.description}</Text>
