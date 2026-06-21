@@ -83,25 +83,25 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
             icon={<Home size={ICON_SIZE.tab} color={iconColorFor(pathname === '/')} />}
             label="홈"
             active={pathname === '/'}
-            onPress={() => router.push('/')}
+            onPress={() => { if (pathname !== '/') router.push('/'); }}
           />
           <NavItem
             icon={<Bell size={ICON_SIZE.tab} color={iconColorFor(pathname === '/schedule')} />}
             label="일정"
             active={pathname === '/schedule'}
-            onPress={() => router.push('/schedule')}
+            onPress={() => { if (pathname !== '/schedule') router.push('/schedule'); }}
           />
           <NavItem
             icon={<Map size={ICON_SIZE.tab} color={iconColorFor(pathname === '/routes')} />}
             label="경로"
             active={pathname === '/routes'}
-            onPress={() => router.push('/routes')}
+            onPress={() => { if (pathname !== '/routes') router.push('/routes'); }}
           />
           <NavItem
             icon={<User size={ICON_SIZE.tab} color={iconColorFor(pathname === '/mypage')} />}
             label="MY"
             active={pathname === '/mypage'}
-            onPress={() => router.push('/mypage')}
+            onPress={() => { if (pathname !== '/mypage') router.push('/mypage'); }}
           />
         </View>
       )}
