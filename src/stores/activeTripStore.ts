@@ -1,9 +1,6 @@
 import { create } from 'zustand';
 
-interface LatLng {
-  latitude: number;
-  longitude: number;
-}
+import type { LatLng } from '@/api/route/types';
 
 interface ActiveTripState {
   activeTripPolyline: string | null;
