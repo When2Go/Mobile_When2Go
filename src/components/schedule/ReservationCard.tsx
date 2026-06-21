@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Bell, ChevronRight, Clock, MapPin, TrainFront, Trash2 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
@@ -21,9 +22,12 @@ import {
   SWIPE_REVEAL_THRESHOLD,
 } from '@/constants/schedule';
 import type { ScheduleItem } from '@/types/schedule.types';
+import { useActiveTripStore } from '@/stores/activeTripStore';
 
 const PAN_ACTIVATE_OFFSET = 10;
 const DELETE_BTN_WIDTH_CLASS = 'w-[88px]';
+const DEPART_BTN_LABEL = '출발하기';
+const HOME_PATH = '/';
 
 interface ReservationCardProps {
   schedule: ScheduleItem;
@@ -37,6 +41,9 @@ interface ReservationCardProps {
  * - 시안의 wasDragging 패턴은 `Gesture.Race(pan, tap)`로 대체.
  */
 export default function ReservationCard({ schedule, onDelete, onTap }: ReservationCardProps) {
+  const router = useRouter();
+  const setActiveTrip = useActiveTripStore((s) => s.setActiveTrip);
+
   const translateX = useSharedValue(0);
   const startX = useSharedValue(0);
 
@@ -47,6 +54,12 @@ export default function ReservationCard({ schedule, onDelete, onTap }: Reservati
   const handleTap = useCallback(() => {
     onTap();
   }, [onTap]);
+
+  const handleDepart = useCallback(() => {
+    if (!schedule.encodedPolyline) return;
+    setActiveTrip(schedule.encodedPolyline, schedule.boardingCoord ?? null);
+    router.push(HOME_PATH);
+  }, [schedule.encodedPolyline, schedule.boardingCoord, setActiveTrip, router]);
 
   const pan = Gesture.Pan()
     .activeOffsetX([-PAN_ACTIVATE_OFFSET, PAN_ACTIVATE_OFFSET])
@@ -161,10 +174,22 @@ export default function ReservationCard({ schedule, onDelete, onTap }: Reservati
                 <Text className={`text-sm ${subText}`}>{schedule.destination}</Text>
               </View>
             </View>
-            <View className={`shrink-0 rounded-full px-2 py-1 ${statusBadgeClass}`}>
-              <Text className={`text-[10px] font-bold ${statusBadgeText}`}>
-                {schedule.status}
-              </Text>
+            <View className="flex-row items-center gap-2 shrink-0">
+              {schedule.encodedPolyline ? (
+                <Pressable
+                  onPress={handleDepart}
+                  accessibilityRole="button"
+                  accessibilityLabel={DEPART_BTN_LABEL}
+                  className="rounded-full bg-blue-600 px-2.5 py-1 active:opacity-70"
+                >
+                  <Text className="text-[10px] font-bold text-white">{DEPART_BTN_LABEL}</Text>
+                </Pressable>
+              ) : null}
+              <View className={`shrink-0 rounded-full px-2 py-1 ${statusBadgeClass}`}>
+                <Text className={`text-[10px] font-bold ${statusBadgeText}`}>
+                  {schedule.status}
+                </Text>
+              </View>
             </View>
           </View>
 
