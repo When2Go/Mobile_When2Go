@@ -2,11 +2,12 @@ import { Alert, Pressable, Text, View } from 'react-native';
 import { Clock, MapPin, TrainFront } from 'lucide-react-native';
 
 import BottomSheetModal from '@/components/common/BottomSheetModal';
+import NearbyRecommendations from '@/components/schedule/NearbyRecommendations';
 import { ICON_SIZE } from '@/constants/icons';
 import { PALETTE } from '@/constants/colors';
 import type { ScheduleItem } from '@/types/schedule.types';
 
-const SHEET_SNAP_POINTS = ['55%'];
+const SHEET_SNAP_POINTS = ['75%'];
 const DELETE_ALERT_TITLE_PREFIX = '"';
 const DELETE_ALERT_TITLE_SUFFIX = '" 삭제';
 const DELETE_ALERT_MSG = '이 일정을 삭제하면 되돌릴 수 없어요.';
@@ -59,7 +60,7 @@ export default function ScheduleDetailSheet({
   };
 
   return (
-    <BottomSheetModal isOpen={isOpen} onClose={onClose} snapPoints={SHEET_SNAP_POINTS}>
+    <BottomSheetModal isOpen={isOpen} onClose={onClose} snapPoints={SHEET_SNAP_POINTS} scrollable>
       <View className="gap-4">
         {/* 헤더 */}
         <View>
@@ -90,6 +91,9 @@ export default function ScheduleDetailSheet({
             <Text className={`flex-1 text-xs ${subText}`}>{schedule.route}</Text>
           </View>
         </View>
+
+        {/* 주변 추천 장소 */}
+        <NearbyRecommendations items={schedule.nearbyRecommendations} />
 
         {/* 삭제 버튼 */}
         <Pressable
