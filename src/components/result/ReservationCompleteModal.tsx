@@ -33,8 +33,8 @@ const MODAL_MAP_BORDER_RADIUS = 12;
 const BBOX_PADDING = 0.3;       // 경로 주변 30% 여백
 const TILE_PX = 256;            // 웹 메르카토르 타일 기본 크기
 const MAP_WIDTH_PX = 390;       // 전형적인 폰 스크린 너비 (px, 가로 full-bleed)
-const ZOOM_MIN = 10;
-const ZOOM_MAX = 16;
+const ZOOM_MIN = 0;
+const ZOOM_MAX = 7;
 const ZOOM_FALLBACK = 13;
 // 지도 내 경로 스타일 (MapPreview와 동일)
 const TRANSIT_PATH_WIDTH = 12;
