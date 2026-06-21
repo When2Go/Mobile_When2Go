@@ -34,6 +34,13 @@ export interface TripListItem {
   status: TripStatus;
 }
 
+/** 목적지 인근 추천 장소 항목 (최대 3개). */
+export interface NearbyRecommendation {
+  name: string;
+  description: string;
+  category: string;
+}
+
 /** GET /api/trips/{tripId} 상세 (`TripDetailResponse`). */
 export interface TripDetail {
   tripId: number;
@@ -49,6 +56,8 @@ export interface TripDetail {
   status: TripStatus;
   /** 마지막 갱신 시각 (ISO 8601). */
   updatedAt: string;
+  /** 목적지 인근 추천 장소 (일찍 도착 시 활용). 백엔드 미지원 시 undefined. */
+  nearbyRecommendations?: NearbyRecommendation[];
 }
 
 /** GET /api/trips 쿼리 파라미터. status·date 둘 다 필수. */

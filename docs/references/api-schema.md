@@ -189,6 +189,15 @@
 | `finalDepartureTime` | string (ISO 8601) | O |  |
 | `status` | `TripStatus` | X |  |
 | `updatedAt` | string (ISO 8601) | X |  |
+| `nearbyRecommendations` | `NearbyRecommendation[]` | O | 목적지 인근 추천 장소 (최대 3개). 일찍 도착 시 활용 |
+
+**`NearbyRecommendation`**
+
+| key | 타입 | Nullable | 설명 |
+|-----|------|----------|------|
+| `name` | string | X | 장소명 |
+| `description` | string | X | 장소 설명 |
+| `category` | string | X | 카테고리 (예: "카페", "음식점") |
 
 > ⚠️ 이전 명세에 있던 `routeType`, `routes[].steps`(경로 단계)는 현재 상세 응답에 **없다**. 경로 단계 정보는 `POST /api/routes/search` 응답에서만 제공된다.
 

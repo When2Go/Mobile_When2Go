@@ -46,6 +46,7 @@ describe('tripListItemToSchedule', () => {
       from: '현재 위치',
       to: '강남역',
       date: '2026-06-17',
+      nearbyRecommendations: [],
     });
   });
 
@@ -112,6 +113,15 @@ describe('tripDetailToSchedule', () => {
     expect(result.departureTime).toBe('오전 7:45');
     expect(result.updatedAt).toBe('07:12');
     expect(result.date).toBe('2026-06-17');
+    expect(result.nearbyRecommendations).toEqual([]);
+  });
+
+  it('nearbyRecommendations가 있으면 그대로 매핑된다', () => {
+    const recommendations = [
+      { name: '스타벅스 강남점', description: '커피와 디저트', category: '카페' },
+    ];
+    const result = tripDetailToSchedule({ ...detail, nearbyRecommendations: recommendations });
+    expect(result.nearbyRecommendations).toEqual(recommendations);
   });
 
   it('finalDepartureTime이 null이면 departureTime은 "-"', () => {

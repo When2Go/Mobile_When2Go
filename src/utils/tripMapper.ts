@@ -44,6 +44,7 @@ export function tripListItemToSchedule(item: TripListItem): ScheduleItem {
     from: item.originName,
     to: item.destName,
     date: isoToDateKey(item.arrivalTime),
+    nearbyRecommendations: [],
   };
 }
 
@@ -59,7 +60,7 @@ export function mergeTripListsToSchedules(lists: TripListItem[][]): ScheduleItem
     .map(tripListItemToSchedule);
 }
 
-/** GET /api/trips/{tripId} 상세 → ScheduleItem. 목록 대비 updatedAt을 추가로 채운다. */
+/** GET /api/trips/{tripId} 상세 → ScheduleItem. 목록 대비 updatedAt·nearbyRecommendations를 추가로 채운다. */
 export function tripDetailToSchedule(detail: TripDetail): ScheduleItem {
   return {
     id: detail.tripId,
@@ -74,5 +75,6 @@ export function tripDetailToSchedule(detail: TripDetail): ScheduleItem {
     from: detail.originName,
     to: detail.destName,
     date: isoToDateKey(detail.arrivalTime),
+    nearbyRecommendations: detail.nearbyRecommendations ?? [],
   };
 }

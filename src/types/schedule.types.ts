@@ -3,6 +3,10 @@
  * mock 단계에서는 화면 전용으로만 쓰이며, 실제 Trip API 연동 시 재배치/확장 예정.
  */
 
+import type { NearbyRecommendation } from '@/api/trip/types';
+
+export type { NearbyRecommendation };
+
 export type ScheduleStatus = '예정' | '확정' | '완료';
 
 export interface ScheduleItem {
@@ -31,4 +35,6 @@ export interface ScheduleItem {
   to: string;
   /** 일정 날짜 키 ("YYYY-MM-DD", KST 기준). 달력 필터·마커 기준. */
   date: string;
+  /** 목적지 인근 추천 장소. 상세 API에서만 채워지며, 목록에서는 빈 배열. */
+  nearbyRecommendations: NearbyRecommendation[];
 }
