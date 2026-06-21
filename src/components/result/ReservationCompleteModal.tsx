@@ -25,11 +25,17 @@ import { decodePolyline, findBoardingIndex } from '@/utils/route/decodePolyline'
 
 const SHEET_SNAP_POINTS = ['78%'];
 const MODAL_MAP_HEIGHT = 180;
-const MODAL_MAP_ZOOM = 13;
 // 모달 BottomSheetModal의 px-5 패딩(20px)을 상쇄해 지도가 좌우 전체 너비를 채우도록.
 const MODAL_MAP_HORIZONTAL_BLEED = -20;
 const MODAL_MAP_MARGIN_BOTTOM = 20;
 const MODAL_MAP_BORDER_RADIUS = 12;
+// 바운딩 박스 줌 계산: 경로 전체가 지도에 들어오도록 카메라를 자동 조정.
+const BBOX_PADDING = 0.3;       // 경로 주변 30% 여백
+const TILE_PX = 256;            // 웹 메르카토르 타일 기본 크기
+const MAP_WIDTH_PX = 390;       // 전형적인 폰 스크린 너비 (px, 가로 full-bleed)
+const ZOOM_MIN = 10;
+const ZOOM_MAX = 16;
+const ZOOM_FALLBACK = 13;
 // 지도 내 경로 스타일 (MapPreview와 동일)
 const TRANSIT_PATH_WIDTH = 12;
 const TRANSIT_PATH_COLOR = PALETTE.blue600;
@@ -93,17 +99,26 @@ export default function ReservationCompleteModal({
     return allCoords.slice(idx);
   }, [allCoords, route?.boardingCoord]);
 
-  // 지도 중심: 탑승 지점 또는 폴리라인 중간점
-  const mapCenter = useMemo(() => {
-    if (route?.boardingCoord) {
-      return { latitude: route.boardingCoord.latitude, longitude: route.boardingCoord.longitude };
+  // 경로 전체가 들어오도록 바운딩 박스 기반으로 카메라 중심·줌 계산
+  const mapCamera = useMemo(() => {
+    const coords = allCoords;
+    if (!coords || coords.length === 0) {
+      return { latitude: DEFAULT_LAT, longitude: DEFAULT_LNG, zoom: ZOOM_FALLBACK };
     }
-    if (allCoords && allCoords.length > 0) {
-      const mid = allCoords[Math.floor(allCoords.length / 2)];
-      return { latitude: mid.latitude, longitude: mid.longitude };
-    }
-    return { latitude: DEFAULT_LAT, longitude: DEFAULT_LNG };
-  }, [route?.boardingCoord, allCoords]);
+    const lats = coords.map((c) => c.latitude);
+    const lngs = coords.map((c) => c.longitude);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLng = Math.min(...lngs);
+    const maxLng = Math.max(...lngs);
+    const latSpan = (maxLat - minLat) * (1 + BBOX_PADDING);
+    const lngSpan = (maxLng - minLng) * (1 + BBOX_PADDING);
+    // 타일(256px) 기준으로 경도·위도 스팬이 뷰에 들어오는 줌 레벨 계산
+    const zoomH = Math.log2((MAP_WIDTH_PX / TILE_PX) * (360 / Math.max(lngSpan, 0.0001)));
+    const zoomV = Math.log2((MODAL_MAP_HEIGHT / TILE_PX) * (360 / Math.max(latSpan, 0.0001)));
+    const zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.floor(Math.min(zoomH, zoomV))));
+    return { latitude: (minLat + maxLat) / 2, longitude: (minLng + maxLng) / 2, zoom };
+  }, [allCoords]);
 
   const destinationCoord = allCoords && allCoords.length > 0 ? allCoords[allCoords.length - 1] : null;
 
@@ -146,7 +161,7 @@ export default function ReservationCompleteModal({
             >
               <NaverMapView
                 style={{ flex: 1 }}
-                initialCamera={{ ...mapCenter, zoom: MODAL_MAP_ZOOM }}
+                initialCamera={mapCamera}
                 isShowLocationButton={false}
                 isShowZoomControls={false}
                 isShowCompass={false}
