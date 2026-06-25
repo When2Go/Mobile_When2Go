@@ -27,7 +27,6 @@ enum WidgetTheme {
 }
 
 enum WidgetMetric {
-  static let cardRadius: CGFloat = 22
   static let innerRadius: CGFloat = 12
   static let gap: CGFloat = 10
   static let hPadding: CGFloat = 14
