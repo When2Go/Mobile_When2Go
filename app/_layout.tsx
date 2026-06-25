@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useDeviceStore } from '@/stores/deviceStore';
 import { useRouteStore } from '@/stores/routeStore';
 import { useFcmToken } from '@/hooks/common/useFcmToken';
+import { useMobileAds } from '@/hooks/ads/useMobileAds';
 import SplashView from '@/components/splash/SplashView';
 
 export default function RootLayout() {
@@ -18,6 +19,7 @@ export default function RootLayout() {
   const [showSplash, setShowSplash] = useState(true);
 
   useFcmToken();
+  useMobileAds();
 
   useEffect(() => {
     void useDeviceStore.getState().ensureDeviceId();

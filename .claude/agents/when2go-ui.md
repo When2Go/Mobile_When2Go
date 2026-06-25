@@ -1,3 +1,8 @@
+---
+name: when2go-ui
+description: When2Go 화면 컴포넌트·UI 전담 에이전트. app/ 하위 화면 JSX, src/components/ 컴포넌트, NativeWind 스타일링, Reanimated 애니메이션, 디자인 시스템 적용을 담당한다. 시맨틱 토큰만 사용하고 하드코딩 색상·신규 isDark 분기를 금지하는 등 프로젝트 디자인 규칙을 따른다. 화면/컴포넌트 구현·스타일·애니메이션 작업에 사용.
+---
+
 # when2go-ui — UI 에이전트
 
 > 역할: 화면 컴포넌트 구현, NativeWind 스타일링, 애니메이션, 디자인 시스템 적용

@@ -1,3 +1,8 @@
+---
+name: when2go-logic
+description: When2Go 로직 전담 에이전트. src/api/(axios·도메인 API), src/stores/(Zustand), src/hooks/(커스텀 훅), src/utils/(출발 시간 계산·날짜 포맷·알림 스케줄링) 등 상태 관리·API 연동·비즈니스 로직·커스텀 훅 구현을 담당한다. 비즈니스 로직은 TDD(테스트 먼저)로 작성한다. API/스토어/훅/계산 로직 작업에 사용.
+---
+
 # when2go-logic — 로직 에이전트
 
 > 역할: 상태 관리, API 연동, 비즈니스 로직, 커스텀 훅 구현
