@@ -214,7 +214,7 @@ Path alias: `@/` → `src/`
 
 ## 7. 광고 슬롯 정책
 
-GoogleAds 등 광고 SDK 연동은 **앱 심사 통과 후**에만 가능. 그 전에는 모든 광고 영역을 빈 placeholder 컴포넌트로 처리.
+GoogleAds 등 광고 SDK 연동은 **앱 심사 통과 후**에만 노출 가능. SDK 토대(`react-native-google-mobile-ads`)는 연결돼 있으나, `EXPO_PUBLIC_ADS_ENABLED=false`(기본)에서는 모든 광고 영역이 빈 placeholder 로 노출된다. 심사 통과 후 `=true` 로 활성화한다.
 
 ### 단일 컴포넌트 — `src/components/common/AdSlot.tsx`
 
@@ -244,7 +244,7 @@ interface AdSlotProps {
 - 화면 작업 시 광고 영역을 **누락하지 말 것** — 심사 통과 후 즉시 활성화 가능하도록 슬롯·여백·레이아웃 미리 확보
 - placeholder는 **시각적으로 광고처럼 보이지 않게** — 회색 박스 + 작은 텍스트만
 - F-AD02(앱 첫 화면 전면 팝업)은 F-AD04 스플래시로 통합 — 별도 전면 팝업 화면 만들지 말 것
-- 실 SDK 연동은 **GoogleAds 심사 통과 + 별도 이슈**로만 진행
+- 실 광고 노출 활성화(`EXPO_PUBLIC_ADS_ENABLED=true`)는 **심사 통과 + AdMob 승인 후 별도 PR**로만 진행. 광고 단위 ID 분기는 `src/config/ads.ts` + `.env` 로 관리
 
 ---
 

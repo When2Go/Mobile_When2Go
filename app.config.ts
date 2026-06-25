@@ -2,6 +2,15 @@ import type { ExpoConfig } from 'expo/config';
 
 const NAVER_MAP_NCP_KEY_ID = process.env.EXPO_PUBLIC_NAVER_MAP_NCP_KEY_ID;
 
+// AdMob App ID — 네이티브 빌드 타임에 Info.plist / AndroidManifest 에 박힌다.
+// 실 값은 .env(gitignore)에 주입. 미설정 시 Google 공개 테스트 App ID 로 fallback 해
+// 키 없이도 빌드가 깨지지 않게 한다. 실 광고 노출 활성화는 심사 통과 후 별도 PR.
+const ADMOB_TEST_IOS_APP_ID = 'ca-app-pub-3940256099942544~1458002511';
+const ADMOB_TEST_ANDROID_APP_ID = 'ca-app-pub-3940256099942544~3347511713';
+const ADMOB_IOS_APP_ID = process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID ?? ADMOB_TEST_IOS_APP_ID;
+const ADMOB_ANDROID_APP_ID =
+  process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID ?? ADMOB_TEST_ANDROID_APP_ID;
+
 const config: ExpoConfig = {
   name: '지금 나가?',
   slug: 'when2go',
@@ -78,6 +87,16 @@ const config: ExpoConfig = {
         android: {
           extraMavenRepos: ['https://repository.map.naver.com/archive/maven'],
         },
+      },
+    ],
+    [
+      'react-native-google-mobile-ads',
+      {
+        androidAppId: ADMOB_ANDROID_APP_ID,
+        iosAppId: ADMOB_IOS_APP_ID,
+        // iOS ATT(추적 투명성) 다이얼로그 문구. NSUserTrackingUsageDescription 으로 들어간다.
+        userTrackingUsageDescription:
+          '맞춤 광고를 제공하기 위해 기기의 광고 식별자를 사용합니다. 동의하지 않아도 광고는 표시됩니다.',
       },
     ],
     './plugins/withFirebaseFix',
