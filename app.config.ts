@@ -11,6 +11,13 @@ const ADMOB_IOS_APP_ID = process.env.EXPO_PUBLIC_ADMOB_IOS_APP_ID ?? ADMOB_TEST_
 const ADMOB_ANDROID_APP_ID =
   process.env.EXPO_PUBLIC_ADMOB_ANDROID_APP_ID ?? ADMOB_TEST_ANDROID_APP_ID;
 
+// Live Activity(F-W01) — 위젯 익스텐션과 메인 앱이 데이터를 공유하는 App Group.
+// 위젯 타겟(targets/widget)·로컬 모듈(modules/when2go-live-activity)·메인 앱 셋이 동일 값을 써야 한다.
+const LIVE_ACTIVITY_APP_GROUP = 'group.kr.co.when2go.app';
+// expo-apple-targets(@bacons/apple-targets)가 위젯 익스텐션 서명에 쓰는 Apple Team ID.
+// 실 값은 .env(gitignore)에 주입. 미설정 시 prebuild 가 메인 앱 팀을 따라가도록 둔다.
+const APPLE_TEAM_ID = process.env.EXPO_APPLE_TEAM_ID;
+
 const config: ExpoConfig = {
   name: '지금 나가?',
   slug: 'when2go',
@@ -27,12 +34,17 @@ const config: ExpoConfig = {
     googleServicesFile: './GoogleService-Info.plist',
     entitlements: {
       'aps-environment': 'development',
+      // 위젯 익스텐션과 Live Activity 데이터를 주고받기 위한 App Group.
+      'com.apple.security.application-groups': [LIVE_ACTIVITY_APP_GROUP],
     },
     infoPlist: {
       ITSAppUsesNonExemptEncryption: false,
       UIBackgroundModes: ['remote-notification'],
       NSPushNotificationUsageDescription: '출발 알림을 받으려면 알림 권한이 필요합니다.',
       NSMicrophoneUsageDescription: '음성으로 목적지와 도착 시간을 입력하려면 마이크 권한이 필요합니다.',
+      // ActivityKit Live Activity(잠금화면·Dynamic Island) 활성화. APNs push-to-start 도 이 키가 있어야 동작.
+      NSSupportsLiveActivities: true,
+      NSSupportsLiveActivitiesFrequentUpdates: true,
     },
   },
   android: {
@@ -102,6 +114,8 @@ const config: ExpoConfig = {
       },
     ],
     './plugins/withFirebaseFix',
+    // iOS Widget Extension(Live Activity) 타겟을 prebuild 에 주입. targets/widget/ 폴더를 읽는다.
+    ['@bacons/apple-targets', APPLE_TEAM_ID ? { appleTeamId: APPLE_TEAM_ID } : {}],
   ],
   experiments: {
     typedRoutes: true,
