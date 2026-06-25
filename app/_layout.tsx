@@ -13,6 +13,7 @@ import { useFcmToken } from '@/hooks/common/useFcmToken';
 import { useLiveActivity } from '@/hooks/widget/useLiveActivity';
 import { useMobileAds } from '@/hooks/ads/useMobileAds';
 import SplashView from '@/components/splash/SplashView';
+import LiveActivityDevTrigger from '@/components/dev/LiveActivityDevTrigger';
 
 export default function RootLayout() {
   // 콜드스타트 시 홈(Stack) 대신 브랜딩 스플래시를 먼저 노출한다.
@@ -36,7 +37,10 @@ export default function RootLayout() {
             {showSplash ? (
               <SplashView onFinish={() => setShowSplash(false)} />
             ) : (
-              <Stack screenOptions={{ headerShown: false }} />
+              <>
+                <Stack screenOptions={{ headerShown: false }} />
+                <LiveActivityDevTrigger />
+              </>
             )}
           </BottomSheetModalProvider>
         </ThemeProvider>
