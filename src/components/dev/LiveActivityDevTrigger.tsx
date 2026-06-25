@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, Text } from 'react-native';
+import { Alert, Platform, Pressable, Text } from 'react-native';
 
 import * as LiveActivity from '@/modules/liveActivity';
 import type {
@@ -57,33 +57,52 @@ export default function LiveActivityDevTrigger() {
 
   useEffect(() => stopTicking, []);
 
-  if (!__DEV__ || Platform.OS !== 'ios' || !LiveActivity.isSupported) return null;
+  if (!__DEV__ || Platform.OS !== 'ios') return null;
 
+  // 왜 안 뜨는지 실기기에서 바로 알 수 있게, 단계별 상태를 Alert 로 노출한다.
   const start = async () => {
+    if (!LiveActivity.isSupported) {
+      Alert.alert(
+        'DEV: 네이티브 모듈 미연결',
+        'When2GoLiveActivity 모듈이 빌드에 없습니다. 위젯 타겟/로컬 모듈이 포함되도록 prebuild 후 재빌드가 필요합니다.',
+      );
+      return;
+    }
+    if (!LiveActivity.areActivitiesEnabled()) {
+      Alert.alert(
+        'DEV: Live Activity 꺼짐',
+        '설정 → 지금 나가? → 실시간 활동(Live Activities) 을 켜주세요. (또는 설정 → Face ID/잠금화면 → 실시간 활동)',
+      );
+      return;
+    }
+
     const now = nowEpoch();
     departRef.current = now;
     boardingRef.current = now + TEST_WINDOW_SEC;
 
-    await LiveActivity.start(MOCK_ATTRS, baseState(boardingRef.current, now));
-    setRunning(true);
+    try {
+      const id = await LiveActivity.start(MOCK_ATTRS, baseState(boardingRef.current, now));
+      setRunning(true);
+      Alert.alert('DEV: 시작됨', `activityId: ${id ?? 'null'}\n기기를 잠그면 잠금화면 카드를 확인하세요.`);
 
-    stopTicking();
-    tickRef.current = setInterval(() => {
-      const tickNow = nowEpoch();
-      const boarding = boardingRef.current;
-
-      if (shouldEndActivity(boarding, tickNow)) {
-        void LiveActivity.end(true);
-        stopTicking();
-        setRunning(false);
-        return;
-      }
-
-      void LiveActivity.update({
-        ...baseState(boarding, tickNow),
-        progress: localProgress(departRef.current, boarding, tickNow),
-      });
-    }, TICK_MS);
+      stopTicking();
+      tickRef.current = setInterval(() => {
+        const tickNow = nowEpoch();
+        const boarding = boardingRef.current;
+        if (shouldEndActivity(boarding, tickNow)) {
+          void LiveActivity.end(true);
+          stopTicking();
+          setRunning(false);
+          return;
+        }
+        void LiveActivity.update({
+          ...baseState(boarding, tickNow),
+          progress: localProgress(departRef.current, boarding, tickNow),
+        });
+      }, TICK_MS);
+    } catch (err) {
+      Alert.alert('DEV: start 실패', String(err));
+    }
   };
 
   const stop = async () => {
