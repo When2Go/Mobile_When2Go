@@ -42,7 +42,7 @@ public class When2GoLiveActivityModule: Module {
 
     Function("isRunning") { () -> Bool in
       guard #available(iOS 16.2, *) else { return false }
-      return self.currentActivity != nil
+      return !Activity<When2GoActivityAttributes>.activities.isEmpty
     }
 
     // 로컬에서 즉시 Activity 시작(포그라운드 폴백). 보통은 APNs push-to-start 가 시작한다.
@@ -54,10 +54,16 @@ public class When2GoLiveActivityModule: Module {
         throw LiveActivityDisabledException()
       }
 
-      // 이미 떠 있으면 갱신만 한다(중복 카드 방지).
-      if let existing = self.currentActivity as? Activity<When2GoActivityAttributes> {
-        await existing.update(ActivityContent(state: state.toState(), staleDate: state.staleDate()))
-        return existing.id
+      // 이미 떠 있는 같은 타입 Activity 가 있으면 모두 갱신만 한다(중복 카드 방지).
+      // currentActivity 참조는 앱 재시작·JS 리로드 후 nil 이 될 수 있어 실제 목록을 본다.
+      let existing = Activity<When2GoActivityAttributes>.activities
+      if let first = existing.first {
+        let content = ActivityContent(state: state.toState(), staleDate: state.staleDate())
+        for activity in existing {
+          await activity.update(content)
+        }
+        self.currentActivity = first
+        return first.id
       }
 
       let attrs = attributes.toAttributes()
@@ -79,16 +85,20 @@ public class When2GoLiveActivityModule: Module {
 
     AsyncFunction("update") { (state: ContentStateRecord) in
       guard #available(iOS 16.2, *) else { return }
-      guard let activity = self.currentActivity as? Activity<When2GoActivityAttributes> else { return }
-      await activity.update(ActivityContent(state: state.toState(), staleDate: state.staleDate()))
+      let content = ActivityContent(state: state.toState(), staleDate: state.staleDate())
+      for activity in Activity<When2GoActivityAttributes>.activities {
+        await activity.update(content)
+      }
     }
 
     // 위젯 끄기(F-W06) / 첫 대중교통 탑승 시점 종료.
+    // 떠 있는 모든 같은 타입 Activity 를 종료해 참조 유실·중복 카드 상황에서도 확실히 정리한다.
     AsyncFunction("end") { (showFinalState: Bool) in
       guard #available(iOS 16.2, *) else { return }
-      guard let activity = self.currentActivity as? Activity<When2GoActivityAttributes> else { return }
       let policy: ActivityUIDismissalPolicy = showFinalState ? .default : .immediate
-      await activity.end(nil, dismissalPolicy: policy)
+      for activity in Activity<When2GoActivityAttributes>.activities {
+        await activity.end(nil, dismissalPolicy: policy)
+      }
       self.currentActivity = nil
       self.sendEvent("onActivityEnd", [:])
     }
