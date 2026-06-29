@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { create as createAxiosInstance } from 'axios';
 
 import { normalizeAxiosError } from '@/api/interceptors/error';
 import type { KakaoSearchResponse, Place } from './types';
@@ -6,6 +6,8 @@ import type { KakaoSearchResponse, Place } from './types';
 const KAKAO_BASE_URL = 'https://dapi.kakao.com/v2/local';
 const REQUEST_TIMEOUT_MS = 10_000;
 const SEARCH_SIZE = 15;
+// 카카오 콘솔에 등록된 허용 도메인 — 키 도용 방지용 Referer 화이트리스트
+const KAKAO_ALLOWED_REFERER = 'https://when2go.qzz.io';
 
 function resolveKakaoKey(): string {
   const key = process.env.EXPO_PUBLIC_KAKAO_REST_API_KEY;
@@ -17,10 +19,13 @@ function resolveKakaoKey(): string {
   return key;
 }
 
-const kakaoApi = axios.create({
+const kakaoApi = createAxiosInstance({
   baseURL: KAKAO_BASE_URL,
   timeout: REQUEST_TIMEOUT_MS,
-  headers: { Authorization: `KakaoAK ${resolveKakaoKey()}` },
+  headers: {
+    Authorization: `KakaoAK ${resolveKakaoKey()}`,
+    Referer: KAKAO_ALLOWED_REFERER,
+  },
 });
 
 kakaoApi.interceptors.response.use((r) => r, normalizeAxiosError);
