@@ -1,15 +1,9 @@
-import { useCallback, useEffect, useRef, type Context } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-  type ListRenderItem,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from 'react-native';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { Pressable, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { NativeViewGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
@@ -42,30 +36,15 @@ const WHEEL_ITEM_HIT_SLOP = 4;
 const SCROLL_EVENT_THROTTLE_MS = 16;
 /** 중앙 강조 박스를 정확히 가운데 칸에 맞추기 위한 음수 마진(절반 높이만큼 위로). */
 const CENTER_BAR_MARGIN_TOP = -(WHEEL_ITEM_HEIGHT / 2);
-/** 화면에 보이는 칸 수(중앙 1 + 양옆). FlatList 초기/batch 렌더 수의 기준. */
-const WHEEL_VISIBLE_COUNT = WHEEL_VISIBLE_SIDE_COUNT * 2 + 1;
 /**
- * FlatList 윈도우 크기(뷰포트 배수). 3 = 가시 1 + 위·아래 각 1 뷰포트.
- * 페이드 적용 구간(FADE_DISTANCE 칸)이 항상 마운트된 상태를 유지하도록
- * 가시 영역보다 넉넉히 잡아 항목이 페이드 없이 튀어나오는 것을 막는다.
- *
- * 참고: removeClippedSubviews 는 일부러 켜지 않는다. reanimated 워크릿이 붙은
- * 셀을 클립하면 페이드/터치가 깨지는 알려진 문제가 있어, 윈도잉은 windowSize 로만 한다.
+ * 가시 범위 슬라이싱(윈도잉)에서 중앙 기준 위·아래로 마운트해 둘 칸 수.
+ * = 가시 측면(WHEEL_VISIBLE_SIDE_COUNT=2) + 페이드 끝(FADE_DISTANCE 너머)까지 덮고도
+ *   빠른 플링 동안 JS 가 renderCenter 를 따라잡을 여유 버퍼까지 포함한 값.
+ * 분(60칸)도 이 범위(중앙 ±8 = 최대 17칸)만 마운트해 매 프레임 평가되는 워크릿 수를 줄인다.
  */
-const WHEEL_WINDOW_SIZE = 3;
+const WHEEL_RENDER_SIDE_COUNT = 8;
 
-const AnimatedFlatList = Animated.FlatList;
-
-/**
- * RN ScrollView 가 자식에게 내려주는 orientation context.
- * VirtualizedList 는 이 context 가 같은 방향으로 존재하면
- * "VirtualizedLists should never be nested inside plain ScrollViews" 경고를 띄운다.
- * 휠은 BottomSheetScrollView(RepeatEditModal) 안에서도 쓰이는데, 고정 높이(WHEEL_HEIGHT)로
- * 독립 스크롤하므로 시트 스크롤에 기여하지 않는다 → 가상화도 정상 동작한다.
- * 휠 FlatList 서브트리에서만 context 를 null 로 리셋해 그 오탐 경고를 막는다.
- * (런타임 static 이지만 RN TS 타입에 노출되지 않아 cast 로 접근.)
- */
-const ScrollViewContext = (ScrollView as unknown as { Context: Context<unknown> }).Context;
+const AnimatedScrollView = Animated.ScrollView;
 
 interface Props {
   period: Period;
@@ -96,12 +75,15 @@ const ITEM_ALIGN_CLASS: Record<ColumnAlign, string> = {
 
 /**
  * 휠 한 열(period | hour | minute 공통).
- * - 세로 FlatList(가상화) + snapToInterval=WHEEL_ITEM_HEIGHT 로 항상 한 칸에 정렬.
- *   화면 밖 항목은 마운트하지 않아(windowing) reanimated 워크릿 평가 수를 줄인다.
- *   고정 높이라 getItemLayout 으로 위치를 즉시 계산 → 초기 중앙 위치도 blank 없이 렌더.
- * - 상·하단 SPACER_HEIGHT 스페이서(ListHeader/ListFooter) → 첫/마지막 항목도 중앙 도달(비순환).
- *   스페이서를 헤더/푸터로 두고 getItemLayout offset 에 SPACER_HEIGHT 를 포함시켜
- *   FlatList 의 렌더 윈도우 판정과 실제 레이아웃을 정확히 일치시킨다.
+ * - 세로 ScrollView + snapToInterval=WHEEL_ITEM_HEIGHT 로 항상 한 칸에 정렬.
+ * - 가시 범위 슬라이싱(윈도잉): 항목을 전부 마운트하지 않고, 현재 중앙(renderCenter)
+ *   기준 ±WHEEL_RENDER_SIDE_COUNT 칸만 렌더한다. 분(60칸)에서 매 스크롤 프레임
+ *   평가되는 reanimated 워크릿 수를 줄이는 게 목적. 항목은 절대 위치로 깔아
+ *   콘텐츠 전체 높이는 고정 → 안 그린 칸이 있어도 스크롤 범위·snap 이 변하지 않는다.
+ * - renderCenter 는 scrollY(공유값)를 useAnimatedReaction 으로 관찰해, 중앙 index 가
+ *   바뀔 때만 runOnJS 로 갱신한다(매 프레임 setState 아님). 초기값은 selectedIndex 라
+ *   첫 렌더부터 선택값과 이웃 칸이 가운데에 정상 표시된다.
+ * - 상·하단 SPACER_HEIGHT 스페이서(콘텐츠 높이에 포함) → 첫/마지막 항목도 중앙 도달(비순환).
  * - 스크롤 멈춤(onMomentumScrollEnd/onScrollEndDrag)에서 offset→index→clamp 후
  *   외부 selected 와 다를 때만 onSelect + Haptics.selectionAsync() 1회.
  * - 외부 prop 변경 시 해당 index 로 scrollTo. 프로그램적 스크롤 타깃을
@@ -121,8 +103,10 @@ function WheelColumn<T>({
 }: WheelColumnProps<T>) {
   const length = options.length;
   const selectedIndex = clampIndex(Math.max(0, options.indexOf(selected)), length);
+  // 항목을 절대 위치로 깔기 위한 콘텐츠 전체 높이(스페이서 위·아래 + 항목 전체).
+  const contentHeight = length * WHEEL_ITEM_HEIGHT + SPACER_HEIGHT * 2;
 
-  const scrollRef = useRef<Animated.FlatList<T>>(null);
+  const scrollRef = useRef<Animated.ScrollView>(null);
   const scrollY = useSharedValue(indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT));
   // 프로그램적으로 스크롤 보낸 목표 index. 그로 인한 멈춤 콜백은 onSelect 재호출 금지.
   const programmaticIndexRef = useRef<number | null>(null);
@@ -137,8 +121,11 @@ function WheelColumn<T>({
   // 표시해, onScrollEndDrag 는 짧은 드래그(관성 없음) 폴백 시에만 settle.
   const isMomentumScrollRef = useRef(false);
 
+  // 윈도잉 중앙 index. scrollY 를 따라 움직이며, 이 값 ±side 칸만 렌더한다.
+  const [renderCenter, setRenderCenter] = useState(selectedIndex);
+
   const scrollToIndex = useCallback((index: number, animated: boolean) => {
-    scrollRef.current?.scrollToOffset({ offset: indexToOffset(index, WHEEL_ITEM_HEIGHT), animated });
+    scrollRef.current?.scrollTo({ y: indexToOffset(index, WHEEL_ITEM_HEIGHT), animated });
   }, []);
 
   // 외부 prop(칩/period 전환 등) 변경 → 해당 index 로 동기화.
@@ -159,6 +146,20 @@ function WheelColumn<T>({
       scrollY.value = event.contentOffset.y;
     },
   });
+
+  // scrollY → 중앙 index. 정수 칸이 바뀔 때만 renderCenter 갱신(매 프레임 setState 방지).
+  useAnimatedReaction(
+    () => {
+      const raw = Math.round(scrollY.value / WHEEL_ITEM_HEIGHT);
+      if (raw < 0) return 0;
+      if (raw > length - 1) return length - 1;
+      return raw;
+    },
+    (curr, prev) => {
+      if (curr !== prev) runOnJS(setRenderCenter)(curr);
+    },
+    [length],
+  );
 
   const settleToOffset = (offsetY: number) => {
     const nextIndex = offsetToIndex(offsetY, WHEEL_ITEM_HEIGHT, length);
@@ -203,72 +204,53 @@ function WheelColumn<T>({
     settleToOffset(event.nativeEvent.contentOffset.y);
   };
 
-  // 값 기준 안정 key → 윈도잉으로 항목이 마운트/언마운트돼도 워크릿이 엉키지 않는다.
-  const keyExtractor = useCallback((value: T) => format(value), [format]);
-
-  // 고정 높이 → 위치를 즉시 계산. offset 에 스페이서(헤더) 높이를 포함시켜
-  // FlatList 의 렌더 윈도우 판정과 실제 레이아웃을 일치시킨다.
-  const getItemLayout = useCallback(
-    (_data: ArrayLike<T> | null | undefined, index: number) => ({
-      length: WHEEL_ITEM_HEIGHT,
-      offset: SPACER_HEIGHT + index * WHEEL_ITEM_HEIGHT,
-      index,
-    }),
-    [],
-  );
-
-  const renderSpacer = useCallback(() => <View style={{ height: SPACER_HEIGHT }} />, []);
-
-  const renderItem = useCallback<ListRenderItem<T>>(
-    ({ item, index }) => (
-      <WheelItem
-        label={format(item)}
-        index={index}
-        scrollY={scrollY}
-        align={align}
-        itemText={itemText}
-        onPress={() => {
-          // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
-          programmaticIndexRef.current = index;
-          scrollToIndex(index, true);
-          if (index !== selectedIndexRef.current) {
-            void Haptics.selectionAsync();
-            onSelect(options[index]);
-          }
-        }}
-      />
-    ),
-    [format, scrollY, align, itemText, scrollToIndex, onSelect, options],
+  // 중앙 ±side 칸만 렌더(끝단 clamp). 안 그린 칸이 있어도 절대 위치라 레이아웃 불변.
+  const renderStart = Math.max(0, renderCenter - WHEEL_RENDER_SIDE_COUNT);
+  const renderEnd = Math.min(length - 1, renderCenter + WHEEL_RENDER_SIDE_COUNT);
+  const visibleIndices = Array.from(
+    { length: renderEnd - renderStart + 1 },
+    (_, k) => renderStart + k,
   );
 
   return (
     <View className="flex-1" style={{ height: WHEEL_HEIGHT }}>
-      <ScrollViewContext.Provider value={null}>
-        <NativeViewGestureHandler disallowInterruption>
-          <AnimatedFlatList
-            ref={scrollRef}
-            data={options}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            getItemLayout={getItemLayout}
-            ListHeaderComponent={renderSpacer}
-            ListFooterComponent={renderSpacer}
-            showsVerticalScrollIndicator={false}
-            snapToInterval={WHEEL_ITEM_HEIGHT}
-            decelerationRate="fast"
-            scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
-            onScroll={scrollHandler}
-            onScrollBeginDrag={handleScrollBeginDrag}
-            onMomentumScrollBegin={handleMomentumScrollBegin}
-            onScrollEndDrag={handleScrollEndDrag}
-            onMomentumScrollEnd={handleMomentumScrollEnd}
-            contentOffset={{ x: 0, y: indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT) }}
-            initialNumToRender={WHEEL_VISIBLE_COUNT}
-            maxToRenderPerBatch={WHEEL_VISIBLE_COUNT}
-            windowSize={WHEEL_WINDOW_SIZE}
-          />
-        </NativeViewGestureHandler>
-      </ScrollViewContext.Provider>
+      <NativeViewGestureHandler disallowInterruption>
+        <AnimatedScrollView
+          ref={scrollRef}
+          showsVerticalScrollIndicator={false}
+          snapToInterval={WHEEL_ITEM_HEIGHT}
+          decelerationRate="fast"
+          scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
+          onScroll={scrollHandler}
+          onScrollBeginDrag={handleScrollBeginDrag}
+          onMomentumScrollBegin={handleMomentumScrollBegin}
+          onScrollEndDrag={handleScrollEndDrag}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          contentOffset={{ x: 0, y: indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT) }}
+        >
+          <View style={{ height: contentHeight }}>
+            {visibleIndices.map((index) => (
+              <WheelItem
+                key={format(options[index])}
+                label={format(options[index])}
+                index={index}
+                scrollY={scrollY}
+                align={align}
+                itemText={itemText}
+                onPress={() => {
+                  // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
+                  programmaticIndexRef.current = index;
+                  scrollToIndex(index, true);
+                  if (index !== selectedIndexRef.current) {
+                    void Haptics.selectionAsync();
+                    onSelect(options[index]);
+                  }
+                }}
+              />
+            ))}
+          </View>
+        </AnimatedScrollView>
+      </NativeViewGestureHandler>
     </View>
   );
 }
@@ -282,7 +264,10 @@ interface WheelItemProps {
   onPress: () => void;
 }
 
-/** 휠 항목 1개. 중앙으로부터 거리에 따라 opacity·scale 보간(프레임 단위). */
+/**
+ * 휠 항목 1개. 중앙으로부터 거리에 따라 opacity·scale 보간(프레임 단위).
+ * 슬라이싱 윈도잉이라 항목은 콘텐츠 안에서 절대 위치(top = 스페이서 + index*높이)로 깔린다.
+ */
 function WheelItem({
   label,
   index,
@@ -303,7 +288,16 @@ function WheelItem({
 
   return (
     <Animated.View
-      style={[animatedStyle, { height: WHEEL_ITEM_HEIGHT }]}
+      style={[
+        animatedStyle,
+        {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: SPACER_HEIGHT + index * WHEEL_ITEM_HEIGHT,
+          height: WHEEL_ITEM_HEIGHT,
+        },
+      ]}
       className={`justify-center ${ITEM_ALIGN_CLASS[align]}`}
     >
       <Pressable onPress={onPress} accessibilityRole="button" hitSlop={WHEEL_ITEM_HIT_SLOP}>
