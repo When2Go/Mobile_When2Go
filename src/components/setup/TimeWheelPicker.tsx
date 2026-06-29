@@ -1,11 +1,12 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, Text, View, type NativeScrollEvent, type NativeSyntheticEvent } from 'react-native';
 import { NativeViewGestureHandler } from 'react-native-gesture-handler';
 import Animated, {
+  runOnJS,
+  useAnimatedReaction,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
-  type AnimatedScrollViewProps,
 } from 'react-native-reanimated';
 import * as Haptics from 'expo-haptics';
 
@@ -35,6 +36,13 @@ const WHEEL_ITEM_HIT_SLOP = 4;
 const SCROLL_EVENT_THROTTLE_MS = 16;
 /** 중앙 강조 박스를 정확히 가운데 칸에 맞추기 위한 음수 마진(절반 높이만큼 위로). */
 const CENTER_BAR_MARGIN_TOP = -(WHEEL_ITEM_HEIGHT / 2);
+/**
+ * 가시 범위 슬라이싱(윈도잉)에서 중앙 기준 위·아래로 마운트해 둘 칸 수.
+ * = 가시 측면(WHEEL_VISIBLE_SIDE_COUNT=2) + 페이드 끝(FADE_DISTANCE 너머)까지 덮고도
+ *   빠른 플링 동안 JS 가 renderCenter 를 따라잡을 여유 버퍼까지 포함한 값.
+ * 분(60칸)도 이 범위(중앙 ±8 = 최대 17칸)만 마운트해 매 프레임 평가되는 워크릿 수를 줄인다.
+ */
+const WHEEL_RENDER_SIDE_COUNT = 8;
 
 const AnimatedScrollView = Animated.ScrollView;
 
@@ -68,7 +76,14 @@ const ITEM_ALIGN_CLASS: Record<ColumnAlign, string> = {
 /**
  * 휠 한 열(period | hour | minute 공통).
  * - 세로 ScrollView + snapToInterval=WHEEL_ITEM_HEIGHT 로 항상 한 칸에 정렬.
- * - 상·하단 SPACER_HEIGHT 스페이서 → 첫/마지막 항목도 중앙 도달(비순환).
+ * - 가시 범위 슬라이싱(윈도잉): 항목을 전부 마운트하지 않고, 현재 중앙(renderCenter)
+ *   기준 ±WHEEL_RENDER_SIDE_COUNT 칸만 렌더한다. 분(60칸)에서 매 스크롤 프레임
+ *   평가되는 reanimated 워크릿 수를 줄이는 게 목적. 항목은 절대 위치로 깔아
+ *   콘텐츠 전체 높이는 고정 → 안 그린 칸이 있어도 스크롤 범위·snap 이 변하지 않는다.
+ * - renderCenter 는 scrollY(공유값)를 useAnimatedReaction 으로 관찰해, 중앙 index 가
+ *   바뀔 때만 runOnJS 로 갱신한다(매 프레임 setState 아님). 초기값은 selectedIndex 라
+ *   첫 렌더부터 선택값과 이웃 칸이 가운데에 정상 표시된다.
+ * - 상·하단 SPACER_HEIGHT 스페이서(콘텐츠 높이에 포함) → 첫/마지막 항목도 중앙 도달(비순환).
  * - 스크롤 멈춤(onMomentumScrollEnd/onScrollEndDrag)에서 offset→index→clamp 후
  *   외부 selected 와 다를 때만 onSelect + Haptics.selectionAsync() 1회.
  * - 외부 prop 변경 시 해당 index 로 scrollTo. 프로그램적 스크롤 타깃을
@@ -88,6 +103,8 @@ function WheelColumn<T>({
 }: WheelColumnProps<T>) {
   const length = options.length;
   const selectedIndex = clampIndex(Math.max(0, options.indexOf(selected)), length);
+  // 항목을 절대 위치로 깔기 위한 콘텐츠 전체 높이(스페이서 위·아래 + 항목 전체).
+  const contentHeight = length * WHEEL_ITEM_HEIGHT + SPACER_HEIGHT * 2;
 
   const scrollRef = useRef<Animated.ScrollView>(null);
   const scrollY = useSharedValue(indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT));
@@ -103,6 +120,9 @@ function WheelColumn<T>({
   // settle 콜백이 두 번 발화한다. onMomentumScrollBegin 으로 관성 시작 여부를
   // 표시해, onScrollEndDrag 는 짧은 드래그(관성 없음) 폴백 시에만 settle.
   const isMomentumScrollRef = useRef(false);
+
+  // 윈도잉 중앙 index. scrollY 를 따라 움직이며, 이 값 ±side 칸만 렌더한다.
+  const [renderCenter, setRenderCenter] = useState(selectedIndex);
 
   const scrollToIndex = useCallback((index: number, animated: boolean) => {
     scrollRef.current?.scrollTo({ y: indexToOffset(index, WHEEL_ITEM_HEIGHT), animated });
@@ -126,6 +146,20 @@ function WheelColumn<T>({
       scrollY.value = event.contentOffset.y;
     },
   });
+
+  // scrollY → 중앙 index. 정수 칸이 바뀔 때만 renderCenter 갱신(매 프레임 setState 방지).
+  useAnimatedReaction(
+    () => {
+      const raw = Math.round(scrollY.value / WHEEL_ITEM_HEIGHT);
+      if (raw < 0) return 0;
+      if (raw > length - 1) return length - 1;
+      return raw;
+    },
+    (curr, prev) => {
+      if (curr !== prev) runOnJS(setRenderCenter)(curr);
+    },
+    [length],
+  );
 
   const settleToOffset = (offsetY: number) => {
     const nextIndex = offsetToIndex(offsetY, WHEEL_ITEM_HEIGHT, length);
@@ -170,46 +204,51 @@ function WheelColumn<T>({
     settleToOffset(event.nativeEvent.contentOffset.y);
   };
 
-  const commonScrollProps: AnimatedScrollViewProps = {
-    showsVerticalScrollIndicator: false,
-    snapToInterval: WHEEL_ITEM_HEIGHT,
-    decelerationRate: 'fast',
-    scrollEventThrottle: SCROLL_EVENT_THROTTLE_MS,
-    onScroll: scrollHandler,
-    onScrollBeginDrag: handleScrollBeginDrag,
-    onMomentumScrollBegin: handleMomentumScrollBegin,
-    onScrollEndDrag: handleScrollEndDrag,
-    onMomentumScrollEnd: handleMomentumScrollEnd,
-    contentOffset: { x: 0, y: indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT) },
-  };
+  // 중앙 ±side 칸만 렌더(끝단 clamp). 안 그린 칸이 있어도 절대 위치라 레이아웃 불변.
+  const renderStart = Math.max(0, renderCenter - WHEEL_RENDER_SIDE_COUNT);
+  const renderEnd = Math.min(length - 1, renderCenter + WHEEL_RENDER_SIDE_COUNT);
+  const visibleIndices = Array.from(
+    { length: renderEnd - renderStart + 1 },
+    (_, k) => renderStart + k,
+  );
 
   return (
     <View className="flex-1" style={{ height: WHEEL_HEIGHT }}>
       <NativeViewGestureHandler disallowInterruption>
         <AnimatedScrollView
           ref={scrollRef}
-          {...commonScrollProps}
-          contentContainerStyle={{ paddingVertical: SPACER_HEIGHT }}
+          showsVerticalScrollIndicator={false}
+          snapToInterval={WHEEL_ITEM_HEIGHT}
+          decelerationRate="fast"
+          scrollEventThrottle={SCROLL_EVENT_THROTTLE_MS}
+          onScroll={scrollHandler}
+          onScrollBeginDrag={handleScrollBeginDrag}
+          onMomentumScrollBegin={handleMomentumScrollBegin}
+          onScrollEndDrag={handleScrollEndDrag}
+          onMomentumScrollEnd={handleMomentumScrollEnd}
+          contentOffset={{ x: 0, y: indexToOffset(selectedIndex, WHEEL_ITEM_HEIGHT) }}
         >
-          {options.map((value, index) => (
-            <WheelItem
-              key={format(value)}
-              label={format(value)}
-              index={index}
-              scrollY={scrollY}
-              align={align}
-              itemText={itemText}
-              onPress={() => {
-                // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
-                programmaticIndexRef.current = index;
-                scrollToIndex(index, true);
-                if (index !== selectedIndexRef.current) {
-                  void Haptics.selectionAsync();
-                  onSelect(options[index]);
-                }
-              }}
-            />
-          ))}
+          <View style={{ height: contentHeight }}>
+            {visibleIndices.map((index) => (
+              <WheelItem
+                key={format(options[index])}
+                label={format(options[index])}
+                index={index}
+                scrollY={scrollY}
+                align={align}
+                itemText={itemText}
+                onPress={() => {
+                  // 탭 폴백: 오프셋 항목 탭 → 그 항목을 중앙으로 스크롤.
+                  programmaticIndexRef.current = index;
+                  scrollToIndex(index, true);
+                  if (index !== selectedIndexRef.current) {
+                    void Haptics.selectionAsync();
+                    onSelect(options[index]);
+                  }
+                }}
+              />
+            ))}
+          </View>
         </AnimatedScrollView>
       </NativeViewGestureHandler>
     </View>
@@ -225,7 +264,10 @@ interface WheelItemProps {
   onPress: () => void;
 }
 
-/** 휠 항목 1개. 중앙으로부터 거리에 따라 opacity·scale 보간(프레임 단위). */
+/**
+ * 휠 항목 1개. 중앙으로부터 거리에 따라 opacity·scale 보간(프레임 단위).
+ * 슬라이싱 윈도잉이라 항목은 콘텐츠 안에서 절대 위치(top = 스페이서 + index*높이)로 깔린다.
+ */
 function WheelItem({
   label,
   index,
@@ -246,7 +288,16 @@ function WheelItem({
 
   return (
     <Animated.View
-      style={[animatedStyle, { height: WHEEL_ITEM_HEIGHT }]}
+      style={[
+        animatedStyle,
+        {
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          top: SPACER_HEIGHT + index * WHEEL_ITEM_HEIGHT,
+          height: WHEEL_ITEM_HEIGHT,
+        },
+      ]}
       className={`justify-center ${ITEM_ALIGN_CLASS[align]}`}
     >
       <Pressable onPress={onPress} accessibilityRole="button" hitSlop={WHEEL_ITEM_HIT_SLOP}>
