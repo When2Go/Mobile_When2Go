@@ -39,7 +39,7 @@ arrivalTimeText:    "오후 2:05"
 transitMinutes:     "4"
 transitTimeText:    "오후 1:27"
 progress:           "0.42"      # 0~1, 범위 밖이면 클램프
-llmMessage:         "지금 나가면 딱 맞아요! 🚶‍♂️"
+llmMessage:         "지금 나가면 딱 맞아요!"   # 이모지 미포함 — 위젯이 프로그레스 캐릭터로 표현
 llmSub:             "도보 12분 → 인하대역"
 boardingEpoch:      "1719300420"  # 탑승 시각 unix epoch(초)
 departEpoch:        "1719299820"  # (선택) 출발 기준 시각. 없으면 boardingEpoch - transitMinutes*60

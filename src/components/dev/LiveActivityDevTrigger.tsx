@@ -36,7 +36,7 @@ function baseState(boardingEpoch: number, now: number): LiveActivityContentState
     transitMinutes: minutesUntilBoarding(boardingEpoch, now),
     transitTimeText: '오후 1:27',
     progress: 0,
-    llmMessage: '지금 나가면 딱 맞아요! 🚶‍♂️',
+    llmMessage: '지금 나가면 딱 맞아요!',
     llmSub: '도보 12분 → 인하대역',
     boardingEpoch,
   };

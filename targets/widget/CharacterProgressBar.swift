@@ -22,6 +22,9 @@ struct CharacterProgressBar: View {
             .frame(width: max(width * clamped, 4))
           Text("🏃")
             .font(.system(size: 15))
+            // 🏃 이모지는 기본적으로 왼쪽을 보고 달린다. 진행도는 좌→우로 가므로
+            // 좌우반전해 이동 방향(오른쪽)을 보도록 한다.
+            .scaleEffect(x: -1, y: 1)
             .position(x: width * clamped, y: -8)
         }
       }
