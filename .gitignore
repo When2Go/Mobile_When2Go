@@ -43,6 +43,10 @@ app-example
 /ios
 /android
 
+# @bacons/apple-targets prebuild 생성물 (expo-target.config.js 에서 매번 재생성)
+targets/*/generated.entitlements
+targets/*/Info.plist
+
 # editor / tool settings (local only)
 .history
 .vscode/

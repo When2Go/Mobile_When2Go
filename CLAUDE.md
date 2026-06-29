@@ -111,6 +111,7 @@ PostToolUse Hook이 `.ts/.tsx` 저장 시 자동으로 ESLint fix + TypeScript c
 - `docs/references/PRD-지금나가-v1.1.md` — 상위 폴더 PRD 사본 (변경 시 양쪽 동기화)
 - `docs/references/api-schema.md` — Spring Boot 백엔드 API 스키마. **API 함수 작성 1차 자료**
 - `docs/references/naver-maps-api-schema.md` — `@mj-studio/react-native-naver-map` 사용 범위 + 비용 정책. **지도 관련 작업 1차 자료**
+- `docs/references/live-activity.md` — iOS Live Activity / Dynamic Island(F-W01) 구성·라이프사이클·빌드. **위젯 관련 작업 1차 자료**
 - `docs/TESTING.md` — 단위 테스트 가이드 (대상·예시·우선순위)
 - `docs/DEPLOY.md` — EAS Build / TestFlight / Play 배포 가이드
 - `docs/frontend-code-quality.md` — 가독성/예측성/응집도/결합도 품질 기준
