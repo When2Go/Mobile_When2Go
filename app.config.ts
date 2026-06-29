@@ -116,6 +116,8 @@ const config: ExpoConfig = {
     './plugins/withFirebaseFix',
     // Android Foreground Service(F-W02) 위젯 — 권한·Service·Receiver 매니페스트 주입.
     './plugins/withForegroundService',
+    // play-services-ads 25.4.0 이 Kotlin 2.3.0 메타데이터로 컴파일됨 → 빌드 환경 Kotlin 버전 상향.
+    './plugins/withKotlinVersion',
     // iOS Widget Extension(Live Activity) 타겟을 prebuild 에 주입. targets/widget/ 폴더를 읽는다.
     ['@bacons/apple-targets', APPLE_TEAM_ID ? { appleTeamId: APPLE_TEAM_ID } : {}],
   ],
