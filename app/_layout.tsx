@@ -11,6 +11,7 @@ import { useDeviceStore } from '@/stores/deviceStore';
 import { useRouteStore } from '@/stores/routeStore';
 import { useFcmToken } from '@/hooks/common/useFcmToken';
 import { useLiveActivity } from '@/hooks/widget/useLiveActivity';
+import { useForegroundService } from '@/hooks/widget/useForegroundService';
 import { useMobileAds } from '@/hooks/ads/useMobileAds';
 import SplashView from '@/components/splash/SplashView';
 import LiveActivityDevTrigger from '@/components/dev/LiveActivityDevTrigger';
@@ -22,6 +23,7 @@ export default function RootLayout() {
 
   useFcmToken();
   useLiveActivity();
+  useForegroundService();
   useMobileAds();
 
   useEffect(() => {

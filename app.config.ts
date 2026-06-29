@@ -114,6 +114,8 @@ const config: ExpoConfig = {
       },
     ],
     './plugins/withFirebaseFix',
+    // Android Foreground Service(F-W02) 위젯 — 권한·Service·Receiver 매니페스트 주입.
+    './plugins/withForegroundService',
     // iOS Widget Extension(Live Activity) 타겟을 prebuild 에 주입. targets/widget/ 폴더를 읽는다.
     ['@bacons/apple-targets', APPLE_TEAM_ID ? { appleTeamId: APPLE_TEAM_ID } : {}],
   ],
