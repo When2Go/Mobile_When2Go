@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { create as createAxiosInstance } from 'axios';
 
 import { normalizeAxiosError } from '@/api/interceptors/error';
 import type { KakaoSearchResponse, Place } from './types';
@@ -19,7 +19,7 @@ function resolveKakaoKey(): string {
   return key;
 }
 
-const kakaoApi = axios.create({
+const kakaoApi = createAxiosInstance({
   baseURL: KAKAO_BASE_URL,
   timeout: REQUEST_TIMEOUT_MS,
   headers: {
