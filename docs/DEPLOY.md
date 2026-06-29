@@ -191,6 +191,30 @@ eas update --branch production --message "출발 시간 계산 버그 수정"
 
 ---
 
+## Kakao REST API 키 회전 절차
+
+`EXPO_PUBLIC_KAKAO_REST_API_KEY`는 앱 JS 번들에 인라인되어 디컴파일 시 노출될 수 있다. 노출이 의심되면 아래 절차로 즉시 회전한다.
+
+### 노출 의심 신호
+- 비정상적인 쿼터 소진(평소 대비 급증)
+- 카카오 콘솔 쿼터 알람 수신
+- 출처 불명(미등록 도메인/앱)에서의 API 호출 기록
+
+### 재발급 절차
+1. 카카오 개발자 콘솔(https://developers.kakao.com) → 내 애플리케이션 → 앱 선택
+2. 앱 설정 → 앱 키 → REST API 키 **재발급**
+3. (선택) 허용 도메인(Referer) 화이트리스트가 최신인지 함께 점검
+
+### 적용 절차
+1. 로컬 `.env`의 `EXPO_PUBLIC_KAKAO_REST_API_KEY`를 새 키로 교체
+2. EAS 환경변수 갱신: `eas secret:push --scope project` (`.env` 기준 자동 갱신)
+3. hotfix 빌드: `eas build --profile production`
+4. TestFlight / Play 심사 제출 후 배포
+
+> 키는 번들에 박혀 OTA(`eas update`)만으로는 교체되지 않는다. 반드시 재빌드 → 스토어 제출 경로를 거친다.
+
+---
+
 ## 참고
 
 - EAS Build 공식: https://docs.expo.dev/build/introduction/
