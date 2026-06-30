@@ -3,7 +3,8 @@ const { withProjectBuildGradle } = require('@expo/config-plugins');
 // play-services-ads 25.4.0 이 Kotlin 2.3.0 메타데이터로 컴파일됨 →
 // 빌드 환경(2.1.x)과 버전 불일치. kotlinVersion / kspVersion 을 올려 해소.
 const KOTLIN_VERSION = '2.3.0';
-const KSP_VERSION = '2.3.0-1.0.25';
+// ksp 버전 체계가 2.x.y-a.b.c → 단순 2.x.y 로 변경됨. Kotlin 2.3.0 과 동일 major.minor.
+const KSP_VERSION = '2.3.0';
 
 const withKotlinVersion = (config) =>
   withProjectBuildGradle(config, (config) => {
