@@ -1,0 +1,16 @@
+plugins {
+  id 'com.android.library'
+  id 'org.jetbrains.kotlin.android'
+  id 'expo-module-gradle-plugin'
+}
+
+group = 'kr.co.when2go.app'
+version = '1.0.0'
+
+android {
+  namespace "kr.co.when2go.app"
+  defaultConfig {
+    versionCode 1
+    versionName "1.0.0"
+  }
+}
